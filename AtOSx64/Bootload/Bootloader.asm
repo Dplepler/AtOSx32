@@ -1,54 +1,114 @@
 
-[bits 16]
+[org 7C00h] 				; Set location counter
+
+KERNEL_OFFSET equ 1000h 	; Location of our kernel in memory
+
+; Start of the boot sector's main routine
 bootload_start:
-
-	cli 						; Disable interrupts: There are no interrupts in protected mode
-
-	lgdt [GDT_DESCRIPTOR] 		; Load Global Descriptor Table onto the CPU
-
-
-	; Set the first bit of the cr0 register to 1, telling the CPU we
-	; would like to switch to protected mode
-	mov eax, cr0 	 		; cr0 is a special control register that can tell the CPU we are using protected mode
-	or eax, 00000001b		; We cannot set cr0's last bit to 1 directly, so we use a general purpose register
-	mov cr0, eax			; Also, we do not want to change previous values of cr0 
-
 	
-	; After telling the CPU we want to use protected mode,
-	; there is a risk that it will use the pipeline mode to process instructions instead
-	; A way to avoid that is to clear the pipeline by far jumping to another segment 
-	; This will automatically set CS to our code segment + clear the pipeline
+	mov [BOOT_DRIVE], dl 	; Save boot device number stored in dl by BIOS
 	
-	jmp CODE_SEG:init_protected_mode	
+	; Set up stack
+	mov bp, 9000h
+	mov sp, bp
+	
+	call load_kernel
+	call switch_to_pm
 
+	jmp $ 					; Hang
+
+
+; Includes
+%include "GDT.asm" 						; Global descriptor table
+%include "protected_mode_setup.asm"		; Routines to set up and initialize protected mode
+%include "../Features/pm_strings.asm"	; String features in 32 bit protected mode
+
+[bits 16] 
+
+; Load the kernel in 16 bit real mode
+load_kernel:
+
+	; Set up parameters to load disk with
+	
+	mov bx, KERNEL_OFFSET 		; Kernel beginning in memory
+	mov dl, [BOOT_DRIVE]		; Boot device number
+	mov dh, 15					; Amount of sectors to load
+	call load_disk				; Call routine
+
+	ret
+	
+	
+; load DH sectors to ES:BX from drive DL
+load_disk:
+
+	push dx 									
+	mov ah, 2	 		; BIOS read sector function
+	mov al, dh 			; Read DH sectors
+	mov ch, 0 			; Select cylinder 0
+	mov dh, 0 			; Select head 0
+	mov cl, 2 			; Start reading from second sector (i.e after the boot sector)
+	int 13h 			; BIOS interrupt
+	jc .disk_error 		; Jump if error (i.e. carry flag set)
+	pop dx 				; Restore DX from the stack
+	cmp dh , al 		; if AL (sectors read) != DH (sectors expected)
+	jne .disk_error 	; display error message
+	ret
+	
+.disk_error:
+
+	; Print error
+	mov si, disk_error_message
+	call print_string
+	jmp $ 						; Hang
+	
+	
+	
+	
+; Output string in SI to screen	
+print_string:			
+	pusha
+
+	mov ah, 0Eh			; int 10h teletype function
+
+.repeat:
+
+	lodsb				; Get char from string
+	cmp al, 0
+	je .done			; If char is zero, end of string
+	int 10h				; Otherwise, print it
+	jmp short .repeat
+
+.done:
+
+	popa
+	ret
+	
+	
+	
+	
 
 [bits 32]
-init_protected_mode:
 
-	; Set all segment registers to the beginning of the data segment
-	; Note that CS will already be set to the code segment after the far jump to here
-	mov ax, DATA_SEG
-	mov ds, ax
-	mov cs, ax
-	mov ss, ax
-	mov es, ax
+; Beginning of protected mode! How cool
+genesis:
 	
-	; Set EBP and ESP to the top of the stack
-	mov ebp, 90000h
-	mov esp, ebp
+	mov esi, success_message
+	call pm_print_string
 	
-	
-finish:
+	call KERNEL_OFFSET
 
-	jmp $ 		; Jump to the current address (Hang)
 
+	jmp $			; Hang
+
+
+
+; Variables
+BOOT_DRIVE			db 0 							; Save boot device number
+disk_error_message 	db "Disk read error!" , 0
+success_message    	db "Successfully switched to protected mode!", 0
+	
+	
 
 times 510-($-$$) db 0	; Fill memory with 0 so that the size of the bootloader will always be 512 (+2 signature bytes)
-dw 0AA55h				; Boot sector signature - tell the CPU this is our bootloader				
+dw 0AA55h				; Boot sector signature - tell the CPU this is our bootloader
 
-
-;=====================================
-;			     INCLUDES				     
-;=====================================
-
-	%INCLUDE "GDT.asm"

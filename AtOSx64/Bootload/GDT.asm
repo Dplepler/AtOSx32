@@ -64,8 +64,8 @@ GDT_END:
 ; The GDT descriptor 
 GDT_DESCRIPTOR:
 
-	dw gdt_end - gdt_start - 1 		; Size of the current GDT (Minus 1)
-	dd gdt_start					; Start address of the GDT
+	dw GDT_END - GDT_START - 1 		; Size of the current GDT (Minus 1)
+	dd GDT_START					; Start address of the GDT
 
 
 ; Offsets to quickly access the code and data segments through the segment registers
