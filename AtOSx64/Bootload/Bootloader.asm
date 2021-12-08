@@ -1,6 +1,6 @@
-
 [org 7C00h] 				; Set location counter
 
+ 
 KERNEL_OFFSET equ 1000h 	; Location of our kernel in memory
 
 ; Start of the boot sector's main routine
@@ -16,6 +16,7 @@ bootload_start:
 	call switch_to_pm
 
 	jmp $ 					; Hang
+	
 
 
 ; Includes
@@ -23,20 +24,22 @@ bootload_start:
 %include "protected_mode_setup.asm"		; Routines to set up and initialize protected mode
 %include "../Features/pm_strings.asm"	; String features in 32 bit protected mode
 
-[bits 16] 
+[bits 16]
 
 ; Load the kernel in 16 bit real mode
 load_kernel:
 
 	; Set up parameters to load disk with
 	
-	mov bx, KERNEL_OFFSET 		; Kernel beginning in memory
-	mov dl, [BOOT_DRIVE]		; Boot device number
+	mov bx, KERNEL_OFFSET  		; Kernel beginning in memory
+	mov dl, [BOOT_DRIVE]		; Boot device number 
 	mov dh, 15					; Amount of sectors to load
 	call load_disk				; Call routine
+	
+	
 
 	ret
-	
+
 	
 ; load DH sectors to ES:BX from drive DL
 load_disk:
@@ -60,8 +63,6 @@ load_disk:
 	mov si, disk_error_message
 	call print_string
 	jmp $ 						; Hang
-	
-	
 	
 	
 ; Output string in SI to screen	
@@ -96,9 +97,9 @@ genesis:
 	call pm_print_string
 	
 	call KERNEL_OFFSET
-
-
+	
 	jmp $			; Hang
+	
 
 
 

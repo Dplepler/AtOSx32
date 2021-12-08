@@ -18,7 +18,7 @@ pm_print_string:
 	cmp al, 0 					; If data read was 0 - finish procedure
 	je .done
 	
-	mov word [edx], ax 			; Store the character and it's attributes onto screen
+	mov [edx], ax 			; Store the character and it's attributes onto screen
 	
 	add edx, 2 					; Increase video memory to print to the next cell
 	

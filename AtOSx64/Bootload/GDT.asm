@@ -30,6 +30,7 @@ GDT_START:
 		db 0x0 			; Base (bits 16 - 23)
 		db 10011010b 	; First set of flags
 		db 11001111b 	; Second set of flags
+		db 0x0
 		
 		
 	GDT_DATA:
