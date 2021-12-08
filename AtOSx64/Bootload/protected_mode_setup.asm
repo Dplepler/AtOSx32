@@ -20,8 +20,7 @@ switch_to_pm:
 	; A way to avoid that is to clear the pipeline by far jumping to another segment 
 	; This will automatically set CS to our code segment + clear the pipeline
 	
-	jmp CODE_SEG:init_protected_mode	
-
+	jmp CODE_SEG:init_protected_mode
 
 [bits 32]
 init_protected_mode:
@@ -30,15 +29,16 @@ init_protected_mode:
 	; Note that CS will already be set to the code segment after the far jump to here
 	mov ax, DATA_SEG
 	mov ds, ax
-	mov cs, ax
 	mov ss, ax
 	mov es, ax
+	mov fs, ax
+	mov gs, ax
 	
 	; Set EBP and ESP to the top of the stack
 	mov ebp, 90000h
 	mov esp, ebp
 	
-	call genesis
+	jmp genesis
 	
 	
 	
