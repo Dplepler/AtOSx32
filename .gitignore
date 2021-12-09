@@ -1,0 +1,6 @@
+*.exe
+*.dll
+*.win32
+*.bin
+*.out
+*.o
