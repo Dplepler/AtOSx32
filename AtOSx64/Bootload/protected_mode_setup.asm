@@ -38,7 +38,5 @@ init_protected_mode:
 	mov ebp, 90000h
 	mov esp, ebp
 	
-	jmp genesis
-	
-	
+	jmp genesis 	; Go back to the bootloader to start executing the kernel!
 	

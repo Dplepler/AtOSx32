@@ -20,9 +20,9 @@ bootload_start:
 
 
 ; Includes
-%include "GDT.asm" 						; Global descriptor table
-%include "protected_mode_setup.asm"		; Routines to set up and initialize protected mode
-%include "../Features/pm_strings.asm"	; String features in 32 bit protected mode
+%include "Bootload/GDT.asm" 						; Global descriptor table
+%include "Bootload/protected_mode_setup.asm"		; Routines to set up and initialize protected mode
+%include "Features/pm_strings.asm"					; String features in 32 bit protected mode
 
 [bits 16]
 
@@ -77,15 +77,12 @@ print_string:
 	cmp al, 0
 	je .done			; If char is zero, end of string
 	int 10h				; Otherwise, print it
-	jmp short .repeat
+	jmp short .repeat 	; And repeat for all characters
 
 .done:
 
 	popa
 	ret
-	
-	
-	
 	
 
 [bits 32]
@@ -93,12 +90,13 @@ print_string:
 ; Beginning of protected mode! How cool
 genesis:
 	
+	; Print success message!
 	mov esi, success_message
 	call pm_print_string
 	
-	call KERNEL_OFFSET
+	call KERNEL_OFFSET 		; Call start of Kernel
 	
-	jmp $			; Hang
+	jmp $					; Hang at the end of the kernel
 	
 
 
