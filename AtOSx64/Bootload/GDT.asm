@@ -1,4 +1,4 @@
-; This file includes the Global Descriptor Table, which is used as a replacement for real mode segment registers
+; This file includes the Global Descriptor Table, which is used as a better replacement for real mode segment registers
 
 GDT_START:
 
@@ -56,7 +56,6 @@ GDT_START:
 		db 10010010b 	; First set of flags
 		db 11001111b 	; Second set of flags
 		db 0x0 			; Base (bits 24 -31)	
-	
 	
 	
 GDT_END:
