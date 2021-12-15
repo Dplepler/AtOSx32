@@ -1,4 +1,4 @@
-[org 7C00h] 				; Set location counter
+[org 7C00h] 			; Set location counter
 
  
 KERNEL_OFFSET equ 1000h 	; Location of our kernel in memory
