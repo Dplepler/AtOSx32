@@ -104,7 +104,7 @@ genesis:
 ; Variables
 BOOT_DRIVE			db 0 							; Save boot device number
 disk_error_message 	db "Disk read error!" , 0
-success_message    	db "Successfully switched to protected mode!", 0
+success_message    	db "Successfully switched to protected mode! DEBUG WOW!", 0
 	
 	
 

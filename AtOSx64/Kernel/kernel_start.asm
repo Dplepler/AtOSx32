@@ -5,5 +5,5 @@
 [bits 32]
 [extern main] 		; Tell NASM that main exists and will be found when we link files
 
-call main
+jmp main
 jmp $
