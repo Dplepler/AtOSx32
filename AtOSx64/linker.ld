@@ -2,23 +2,23 @@
 OUTPUT_FORMAT("binary")
 
  /* Tell where the various sections of the object files will be put in the final
-   kernel image. */
+   kernel image */
 SECTIONS
 {
 	/* Begin putting sections at 1 MiB, a conventional place for kernels to be
-	   loaded at by the bootloader. */
+	   loaded at by the bootloader */
 	. = 0x1000;
  
 	/* First put the multiboot header, as it is required to be put very early
-	   early in the image or the bootloader won't recognize the file format.
-	   Next we'll put the .text section. */
+	   early in the image or the bootloader won't recognize the file format
+	   Next we'll put the .text section */
 	.text BLOCK(4K) : ALIGN(4K)
 	{
 		*(.multiboot)
 		*(.text)
 	}
  
-	/* Read-only data. */
+	/* Read-only data */
 	.rodata BLOCK(4K) : ALIGN(4K)
 	{
 		*(.rodata)
