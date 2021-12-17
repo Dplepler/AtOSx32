@@ -7,20 +7,25 @@ AtOS.img : Bootload/Bootloader.bin Kernel/kernel.bin
 	qemu-system-x86_64 AtOS.img
 
 
-Bootload/Bootloader.bin:
-	nasm -O0 -f bin -o Bootload/Bootloader.bin Bootload/Bootloader.asm
+C_SOURCES = $(wildcard Kernel/*.c)
 
-Kernel/kernel.bin : Kernel/kernel_start.o Kernel/kernel.o
-	i686-elf-gcc -T linker.ld -o Kernel/kernel.bin -ffreestanding -nostdlib Kernel/kernel_start.o Kernel/kernel.o -lgcc
+OBJ = $(C_SOURCES:.c=.o)
 
-Kernel/kernel.o : Kernel/kernel.c
-	i686-elf-gcc -c Kernel/kernel.c -o Kernel/kernel.o -std=gnu99 -ffreestanding -Wall -Wextra
+Kernel/kernel.bin : Kernel/kernel_start.o ${OBJ}
+	i686-elf-gcc -T linker.ld -o $@ -ffreestanding -nostdlib Kernel/kernel_start.o $^ -lgcc
 
-Kernel/kernel_start.o : Kernel/kernel_start.asm
-	nasm Kernel/kernel_start.asm -f elf -o Kernel/kernel_start.o
+%.o : %.c
+	i686-elf-gcc -c $< -o $@ -std=gnu99 -ffreestanding -Wall -Wextra
+
+%.o : %.asm
+	nasm $< -f elf -o $@
+
+%.bin : %.asm
+	nasm -O0 -f bin -o $@ $<
+	
 
 
 clean:
-	rm Kernel/*.bin Kernel/*.o
-	rm Bootload/*.bin
+	rm -rf Kernel/*.bin Kernel/*.o
+	rm -rf Bootload/*.bin
 	rm AtOS.img
