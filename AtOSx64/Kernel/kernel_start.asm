@@ -3,7 +3,7 @@
 ; In this case it's the main function of the kernel
 
 [bits 32]
-[extern main] 		; Tell NASM that main exists and will be found when we link files
+[extern kmain] 		; Tell NASM that the main kernel function exists and will be found when we link files
 
-jmp main
+jmp kmain
 jmp $
