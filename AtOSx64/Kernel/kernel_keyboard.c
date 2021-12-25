@@ -1,32 +1,80 @@
-/*
-Keyboard encoder is accessible through port 0x60
-*/
-enum KEYBOARD_ENCODER_IO {
- 
-	KEYBOARD_ENC_INPUT_BUF	=	0x60,
-	KEYBOARD_ENC_CMD_REG	=	0x60
-};
- 
-/*
-Keyboard controller is accessible through port 0x64
-*/
-enum KEYBOARD_CTRL_IO {
- 
-	KEYBOARD_CTRL_STATS_REG =	0x64,
-	KEYBOARD_CTRL_CMD_REG   =	0x64
-};
+#include "kernel_keyboard.h"
+
+
 
 /*
-Status register flag locations
+keyboard_ctrl_read_status reads the status of the keyboard controller
+Input: None
+Output: Data inside port 0x64
 */
-enum KEYBOARD_CTRL_STATS_MASK {
+uint8_t keyboard_ctrl_read_status() {
  
-	KEYBOARD_CTRL_STATS_MASK_OUT_BUF	=	1,		//00000001
-	KEYBOARD_CTRL_STATS_MASK_IN_BUF		=	2,		//00000010
-	KEYBOARD_CTRL_STATS_MASK_SYSTEM		=	4,		//00000100
-	KEYBOARD_CTRL_STATS_MASK_CMD_DATA	=	8,		//00001000
-	KEYBOARD_CTRL_STATS_MASK_LOCKED		=	0x10,	//00010000
-	KEYBOARD_CTRL_STATS_MASK_AUX_BUF	=	0x20,	//00100000
-	KEYBOARD_CTRL_STATS_MASK_TIMEOUT	=	0x40,	//01000000
-	KEYBOARD_CTRL_STATS_MASK_PARITY		=	0x80	//10000000
-};
+	return inportb(KEYBOARD_CTRL_STATS_REG);
+}
+
+/*
+keyboard_enc_read_buffer reads the keyboard encoder's buffer data
+Input: None
+Output: Data inside port 0x60
+*/
+uint8_t keyboard_enc_read_buffer() {
+ 
+	return inportb(KEYBOARD_ENC_INPUT_BUF);
+}
+
+/*
+keyboard_ctrl_send_cmd sends a command to the keyboard controller
+Input: Command to send to port 0x64
+Output: None
+*/
+void keyboard_ctrl_send_cmd(uint8_t cmd) {
+ 	
+ 	// Wait for the keyboard controller buffer to be clear
+	while ((keyboard_ctrl_read_status() & KEYBOARD_CTRL_STATS_MASK_IN_BUF) != 0) { }
+ 
+ 	// Send command
+	outportb(KEYBOARD_CTRL_CMD_REG, cmd);
+}
+
+/*
+keyboard_enc_send_cmd sends a command to the keyboard encoder
+Input: Command to send to port 0x60
+Output: None
+*/
+void keyboard_enc_send_cmd(uint8_t cmd) {
+ 
+	// Wait for the keyboard controller buffer to be clear
+
+	// Even though we are writing to the keyboard encoder, we still
+	// pass through the controller
+	while ((keyboard_ctrl_read_status() & KEYBOARD_CTRL_STATS_MASK_IN_BUF) != 0) { }
+ 
+	// Send command
+	outportb(KEYBOARD_ENC_CMD_REG, cmd);
+}
+
+void keyboard_set_scroll_led() {
+
+	keyboard_enc_send_cmd(0xED);
+	keyboard_enc_send_cmd(keyboard_enc_read_buffer() | 1);
+}
+
+void keyboard_set_num_led() {
+
+	keyboard_enc_send_cmd(0xED);
+	keyboard_enc_send_cmd(keyboard_enc_read_buffer() | 2);
+}
+
+/*
+keyboard_set_caps_led turns on the capslock LED on the keyboard
+Input: None
+Output: None
+*/
+void keyboard_set_caps_led(bool flag) {
+
+	uint8_t data = 0b00000111;
+
+	keyboard_enc_send_cmd(0xED);
+	keyboard_enc_send_cmd(data);		
+}
+

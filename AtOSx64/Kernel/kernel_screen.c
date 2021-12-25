@@ -1,26 +1,4 @@
- #include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-
-/* Hardware text mode color constants. */
-enum vga_color {
-	VGA_COLOR_BLACK = 0,
-	VGA_COLOR_BLUE = 1,
-	VGA_COLOR_GREEN = 2,
-	VGA_COLOR_CYAN = 3,
-	VGA_COLOR_RED = 4,
-	VGA_COLOR_MAGENTA = 5,
-	VGA_COLOR_BROWN = 6,
-	VGA_COLOR_LIGHT_GRAY = 7,
-	VGA_COLOR_DARK_GRAY = 8,
-	VGA_COLOR_LIGHT_BLUE = 9,
-	VGA_COLOR_LIGHT_GREEN = 10,
-	VGA_COLOR_LIGHT_CYAN = 11,
-	VGA_COLOR_LIGHT_RED = 12,
-	VGA_COLOR_LIGHT_MAGENTA = 13,
-	VGA_COLOR_LIGHT_BROWN = 14,
-	VGA_COLOR_WHITE = 15,
-};
+#include "kernel_screen.h"
  
 /*
 vga_entry_color generates a byte containing both given colors
@@ -28,7 +6,7 @@ Input: Character color, background color
 Output: A byte, where the most significant half is the background color
 and the least significant half is the character color
 */
-static inline uint8_t vga_entry_color(enum vga_color ccolor, enum vga_color bcolor) {
+uint8_t vga_entry_color(enum vga_color ccolor, enum vga_color bcolor) {
 	return ccolor | bcolor << 4;
 }
  
@@ -38,7 +16,7 @@ Input: Character, color attribute of character
 Output: A word, where the most significant half is the color attribute
 and the least significant half is the character
 */
-static inline uint16_t vga_entry(unsigned char c, uint8_t color) {
+uint16_t vga_entry(unsigned char c, uint8_t color) {
 	return (uint16_t) c | (uint16_t) color << 8;
 }
  
@@ -55,15 +33,6 @@ size_t strlen(const char* str) {
 
 	return len;
 }
- 
-/* Constants */
-static const size_t VGA_WIDTH = 80;
-static const size_t VGA_HEIGHT = 25;
- 
-size_t terminal_row;
-size_t terminal_column;
-uint8_t terminal_color;
-uint16_t* terminal_buffer;
  
 void terminal_initialize() {
 	terminal_row = 0;
