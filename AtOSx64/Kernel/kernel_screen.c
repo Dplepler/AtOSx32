@@ -47,13 +47,81 @@ void terminal_initialize() {
 			terminal_buffer[index] = vga_entry(' ', terminal_color);
 		}
 	}
+
+	update_cursor(0, 0); 	// Set cursor position to the start of the screen
+}
+
+/*
+enable_cursor turns on the cursor in text mode with a given size
+Input: Start of cursor, end of cursor
+Output: None
+*/
+void enable_cursor(uint8_t cursor_start, uint8_t cursor_end) {
+
+	/* Prepare and write beginning of cursor data */
+	outportb(0x3D4, 0x0A); 
+	outportb(0x3D5, (inportb(0x3D5) & 0xC0) | cursor_start); 	
+ 
+	/* Prepare and write end of cursor data */
+	outportb(0x3D4, 0x0B);
+	outportb(0x3D5, (inportb(0x3D5) & 0xE0) | cursor_end);
+}
+
+/*
+disable_cursor disables the current cursor in text mode
+Input: None
+Output: None
+*/
+void disable_cursor() {
+
+	outportb(0x3D4, 0x0A);
+	outportb(0x3D5, 0x20);
+}
+
+/*
+update_cursor updates the coordinates of the cursor with a given new position
+Input: Desired x coordinate of cursor, desired y coordinate of cursor
+Output: None
+*/
+void update_cursor(int x, int y) {
+
+	uint16_t pos = y * VGA_WIDTH + x; 	// Calculate desired position with the linear data
+ 
+ 	/* Input new y position */
+	outportb(0x3D4, 0x0F);
+	outportb(0x3D5, (uint8_t)(pos & 0xFF));
+
+	/* Input new x position */
+	outportb(0x3D4, 0x0E);
+	outportb(0x3D5, (uint8_t)((pos >> 8) & 0xFF));
 }
  
- /*
- terminal_setcolor sets the color of the terminal
- Input: Color to set the terminal with
- Output: None
- */
+/*
+get_cursor_position gets the current cursor coordinates
+Input: None
+Output: 2 byte position (x, y)
+*/
+uint16_t get_cursor_position() {
+
+    uint16_t pos = 0;
+
+    /* Get y position */
+    outportb(0x3D4, 0x0F);
+    pos |= inportb(0x3D5);
+
+    /* Get x position */
+    outportb(0x3D4, 0x0E);
+    pos |= ((uint16_t)inportb(0x3D5)) << 8;
+
+    return pos;
+}
+
+
+/*
+terminal_setcolor sets the color of the terminal
+Input: Color to set the terminal with
+Output: None
+*/
 void terminal_setcolor(uint8_t color) {
 	terminal_color = color;
 }
@@ -64,6 +132,7 @@ Input: Character to put, it's color, coords on screen
 Output: None
 */
 void terminal_putentryat(char c, uint8_t color, size_t x, size_t y) {
+
 	const size_t index = y * VGA_WIDTH + x;
 	terminal_buffer[index] = vga_entry(c, color);
 }
@@ -74,6 +143,7 @@ Intput: Character to put
 Output: None
 */
 void terminal_putchar(char c) {
+
 	terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
 
 	// Reset indexes if we're out of bounds
@@ -93,6 +163,7 @@ Input: Character array to write, amount to write
 Output: None
 */
 void terminal_write(const char* data, size_t amount) {
+
 	for (size_t i = 0; i < amount; i++) {
 		terminal_putchar(data[i]);
 	}

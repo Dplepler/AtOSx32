@@ -72,7 +72,7 @@ Output: None
 */
 void keyboard_set_caps_led(bool flag) {
 
-	uint8_t data = 0b00000111;
+	int8_t data = 0b00000111;
 
 	keyboard_enc_send_cmd(0xED);
 	keyboard_enc_send_cmd(data);		
