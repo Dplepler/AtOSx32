@@ -14,7 +14,6 @@ int kmain(void) {
 	/* Initialize terminal interface */
 	terminal_initialize();
 
-
 	//keyboard_set_caps_led(1);
 
 	keyboard_set_caps_led(1);
