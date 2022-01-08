@@ -41,8 +41,5 @@ uint8_t keyboard_ctrl_read_status();
 uint8_t keyboard_enc_read_buffer();
 void keyboard_ctrl_send_cmd(uint8_t cmd);
 void keyboard_enc_send_cmd(uint8_t cmd);
-void keyboard_set_scroll_led();
-void keyboard_set_num_led();
-void keyboard_set_caps_led(bool flag);
 
 #endif

@@ -9,17 +9,14 @@
 #endif
 
 
-
 int kmain(void) {
+
 	/* Initialize terminal interface */
 	terminal_initialize();
 
-	//keyboard_set_caps_led(1);
 
-	keyboard_set_caps_led(1);
-
-	/* Newline support is left as an exercise. */
-	
+	terminal_draw_square(0, 0, 10, 10, 9);
+	//terminal_putentryat('A', 10, 1, 0);
 
 	return 0;
 }

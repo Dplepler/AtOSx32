@@ -6,7 +6,7 @@
 #include <stdint.h>
 
 /* Hardware text mode color constants. */
-enum vga_color {
+typedef enum vga_color {
 	VGA_COLOR_BLACK = 0,
 	VGA_COLOR_BLUE = 1,
 	VGA_COLOR_GREEN = 2,
@@ -23,7 +23,7 @@ enum vga_color {
 	VGA_COLOR_LIGHT_MAGENTA = 13,
 	VGA_COLOR_LIGHT_BROWN = 14,
 	VGA_COLOR_WHITE = 15,
-};
+} vga_color;
 
 /* Constants */
 static const size_t VGA_WIDTH = 80;
@@ -34,8 +34,7 @@ size_t terminal_column;
 uint8_t terminal_color;
 uint16_t* terminal_buffer;
 
-
-uint8_t vga_entry_color(enum vga_color ccolor, enum vga_color bcolor);
+uint8_t vga_entry_color(vga_color ccolor, vga_color bcolor);
 uint16_t vga_entry(unsigned char c, uint8_t color);
 size_t strlen(const char* str);
 void terminal_initialize();
@@ -43,10 +42,12 @@ void enable_cursor(uint8_t cursor_start, uint8_t cursor_end);
 void disable_cursor();
 void update_cursor(int x, int y);
 uint16_t get_cursor_position();
-void terminal_setcolor(uint8_t color);
-void terminal_putentryat(char c, uint8_t color, size_t x, size_t y);
+void terminal_setcolor(vga_color color);
+void terminal_putentryat(char c, uint8_t color, const uint8_t x, const uint8_t y);
 void terminal_putchar(char c);
+void terminal_put_colored_char_at(char c, uint8_t color, const uint8_t x, const uint8_t y);
 void terminal_write(const char* data, size_t amount);
 void terminal_writestring(const char* data);
+void terminal_draw_square(const uint8_t x, const uint8_t y, const uint8_t destx, const uint8_t desty, const vga_color color);
 
 #endif

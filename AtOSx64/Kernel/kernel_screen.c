@@ -6,7 +6,7 @@ Input: Character color, background color
 Output: A byte, where the most significant half is the background color
 and the least significant half is the character color
 */
-uint8_t vga_entry_color(enum vga_color ccolor, enum vga_color bcolor) {
+uint8_t vga_entry_color(vga_color ccolor, vga_color bcolor) {
 	return ccolor | bcolor << 4;
 }
  
@@ -122,7 +122,7 @@ terminal_setcolor sets the color of the terminal
 Input: Color to set the terminal with
 Output: None
 */
-void terminal_setcolor(uint8_t color) {
+void terminal_setcolor(vga_color color) {
 	terminal_color = color;
 }
  
@@ -131,7 +131,7 @@ terminal_putentryat puts a character in a given position on the screen
 Input: Character to put, it's color, coords on screen
 Output: None
 */
-void terminal_putentryat(char c, uint8_t color, size_t x, size_t y) {
+void terminal_putentryat(char c, uint8_t color, const uint8_t x, const uint8_t y) {
 
 	const size_t index = y * VGA_WIDTH + x;
 	terminal_buffer[index] = vga_entry(c, color);
@@ -153,6 +153,16 @@ void terminal_putchar(char c) {
 			terminal_row = 0;
 		}
 	}
+}
+
+void terminal_put_colored_char_at(char c, uint8_t color, const uint8_t x, const uint8_t y) {
+
+	uint8_t tcolor = terminal_color;
+
+	terminal_setcolor(color);
+	terminal_putentryat(c, terminal_color, x, y);
+	terminal_setcolor(tcolor);
+
 }
  
 /*
@@ -176,4 +186,14 @@ Output: None
 */
 void terminal_writestring(const char* data) {
 	terminal_write(data, strlen(data));
+}
+
+void terminal_draw_square(const uint8_t x, const uint8_t y, const uint8_t destx, const uint8_t desty, const vga_color color) {
+
+	for (uint8_t i = y; i < y + desty; i++) {
+		for (uint8_t i2 = x; i2 < x + destx; i2++) {
+			terminal_put_colored_char_at('p', vga_entry_color(color, color), x + i2, y + i);
+		}
+	}
+
 }
