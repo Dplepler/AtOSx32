@@ -16,7 +16,6 @@ int kmain(void) {
 
 
 	terminal_draw_square(0, 0, 10, 10, 9);
-	//terminal_putentryat('A', 10, 1, 0);
 
 	return 0;
 }
