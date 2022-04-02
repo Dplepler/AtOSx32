@@ -53,18 +53,4 @@ void keyboard_enc_send_cmd(uint8_t cmd) {
 	outportb(KEYBOARD_ENC_CMD_REG, cmd);
 }
 
-/*
-keyboard_set_caps_led turns on the capslock LED on the keyboard
-Input: None
-Output: None
-
-NOTE: CURRENTLY NOT WORKING, HAVE NO IDEA HOW TO FIX. 
-*/
-void keyboard_set_caps_led(bool flag) {
-
-	int8_t data = 7;
-
-	keyboard_enc_send_cmd(0xED);
-	keyboard_enc_send_cmd(data);		
-}
 

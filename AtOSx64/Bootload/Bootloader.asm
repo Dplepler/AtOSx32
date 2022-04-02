@@ -89,10 +89,7 @@ print_string:
 
 ; Beginning of protected mode! How cool
 genesis:
-	
-	; Print success message!
-	mov esi, success_message
-	call pm_print_string
+
 	
 	call KERNEL_OFFSET 		; Call start of Kernel
 	
@@ -110,4 +107,3 @@ success_message    	db "Successfully switched to protected mode! DEBUG WOW!", 0
 
 times 510-($-$$) db 0	; Fill memory with 0 so that the size of the bootloader will always be 512 (+2 signature bytes)
 dw 0AA55h				; Boot sector signature - tell the CPU this is our bootloader
-
