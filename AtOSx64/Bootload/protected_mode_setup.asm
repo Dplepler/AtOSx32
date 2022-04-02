@@ -32,12 +32,6 @@ TD_OFFSET equ 3000h ; Table directory entry offset
 
 init_protected_mode:
 
-	;mov eax, TD_OFFSET 		; The address that points to the directory table, 1024 entries, 32 bits each
-	;mov cr3, eax			; We put the address of our directory table in the cr3 register
-	 
-	;mov eax, cr0			; To enable paging we need to set the correct flags in the cr0 register
-	;or 	eax, 80000001h
-	;mov cr0, eax
 
 	; Set all segment registers to the beginning of the data segment
 	; Note that CS will already be set to the code segment after the far jump to here
@@ -47,10 +41,26 @@ init_protected_mode:
 	mov es, ax
 	mov fs, ax
 	mov gs, ax
-	
+
 	; Set EBP and ESP to the top of the stack
 	mov ebp, 90000h
 	mov esp, ebp
+      
+
+	mov eax, TD_OFFSET 		; The address that points to the directory table, 1024 entries, 32 bits each
+	mov cr3, eax			; We put the address of our directory table in the cr3 register
+
+	mov edi, cr3  
+	xor eax, eax
+	mov ecx, 1024
+	rep stosd  
 	
-	jmp genesis 	; Go back to the bootloader to start executing the kernel!
+	mov eax, cr0			; To enable paging we need to set the correct flags in the cr0 register
+	or 	eax, 80000000h
+	;mov cr0, eax
+	jmp $
+
+
 	
+	jmp genesis 			; Go back to the bootloader to start executing the kernel!
+			

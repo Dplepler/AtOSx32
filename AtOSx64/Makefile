@@ -1,12 +1,20 @@
 
 all: DiskImages/AtOS.img
 
+debug: DiskImages/AtOSDebug.img
+
 DiskImages/AtOS.img : Bootload/Bootloader.bin Kernel/kernel.bin
 	dd if=/dev/zero of=DiskImages/AtOS.img bs=1024 count=1440
 	dd if=Bootload/Bootloader.bin of=DiskImages/AtOS.img conv=notrunc
 	dd if=Kernel/kernel.bin of=DiskImages/AtOS.img bs=512 seek=1 conv=notrunc
 	qemu-system-x86_64 DiskImages/AtOS.img
 
+
+DiskImages/AtOSDebug.img : Bootload/Bootloader.bin Kernel/kernel.bin
+	dd if=/dev/zero of=DiskImages/AtOS.img bs=1024 count=1440
+	dd if=Bootload/Bootloader.bin of=DiskImages/AtOS.img conv=notrunc
+	dd if=Kernel/kernel.bin of=DiskImages/AtOS.img bs=512 seek=1 conv=notrunc
+	qemu-system-x86_64 -hda DiskImages/AtOS.img -monitor stdio
 
 C_SOURCES = $(wildcard Kernel/*.c)
 
