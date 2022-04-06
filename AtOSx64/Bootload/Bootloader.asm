@@ -88,8 +88,7 @@ print_string:
 genesis:
 
 	
-	
-	
+	jmp $
 	call KERNEL_OFFSET 		; Call start of Kernel
 	
 	jmp $					; Hang at the end of the kernel

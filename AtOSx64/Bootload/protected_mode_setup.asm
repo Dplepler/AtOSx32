@@ -28,7 +28,8 @@ switch_to_pm:
 
 [bits 32]
 
-TD_OFFSET equ 3000h ; Table directory entry offset
+PD_OFFSET equ 3000h 	; Table directory entry offset
+PT_OFFSET equ 4000h		; First page table offset
 
 init_protected_mode:
 
@@ -45,36 +46,38 @@ init_protected_mode:
 	; Set EBP and ESP to the top of the stack
 	mov ebp, 90000h
 	mov esp, ebp
-
-	jmp $
       
-	mov eax, 2h
-	mov edi, TD_OFFSET
+    ; Set all directory entries to not present, with read/write access
+    ; The page directory consists of 1024 entries, each 32 bit
+	mov eax, 2h	
+	mov edi, PD_OFFSET
 	mov ecx, 1024
 
-	rep stosd
+	rep stosd  			; Repeat copying EAX's value to EDI memory location ECX times
 
-	mov ecx, 0
-	mov edi, 4000h
+	xor ecx, ecx
+	mov edi, PT_OFFSET
 
 
+; Map the first page table's entries to physical page frames
+; In this case, as of now, we map the pages into the beginning of physical memory
 .fill_table:
 
-	mov eax, 1000h
+	mov eax, 1000h 		; Each page table entry maps 4 kilobytes of data, so we would give the 4k aligned offset each time
 
-	mul ecx
+	mul ecx 			; Index times 4096 (4k) bytes
+	or eax, 3 			; Set present flag to true, as well as read/write
 
-	or eax, 3
-	mov dword [edi], eax
-	add edi, 4
-	inc ecx
-	cmp ecx, 1024
+	mov dword [edi], eax	; Map page frame value to entry
+	add edi, 4  			; Go to next entry
+	inc ecx 				
+	cmp ecx, 1024 			; We only want to map 1024 entries (that make up a page table)
 
 	jle .fill_table
 
-	mov edi, TD_OFFSET
-	mov dword [edi], 4000h
-	or dword [edi], 3
+	mov edi, PD_OFFSET 			 		
+	mov dword [edi], PT_OFFSET	; Put the first page table into the first page directory entry 
+	or dword [edi], 3 			; Turn present flag on
 
 	mov eax, TD_OFFSET 		; The address that points to the directory table, 1024 entries, 32 bits each
 	mov cr3, eax			; We put the address of our directory table in the cr3 register
@@ -83,8 +86,6 @@ init_protected_mode:
 	mov eax, cr0			; To enable paging we need to set the correct flags in the cr0 register
 	or 	eax, 80000000h
 	mov cr0, eax
-	
 
-	jmp $
 	jmp genesis 			; Go back to the bootloader to start executing the kernel!
 			
