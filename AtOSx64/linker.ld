@@ -5,8 +5,8 @@ OUTPUT_FORMAT("binary")
    kernel image */
 SECTIONS
 {
-	/* Begin putting sections at 1 MiB, a conventional place for kernels to be
-	   loaded at by the bootloader */
+	/* Begin putting sections at a conventional offset to where the kernel will be
+	   loaded to by the bootloader */
 	. = 0x1000;
  
 	/* First put the multiboot header, as it is required to be put very early

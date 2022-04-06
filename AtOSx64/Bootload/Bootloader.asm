@@ -1,5 +1,4 @@
-[org 7C00h] 			; Set location counter
-
+[org 7C00h] 				; Set location counter
  
 KERNEL_OFFSET equ 1000h 	; Location of our kernel in memory
 
@@ -15,7 +14,7 @@ bootload_start:
 	call load_kernel
 	call switch_to_pm
 
-	jmp $ 					; Hang
+	jmp $ 			; Hang
 	
 
 
@@ -35,8 +34,6 @@ load_kernel:
 	mov dl, [BOOT_DRIVE]		; Boot device number 
 	mov dh, 15					; Amount of sectors to load
 	call load_disk				; Call routine
-	
-	
 
 	ret
 
@@ -90,6 +87,8 @@ print_string:
 ; Beginning of protected mode! How cool
 genesis:
 
+	
+	
 	
 	call KERNEL_OFFSET 		; Call start of Kernel
 	

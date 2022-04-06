@@ -50,16 +50,15 @@ init_protected_mode:
 	mov eax, TD_OFFSET 		; The address that points to the directory table, 1024 entries, 32 bits each
 	mov cr3, eax			; We put the address of our directory table in the cr3 register
 
-	mov edi, cr3  
-	xor eax, eax
+	mov eax, 2h
+	mov edi, TD_OFFSET
 	mov ecx, 1024
-	rep stosd  
+
+	rep stosd
 	
 	mov eax, cr0			; To enable paging we need to set the correct flags in the cr0 register
 	or 	eax, 80000000h
-	;mov cr0, eax
-	jmp $
-
+	mov cr0, eax
 
 	
 	jmp genesis 			; Go back to the bootloader to start executing the kernel!
