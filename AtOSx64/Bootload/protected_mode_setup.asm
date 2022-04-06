@@ -45,21 +45,46 @@ init_protected_mode:
 	; Set EBP and ESP to the top of the stack
 	mov ebp, 90000h
 	mov esp, ebp
+
+	jmp $
       
-
-	mov eax, TD_OFFSET 		; The address that points to the directory table, 1024 entries, 32 bits each
-	mov cr3, eax			; We put the address of our directory table in the cr3 register
-
 	mov eax, 2h
 	mov edi, TD_OFFSET
 	mov ecx, 1024
 
 	rep stosd
+
+	mov ecx, 0
+	mov edi, 4000h
+
+
+.fill_table:
+
+	mov eax, 1000h
+
+	mul ecx
+
+	or eax, 3
+	mov dword [edi], eax
+	add edi, 4
+	inc ecx
+	cmp ecx, 1024
+
+	jle .fill_table
+
+	mov edi, TD_OFFSET
+	mov dword [edi], 4000h
+	or dword [edi], 3
+
+	mov eax, TD_OFFSET 		; The address that points to the directory table, 1024 entries, 32 bits each
+	mov cr3, eax			; We put the address of our directory table in the cr3 register
+
 	
 	mov eax, cr0			; To enable paging we need to set the correct flags in the cr0 register
 	or 	eax, 80000000h
 	mov cr0, eax
-
 	
+
+	jmp $
 	jmp genesis 			; Go back to the bootloader to start executing the kernel!
 			
