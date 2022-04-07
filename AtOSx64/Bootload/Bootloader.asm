@@ -30,7 +30,7 @@ load_kernel:
 
 	; Set up parameters to load disk with
 	
-	mov bx, KERNEL_OFFSET  		; Kernel beginning in memory
+	mov ebx, KERNEL_OFFSET
 	mov dl, [BOOT_DRIVE]		; Boot device number 
 	mov dh, 15					; Amount of sectors to load
 	call load_disk				; Call routine
@@ -42,7 +42,7 @@ load_kernel:
 load_disk:
 
 	push dx 									
-	mov ah, 2	 		; BIOS read sector function
+	mov ah, 2h	 		; BIOS read sector function
 	mov al, dh 			; Read DH sectors
 	mov ch, 0 			; Select cylinder 0
 	mov dh, 0 			; Select head 0
@@ -87,10 +87,7 @@ print_string:
 ; Beginning of protected mode! How cool
 genesis:
 
-	
-	jmp $
 	call KERNEL_OFFSET 		; Call start of Kernel
-	
 	jmp $					; Hang at the end of the kernel
 	
 

@@ -1,5 +1,4 @@
- 
-OUTPUT_FORMAT("binary")
+ OUTPUT_FORMAT("binary")
 
  /* Tell where the various sections of the object files will be put in the final
    kernel image */
@@ -7,7 +6,7 @@ SECTIONS
 {
 	/* Begin putting sections at a conventional offset to where the kernel will be
 	   loaded to by the bootloader */
-	. = 0x1000;
+	. = 0x100000;
  
 	/* First put the multiboot header, as it is required to be put very early
 	   early in the image or the bootloader won't recognize the file format
