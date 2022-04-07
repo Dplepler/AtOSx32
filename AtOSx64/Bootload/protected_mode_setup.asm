@@ -62,14 +62,14 @@ init_protected_mode:
 	rep stosd  			; Repeat copying EAX's value to EDI memory location ECX times
 
 	mov edi, PT_OFFSET
-	mov ecx, 0x100000
-	mov edx, 0
+	xor ecx, ecx
+	xor edx, edx
 
 	call fill_table
 
-	mov edi, NPT_OFFSET  	; Page table to fill
-	mov ecx, KERNEL_OFFSET 	; Physical memory where the kernel is located
-	mov edx, KERNEL_ENTRY_OFFSET  ; Kernel's page directory index (Will point to 0xC0100000)
+	mov edi, NPT_OFFSET  			; Page table to fill
+	mov ecx, 1 						; Physical page index where the kernel is located
+	mov edx, KERNEL_ENTRY_OFFSET  	; Kernel's page directory index (Will point to 0xC0100000)
 
 	call fill_table
 
@@ -84,28 +84,32 @@ init_protected_mode:
 			
 
 ; Map a page table's entries to physical page frames
-; In: EDI = Page table offset to fill, ECX = Physical memory to start mapping from, EDX = Page directory entry index to point to new table
+; In: EDI = Page table offset to fill, ECX = Physical page frame index, EDX = Page directory entry index to point to new table
 fill_table:
 
 	pusha
+	push edx
 
+	xor ebx, ebx
 	mov eax, ecx
 
 .fill:
 	
+	mov eax, 1000h 		; Each page table entry maps 4 kilobytes of data, so we would give the 4k aligned offset each time
+	mul ecx 			; Index times 4096 (4k) bytes
 	or eax, 3 			; Set present flag to true, as well as read/write
 
 	mov dword [edi], eax	; Map page frame value to entry
 	add edi, 4  			; Go to next entry
-	inc ecx 				
+	inc ecx 
+	inc ebx			
 
-	mov eax, 1000h 		; Each page table entry maps 4 kilobytes of data, so we would give the 4k aligned offset each time
-	mul ecx 			; Index times 4096 (4k) bytes
+	cmp ebx, 1024 			; We only want to map 1024 entries (that make up a page table)
+	jl .fill
 
-	cmp ecx, 1024 			; We only want to map 1024 entries (that make up a page table)
-	jle .fill
+	sub edi, 1000h 	; Get the initial page table offset
 
-	sub edi, 4100 	; Get the initial page table offset (4kib - 4 extra bytes)
+	pop edx
 
 	; Get the physical address of the page directory entry to add table to
 	; EDX = Page directory entry index
