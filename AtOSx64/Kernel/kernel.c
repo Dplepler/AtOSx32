@@ -14,8 +14,7 @@ int kmain(void) {
 	/* Initialize terminal interface */
 	terminal_initialize();
 
-
-	terminal_draw_square(0, 0, 10, 10, 9);
+	terminal_draw_square(0, 0, 20, 10, 9);
 
 	return 0;
 }

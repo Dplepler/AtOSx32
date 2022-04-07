@@ -29,10 +29,11 @@ switch_to_pm:
 [bits 32]
 
 ; These offsets must be 4k aligned
-;==================;
-PD_OFFSET equ 3000h; 	Table directory entry offset
-PT_OFFSET equ 4000h;	First page table offset
-;==================;
+;===================;
+PD_OFFSET  equ 3000h; 	Table directory entry offset
+PT_OFFSET  equ 4000h;	First page table offset
+NPT_OFFSET equ 5000h;	Kernel page table offset
+;===================;
 
 KERNEL_ENTRY_OFFSET equ 300h 	; Entry in the page directory for our higher half kernel at 0xC0100000
 
@@ -61,15 +62,20 @@ init_protected_mode:
 	rep stosd  			; Repeat copying EAX's value to EDI memory location ECX times
 
 	mov edi, PT_OFFSET
-	xor ecx, ecx
+	mov ecx, 0x100000
 	mov edx, 0
+
+	call fill_table
+
+	mov edi, NPT_OFFSET  	; Page table to fill
+	mov ecx, KERNEL_OFFSET 	; Physical memory where the kernel is located
+	mov edx, KERNEL_ENTRY_OFFSET  ; Kernel's page directory index (Will point to 0xC0100000)
 
 	call fill_table
 
 	mov eax, PD_OFFSET 		; The address that points to the directory table, 1024 entries, 32 bits each
 	mov cr3, eax			; We put the address of our directory table in the cr3 register
 
-	
 	mov eax, cr0			; To enable paging we need to set the correct flags in the cr0 register
 	or 	eax, 80000000h
 	mov cr0, eax
@@ -83,18 +89,20 @@ fill_table:
 
 	pusha
 
+	mov eax, ecx
+
 .fill:
-
-	mov eax, 1000h 		; Each page table entry maps 4 kilobytes of data, so we would give the 4k aligned offset each time
-
-	mul ecx 			; Index times 4096 (4k) bytes
+	
 	or eax, 3 			; Set present flag to true, as well as read/write
 
 	mov dword [edi], eax	; Map page frame value to entry
 	add edi, 4  			; Go to next entry
 	inc ecx 				
-	cmp ecx, 1024 			; We only want to map 1024 entries (that make up a page table)
 
+	mov eax, 1000h 		; Each page table entry maps 4 kilobytes of data, so we would give the 4k aligned offset each time
+	mul ecx 			; Index times 4096 (4k) bytes
+
+	cmp ecx, 1024 			; We only want to map 1024 entries (that make up a page table)
 	jle .fill
 
 	sub edi, 4100 	; Get the initial page table offset (4kib - 4 extra bytes)
@@ -108,6 +116,6 @@ fill_table:
 
 	mov dword [esi], edi		; Put the first page table into the first page directory entry 
 	or 	dword [esi], 3 			; Turn present flag on
-	
+
 	popa
 	ret
