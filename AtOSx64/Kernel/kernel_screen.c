@@ -35,6 +35,7 @@ size_t strlen(const char* str) {
 }
  
 void terminal_initialize() {
+	
 	terminal_row = 0;
 	terminal_column = 0;
 	terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GRAY, VGA_COLOR_DARK_GRAY);

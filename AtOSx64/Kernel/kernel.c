@@ -16,5 +16,8 @@ int kmain(void) {
 
 	terminal_draw_square(0, 0, 20, 10, 9);
 
+	update_cursor(100, 100);
+	enable_cursor();
+
 	return 0;
 }

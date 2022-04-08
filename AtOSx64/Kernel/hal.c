@@ -2,10 +2,10 @@
 
 uint8_t inportb(unsigned short port) {
 
-   	uint8_t ret = 10;
-   	asm volatile ("inb %%dx,%%al":"=a" (ret):"d" (port));
+   uint8_t ret = 10;
+   asm volatile ("inb %%dx,%%al":"=a" (ret):"d" (port));
 
-   	return ret;
+	return ret;
 }
 
 void outportb(unsigned short port, uint8_t value) {

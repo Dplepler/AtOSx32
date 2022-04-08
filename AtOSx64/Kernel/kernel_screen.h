@@ -7,6 +7,7 @@
 
 /* Hardware text mode color constants. */
 typedef enum vga_color {
+	
 	VGA_COLOR_BLACK = 0,
 	VGA_COLOR_BLUE = 1,
 	VGA_COLOR_GREEN = 2,
@@ -23,6 +24,7 @@ typedef enum vga_color {
 	VGA_COLOR_LIGHT_MAGENTA = 13,
 	VGA_COLOR_LIGHT_BROWN = 14,
 	VGA_COLOR_WHITE = 15,
+
 } vga_color;
 
 /* Constants */

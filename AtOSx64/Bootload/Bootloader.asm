@@ -87,10 +87,9 @@ print_string:
 ; Beginning of protected mode! How cool
 genesis:
 
-	call KERNEL_OFFSET 		; Call start of Kernel
+	call 0C0000000h 		; Call the virtual address of the Kernel
 	jmp $					; Hang at the end of the kernel
 	
-
 
 
 ; Variables
