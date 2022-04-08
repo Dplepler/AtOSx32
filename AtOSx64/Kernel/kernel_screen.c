@@ -52,7 +52,7 @@ void terminal_initialize() {
 	terminal_row = 0;
 	terminal_column = 0;
 	terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GRAY, VGA_COLOR_DARK_GRAY);
-	terminal_buffer = (uint16_t*) 0xB8000;
+	terminal_buffer = (uint16_t*) 0xC03FF000;
 
 	/* Cleaning the screen and setting background color */
 	for (size_t y = 0; y < VGA_HEIGHT; y++) {
@@ -188,9 +188,9 @@ void terminal_write(const char* data, size_t amount) {
 
 	terminal_putchar(data[0]);
 
-	// for (size_t i = 0; i < amount; i++) {
-	// 	terminal_putchar(data[i]);
-	// }
+	for (size_t i = 0; i < amount; i++) {
+		terminal_putchar(data[i]);
+	}
 }
 
 /*

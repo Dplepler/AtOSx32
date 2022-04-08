@@ -73,6 +73,11 @@ init_protected_mode:
 
 	call fill_table
 
+	; Change the last page entry to point to our VGA buffer
+	add edi, 0FFCh				; Add 1023 * 3 to page offset, point to last table entry
+	mov dword [edi], 0B8003h	; 0xB8000 | 3 = VGA buffer with present and write/read bits set
+
+
 	mov eax, PD_OFFSET 		; The address that points to the directory table, 1024 entries, 32 bits each
 	mov cr3, eax			; We put the address of our directory table in the cr3 register
 
