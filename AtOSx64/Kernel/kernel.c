@@ -19,10 +19,16 @@ int kmain(void) {
 	/* Initialize terminal interface */
 	terminal_initialize();
 
+	char* hello = "hello";
 
-	terminal_draw_square(0, 0, 20, 10, 13);
+	for (unsigned int i = 0; i < 5; i++) {
+		terminal_putchar(hello[i]);
+	}
 
-	terminal_write("hello world!", 5);
+
+	//terminal_draw_square(0, 0, 20, 10, VGA_COLOR_CYAN);
+
+	//terminal_write("hello world!", 5);
 	//terminal_putchar('b');
 
 	return 0;

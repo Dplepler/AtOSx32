@@ -61,9 +61,10 @@ init_protected_mode:
 
 	rep stosd  			; Repeat copying EAX's value to EDI memory location ECX times
 
-	mov edi, PT_OFFSET
-	xor ecx, ecx
-	xor edx, edx
+	; To let the bootloader continue without failing, we will identity map the first 4 Megabytes (i.e page table)
+	mov edi, PT_OFFSET		; Some page table offset
+	xor ecx, ecx			; Beginning of physical memory
+	xor edx, edx			; First directory entry
 
 	call fill_table
 
