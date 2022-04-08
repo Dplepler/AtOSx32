@@ -8,16 +8,22 @@
 #error "You need an ix86-elf compiler to build AtOS"
 #endif
 
+#include "kernel_screen.h"
 
 int kmain(void) {
+
+
+	char* ptr = 0;
+
 
 	/* Initialize terminal interface */
 	terminal_initialize();
 
-	terminal_draw_square(0, 0, 20, 10, 9);
 
-	update_cursor(100, 100);
-	enable_cursor();
+	terminal_draw_square(0, 0, 20, 10, 13);
+
+	terminal_write("hello world!", 5);
+	//terminal_putchar('b');
 
 	return 0;
 }

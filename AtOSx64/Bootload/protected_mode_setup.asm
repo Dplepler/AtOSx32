@@ -69,7 +69,7 @@ init_protected_mode:
 
 	mov edi, NPT_OFFSET  			; Page table to fill
 	mov ecx, 1 						; Physical page index where the kernel is located
-	mov edx, KERNEL_ENTRY_OFFSET  	; Kernel's page directory index (Will point to 0xC0100000)
+	mov edx, KERNEL_ENTRY_OFFSET  	; Kernel's page directory index (Will point to 0xC0000000)
 
 	call fill_table
 

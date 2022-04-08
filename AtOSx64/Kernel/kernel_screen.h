@@ -4,10 +4,11 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "hal.h"
 
 /* Hardware text mode color constants. */
 typedef enum vga_color {
-	
+
 	VGA_COLOR_BLACK = 0,
 	VGA_COLOR_BLUE = 1,
 	VGA_COLOR_GREEN = 2,
@@ -27,14 +28,16 @@ typedef enum vga_color {
 
 } vga_color;
 
-/* Constants */
-static const size_t VGA_WIDTH = 80;
-static const size_t VGA_HEIGHT = 25;
- 
-size_t terminal_row;
-size_t terminal_column;
-uint8_t terminal_color;
-uint16_t* terminal_buffer;
+// typedef struct _SCREEN_ATTRIBUTES_STRUCT {
+
+// 	size_t terminal_row;
+// 	size_t terminal_column;
+// 	uint8_t terminal_color;
+// 	uint16_t* terminal_buffer;
+
+// } screen_t;
+
+//screen_t* vga_init(size_t row, size_t column, uint8_t color, uint16_t* buffer);
 
 uint8_t vga_entry_color(vga_color ccolor, vga_color bcolor);
 uint16_t vga_entry(unsigned char c, uint8_t color);

@@ -1,7 +1,6 @@
 #include "kernel_keyboard.h"
 
 
-
 /*
 keyboard_ctrl_read_status reads the status of the keyboard controller
 Input: None

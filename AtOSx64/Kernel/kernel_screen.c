@@ -1,4 +1,18 @@
 #include "kernel_screen.h"
+
+// screen_t* vga_init(size_t row, size_t column, uint8_t color, uint16_t* buffer) {
+
+
+
+// }
+
+static const size_t VGA_WIDTH = 80;
+static const size_t VGA_HEIGHT = 25;
+
+static size_t terminal_row;
+static size_t terminal_column;
+static uint8_t terminal_color;
+static uint16_t* terminal_buffer;
  
 /*
 vga_entry_color generates a byte containing both given colors
@@ -26,16 +40,15 @@ Input: Character array
 Output: Length of character array
 */
 size_t strlen(const char* str) {
+
 	size_t len = 0;
-	while (str[len]) {
-		len++;
-	}
+	while (str[len]) { len++; }
 
 	return len;
 }
  
 void terminal_initialize() {
-	
+
 	terminal_row = 0;
 	terminal_column = 0;
 	terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GRAY, VGA_COLOR_DARK_GRAY);
@@ -135,7 +148,7 @@ Output: None
 void terminal_putentryat(char c, uint8_t color, const uint8_t x, const uint8_t y) {
 
 	const size_t index = y * VGA_WIDTH + x;
-	terminal_buffer[index] = vga_entry(c, color);
+	terminal_buffer[index] = vga_entry(c, vga_entry_color(color, terminal_color));
 }
 
 /*
@@ -145,7 +158,7 @@ Output: None
 */
 void terminal_putchar(char c) {
 
-	terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
+	terminal_putentryat(c, VGA_COLOR_WHITE, terminal_column, terminal_row);
 
 	// Reset indexes if we're out of bounds
 	if (++terminal_column == VGA_WIDTH) {
@@ -163,7 +176,6 @@ void terminal_put_colored_char_at(char c, uint8_t color, const uint8_t x, const 
 	terminal_setcolor(color);
 	terminal_putentryat(c, terminal_color, x, y);
 	terminal_setcolor(tcolor);
-
 }
  
 /*
@@ -171,19 +183,19 @@ terminal_write prints a given amount of characters from a character array
 to the current index on the screen
 
 Input: Character array to write, amount to write
-Output: None
 */
 void terminal_write(const char* data, size_t amount) {
 
-	for (size_t i = 0; i < amount; i++) {
-		terminal_putchar(data[i]);
-	}
+	terminal_putchar(data[0]);
+
+	// for (size_t i = 0; i < amount; i++) {
+	// 	terminal_putchar(data[i]);
+	// }
 }
 
 /*
 terminal_writestring prints a character array to the screen
 Input: Character array to print
-Output: None
 */
 void terminal_writestring(const char* data) {
 	terminal_write(data, strlen(data));

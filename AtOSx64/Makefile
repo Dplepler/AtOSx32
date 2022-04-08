@@ -1,4 +1,3 @@
-
 all: 	DiskImages/AtOS.img
 
 debug: 	DiskImages/AtOSDebug.img
@@ -38,7 +37,6 @@ Kernel/kernel.bin : Kernel/kernel_start.o ${OBJ}
 
 %.bin : %.asm
 	nasm -O0 -f bin -o $@ $<
-	
 
 
 clean:
