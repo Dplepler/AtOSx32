@@ -1,0 +1,454 @@
+make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+# GNU Make 4.2.1
+# Built for x86_64-pc-linux-gnu
+# Copyright (C) 1988-2016 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+ 
+
+# Make data base, printed on Fri Apr  8 10:02:23 2022
+
+# Variables
+
+# 'override' directive
+GNUMAKEFLAGS := 
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# automatic
+?F = $(notdir $?)
+# environment
+DESKTOP_SESSION = ubuntu
+# default
+.SHELLFLAGS := -c
+# makefile (from 'Makefile', line 27)
+OBJ = $(C_SOURCES:.c=.o)
+# environment
+XDG_SESSION_CLASS = user
+# environment
+XDG_SESSION_TYPE = x11
+# environment
+VSCODE_LOG_NATIVE = false
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# environment
+IM_CONFIG_PHASE = 1
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# environment
+XAUTHORITY = /run/user/1000/gdm/Xauthority
+# environment
+GDMSESSION = ubuntu
+# environment
+XMODIFIERS = @im=ibus
+# makefile
+CURDIR := /home/dplepler/Documents/Projects/AtOSx64/AtOSx64
+# makefile
+SHELL = /bin/sh
+# environment
+VSCODE_NLS_CONFIG = {"locale":"en-us","availableLanguages":{},"_languagePackSupport":true}
+# environment
+_ = /usr/share/code/code
+# environment
+JOURNAL_STREAM = 8:106767
+# environment
+XDG_CONFIG_DIRS = /etc/xdg/xdg-ubuntu:/etc/xdg
+# makefile (from 'Makefile', line 1)
+MAKEFILE_LIST :=  Makefile
+# automatic
+@F = $(notdir $@)
+# environment
+GIO_LAUNCHED_DESKTOP_FILE = /usr/share/applications/code.desktop
+# environment
+USERNAME = dplepler
+# environment
+XDG_DATA_DIRS = /usr/share/ubuntu:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop
+# environment
+DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
+# environment
+VSCODE_VERBOSE_LOGGING = true
+# environment
+MANAGERPID = 3589
+# environment
+LESSOPEN = | /usr/bin/lesspipe %s
+# environment
+VSCODE_CWD = /home/dplepler
+# default
+MAKE_HOST := x86_64-pc-linux-gnu
+# environment
+PATH = /home/dplepler/opt/cross/bin:/home/dplepler/opt/cross/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+# environment
+GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
+# environment
+SESSION_MANAGER = local/ubuntu:@/tmp/.ICE-unix/3803,unix/ubuntu:/tmp/.ICE-unix/3803
+# environment
+XDG_RUNTIME_DIR = /run/user/1000
+# environment
+XDG_MENU_PREFIX = gnome-
+# environment
+VSCODE_LOG_STACK = false
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# environment
+INVOCATION_ID = 42ecbe9773e3464c9ae8db9c20106be1
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync check-symlink load
+# environment
+LS_COLORS = 
+# environment
+XDG_SESSION_DESKTOP = ubuntu
+# environment
+SSH_AUTH_SOCK = /run/user/1000/keyring/ssh
+# environment
+GIO_LAUNCHED_DESKTOP_FILE_PID = 63150
+# automatic
+%F = $(notdir $%)
+# environment
+DISPLAY = :0
+# environment
+VSCODE_PIPE_LOGGING = true
+# environment
+PWD = /home/dplepler/Documents/Projects/AtOSx64/AtOSx64
+# default
+.LOADED := 
+# environment
+SSH_AGENT_PID = 3762
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = ubuntu:GNOME
+# environment
+GTK_MODULES = gail:atk-bridge
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+HOME = /home/dplepler
+# environment
+LESSCLOSE = /usr/bin/lesspipe %s %s
+# environment
+VSCODE_CODE_CACHE_PATH = /home/dplepler/.config/Code/CachedData/8dfae7a5cd50421d10cd99cb873990460525a898
+# environment
+LOGNAME = dplepler
+# environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# environment
+GNOME_DESKTOP_SESSION_ID = this-is-deprecated
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# environment
+MAKELEVEL := 0
+# default
+MAKE = $(MAKE_COMMAND)
+# default
+MAKECMDGOALS := all
+# environment
+QT_IM_MODULE = ibus
+# environment
+SHLVL = 0
+# environment
+GNOME_SHELL_SESSION_MODE = ubuntu
+# environment
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-23c88452-93d0-4a37-8bac-07e30f5b01f6.sock
+# default
+MAKE_VERSION := 4.2.1
+# environment
+USER = dplepler
+# makefile
+.DEFAULT_GOAL := all
+# environment
+XDG_CURRENT_DESKTOP = Unity
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# default
+MAKE_COMMAND := make
+# default
+.VARIABLES := 
+# automatic
+*F = $(notdir $*)
+# environment
+VSCODE_IPC_HOOK = /run/user/1000/vscode-6eff2ff2-1.66.1-main.sock
+# makefile
+MAKEFLAGS = pqrR
+# environment
+MFLAGS = -pqrR
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# environment
+GDK_BACKEND = x11
+# automatic
++F = $(notdir $+)
+# environment
+ 
+QT_ACCESSIBILITY = 1
+# default
+MAKEFILES := 
+# automatic
+<F = $(notdir $<)
+# environment
+LC_ALL = C
+# environment
+GJS_DEBUG_TOPICS = JS ERROR;JS LOG
+# automatic
+^F = $(notdir $^)
+# makefile (from 'Makefile', line 25)
+C_SOURCES = $(wildcard Kernel/*.c)
+# default
+SUFFIXES := 
+# environment
+CHROME_DESKTOP = code-url-handler.desktop
+# environment
+WINDOWPATH = 2
+# default
+.INCLUDE_DIRS = /usr/include /usr/local/include /usr/include
+# environment
+GJS_DEBUG_OUTPUT = stderr
+# default
+.RECIPEPREFIX := 
+# environment
+LANG = C
+# environment
+VSCODE_PID = 63150
+# variable set hash-table stats:
+# Load=99/1024=10%, Rehash=0, Collisions=15/126=12%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# Kernel (device 2053, inode 1446501): 19 files, no impossibilities.
+# . (device 2053, inode 1315768): 10 files, no impossibilities.
+# Bootload (device 2053, inode 1315769): 3 files, no impossibilities so far.
+
+# 32 files, no impossibilities in 3 directories.
+
+# Implicit Rules
+
+%.o: %.c
+#  recipe to execute (from 'Makefile', line 33):
+	i686-elf-gcc -c $< -o $@ -std=gnu99 -ffreestanding -Wall -Wextra
+
+%.o: %.asm
+#  recipe to execute (from 'Makefile', line 36):
+	nasm $< -f elf -o $@
+
+%.bin: %.asm
+#  recipe to execute (from 'Makefile', line 39):
+	nasm -O0 -f bin -o $@ $<
+
+# 3 implicit rules, 0 (0.0%) terminal.
+
+# Files
+
+gdb: DiskImages/AtOSGDB.img
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+all: DiskImages/AtOS.img
+#  Command line target.
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Successfully updated.
+
+DiskImages/AtOS.img: Bootload/Bootloader.bin Kernel/kernel.bin
+#  Implicit rule search has not been done.
+#  Last modified 2022-04-08 09:51:23.302800615
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 7):
+	dd if=/dev/zero of=DiskImages/AtOS.img bs=1024 count=1440
+	dd if=Bootload/Bootloader.bin of=DiskImages/AtOS.img conv=notrunc
+	dd if=Kernel/kernel.bin of=DiskImages/AtOS.img bs=512 seek=1 conv=notrunc
+	qemu-system-x86_64 DiskImages/AtOS.img
+
+Kernel/memory.o: Kernel/memory.c
+ 
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'Kernel/memory'
+#  Last modified 2022-04-08 09:51:23.210799936
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 33):
+	i686-elf-gcc -c $< -o $@ -std=gnu99 -ffreestanding -Wall -Wextra
+
+Kernel/kernel_keyboard.o: Kernel/kernel_keyboard.c
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'Kernel/kernel_keyboard'
+#  Last modified 2022-04-08 09:51:23.198799847
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 33):
+	i686-elf-gcc -c $< -o $@ -std=gnu99 -ffreestanding -Wall -Wextra
+
+Kernel/kernel_screen.o: Kernel/kernel_screen.c
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'Kernel/kernel_screen'
+#  Last modified 2022-04-08 09:51:23.286800498
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 33):
+	i686-elf-gcc -c $< -o $@ -std=gnu99 -ffreestanding -Wall -Wextra
+
+# Not a target:
+Kernel/kernel_start.asm:
+#  Implicit rule search has been done.
+#  Last modified 2022-04-06 10:56:13.765607883
+#  File has been updated.
+#  Successfully updated.
+
+Kernel/hal.o: Kernel/hal.c
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'Kernel/hal'
+#  Last modified 2022-04-08 09:51:23.226800054
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 33):
+	i686-elf-gcc -c $< -o $@ -std=gnu99 -ffreestanding -Wall -Wextra
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  Last modified 2022-04-08 09:51:47.186977682
+#  File has been updated.
+#  Successfully updated.
+
+debug: DiskImages/AtOSDebug.img
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+Kernel/kernel_start.o: Kernel/kernel_start.asm
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'Kernel/kernel_start'
+#  Last modified 2022-04-08 09:51:23.174799668
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 36):
+	nasm $< -f elf -o $@
+
+Kernel/kernel.o: Kernel/kernel.c
+#  Implicit rule search has been done.
+ 
+#  Implicit/static pattern stem: 'Kernel/kernel'
+#  Last modified 2022-04-08 09:51:23.250800231
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 33):
+	i686-elf-gcc -c $< -o $@ -std=gnu99 -ffreestanding -Wall -Wextra
+
+# Not a target:
+Kernel/memory.c:
+#  Implicit rule search has been done.
+#  Last modified 2022-04-07 09:47:50.820761639
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+Kernel/kernel_keyboard.c:
+#  Implicit rule search has been done.
+#  Last modified 2022-04-08 06:45:45.633681756
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+Kernel/kernel_screen.c:
+#  Implicit rule search has been done.
+#  Last modified 2022-04-08 09:13:35.546150421
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+Kernel/hal.c:
+#  Implicit rule search has been done.
+#  Last modified 2022-04-08 06:48:10.865312446
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+Bootload/Bootloader.asm:
+#  Implicit rule search has been done.
+#  Last modified 2022-04-08 06:11:16.751414614
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+DiskImages/AtOSDebug.img: Bootload/Bootloader.bin Kernel/kernel.bin
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 14):
+	dd if=/dev/zero of=DiskImages/AtOS.img bs=1024 count=1440
+	dd if=Bootload/Bootloader.bin of=DiskImages/AtOS.img conv=notrunc
+	dd if=Kernel/kernel.bin of=DiskImages/AtOS.img bs=512 seek=1 conv=notrunc
+	qemu-system-x86_64 -hda DiskImages/AtOS.img -monitor stdio
+
+Kernel/kernel.bin: Kernel/kernel_start.o Kernel/hal.o Kernel/kernel_keyboard.o Kernel/memory.o Kernel/kernel.o Kernel/kernel_screen.o
+#  Implicit rule search has not been done.
+#  Last modified 2022-04-08 09:51:23.290800528
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 30):
+	i686-elf-gcc -T linker.ld -o $@ -ffreestanding -nostdlib Kernel/kernel_start.o $^ -lgcc
+
+clean:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 43):
+	rm -rf Kernel/*.bin Kernel/*.o
+	rm -rf Bootload/*.bin
+
+# Not a target:
+Kernel/kernel.c:
+#  Implicit rule search has been done.
+ 
+#  Last modified 2022-04-08 07:54:15.585995261
+#  File has been updated.
+#  Successfully updated.
+
+DiskImages/AtOSGDB.img: Bootload/Bootloader.bin Kernel/kernel.bin
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 20):
+	dd if=/dev/zero of=DiskImages/AtOS.img bs=1024 count=1440
+	dd if=Bootload/Bootloader.bin of=DiskImages/AtOS.img conv=notrunc
+	dd if=Kernel/kernel.bin of=DiskImages/AtOS.img bs=512 seek=1 conv=notrunc
+	qemu-system-x86_64 -S -s DiskImages/AtOS.img
+
+Bootload/Bootloader.bin: Bootload/Bootloader.asm
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'Bootload/Bootloader'
+#  Last modified 2022-04-08 09:51:23.170799639
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 39):
+	nasm -O0 -f bin -o $@ $<
+
+# files hash-table stats:
+# Load=25/1024=2%, Rehash=0, Collisions=0/77=0%
+# VPATH Search Paths
+
+# No 'vpath' search paths.
+
+# No general ('VPATH' variable) search path.
+
+# strcache buffers: 1 (0) / strings = 68 / storage = 942 B / avg = 13 B
+# current buf: size = 8162 B / used = 942 B / count = 68 / avg = 13 B
+
+# strcache performance: lookups = 102 / hit rate = 33%
+# hash-table stats:
+# Load=68/8192=1%, Rehash=0, Collisions=3/102=3%
+# Finished Make data base on Fri Apr  8 10:02:23 2022
+
+ 
