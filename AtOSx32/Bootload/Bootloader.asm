@@ -12,11 +12,82 @@ bootload_start:
 	mov sp, bp
 	
 	call load_kernel
+	call enable_a20
+
 	call switch_to_pm
 
 	jmp $ 			; Hang
 	
 
+
+enable_a20:
+
+	pusha
+
+	
+	call check_a20
+
+	popa
+	ret
+
+; Checks if the A20 line is enabled
+; Output: AX = 1 if A20 line is enabled, otherwise 0
+check_a20:
+
+	pushf 	; Save flag register
+
+	; Save registers we are going to use
+	push ds
+	push es
+	push di
+	push si
+
+	cli 	; Disable interupts
+
+	xor ax, ax 	; Reset AX
+	mov es, ax	; Set ES to 0
+
+	not ax		
+	mov ds, ax	; Set DS to 0xFFFF
+
+
+	; We are now going to check if our boot signature (0AA55h located at 0000:7DFE) is equal to 
+	; the value stored at memory FFFF:7E0E
+	; If it is, it means that the memory is wrapped around and that the A20 address line is disabled
+	mov di, 500h
+	mov si, 510h
+
+	mov al, byte [es:di]
+	push ax
+ 
+    mov al, byte [ds:si]
+    push ax
+ 
+    mov byte [es:di], 0h		; Make sure value is not 0xFF
+    mov byte [ds:si], 0FFh
+ 
+    cmp byte [es:di], 0FFh		; If this was changed to 0xFF then there is a wrap around
+ 
+    pop ax
+    mov byte [ds:si], al
+ 
+    pop ax
+    mov byte [es:di], al
+ 
+    xor ax, ax
+    je .exit
+ 
+    mov ax, 1	
+
+.exit:
+
+	pop si
+    pop di
+    pop es
+    pop ds
+    popf
+	
+	ret
 
 ; Includes
 %include "Bootload/GDT.asm" 						; Global descriptor table
@@ -32,7 +103,7 @@ load_kernel:
 	
 	mov ebx, KERNEL_OFFSET
 	mov dl, [BOOT_DRIVE]		; Boot device number 
-	mov dh, 15					; Amount of sectors to load
+	mov dh, 54					; Amount of sectors to load
 	call load_disk				; Call routine
 
 	ret
@@ -63,9 +134,9 @@ load_disk:
 	
 	
 ; Output string in SI to screen	
-print_string:			
-	pusha
+print_string:	
 
+	pusha
 	mov ah, 0Eh			; int 10h teletype function
 
 .repeat:

@@ -35,7 +35,7 @@ PT_OFFSET  equ 4000h;	First page table offset
 NPT_OFFSET equ 5000h;	Kernel page table offset
 ;===================;
 
-KERNEL_ENTRY_OFFSET equ 300h 	; Entry in the page directory for our higher half kernel at 0xC0100000
+KERNEL_ENTRY_OFFSET equ 300h 	; Entry in the page directory for our higher half kernel at 0xC0000000
 
 init_protected_mode:
 
