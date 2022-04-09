@@ -19,13 +19,22 @@ bootload_start:
 	jmp $ 			; Hang
 	
 
-
+; Enables A20 address line to access higher memory in 16 bit
 enable_a20:
 
 	pusha
 
-	
+	; Don't activate A20 address line if it was already activated (most likely if running on QEmu)
 	call check_a20
+	cmp ax, 1
+	je .exit
+
+	; Activate A20 address line
+	mov ax,2401h               
+	int 15h
+
+
+.exit:
 
 	popa
 	ret
@@ -54,6 +63,7 @@ check_a20:
 	; We are now going to check if our boot signature (0AA55h located at 0000:7DFE) is equal to 
 	; the value stored at memory FFFF:7E0E
 	; If it is, it means that the memory is wrapped around and that the A20 address line is disabled
+	
 	mov di, 500h
 	mov si, 510h
 
