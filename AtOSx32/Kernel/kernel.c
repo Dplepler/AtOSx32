@@ -12,10 +12,6 @@
 
 int kmain(void) {
 
-
-	char* ptr = 0;
-
-
 	/* Initialize terminal interface */
 	terminal_initialize();
 

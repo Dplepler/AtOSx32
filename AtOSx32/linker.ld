@@ -4,14 +4,14 @@ ENTRY (kmain)
 
 SECTIONS
 {
-        . = 0x1000;
-	/* The kernel will live at 3GB + 4KB in the virtual address space, */
+        . = 0x100000;
+	/* The kernel will live at 3GB in the virtual address space, */
 	/* which will be mapped to 1MB in the physical address space. */
 	/* Note that we page-align the sections. */
 
 	_kernel_start = .;
 
-	. += 0xC0000000;
+	. = 0xC0000000;
 	/* Add a symbol that indicates the start address of the kernel. */
 	.text ALIGN (4K) : AT (ADDR (.text) - 0xC0000000)
 	{
