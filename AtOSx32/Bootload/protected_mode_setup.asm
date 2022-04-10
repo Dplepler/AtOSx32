@@ -39,6 +39,9 @@ KERNEL_ENTRY_OFFSET equ 300h 	; Entry in the page directory for our higher half 
 
 init_protected_mode:
 
+	mov cx, 69h
+	jmp $
+
 	
 	; Set all segment registers to the beginning of the data segment
 	; Note that CS will already be set to the code segment after the far jump to here

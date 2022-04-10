@@ -1,6 +1,6 @@
 [org 7E00h] 		; Load right after the stage0 boot sector
 [bits 16]
-KERNEL_OFFSET equ 1300h 	; Location of our kernel in memory
+KERNEL_OFFSET equ 1000h 	; Location of our kernel in memory
 
 ; Start of the boot sector's main routine
 bootload_start:
@@ -9,14 +9,10 @@ bootload_start:
 	xor ax, ax       	
    	mov ds, ax          
    	mov ss, ax          
-   	mov sp, 9c00h   
+   	mov sp, 9c00h
 
 	call enable_a20
 	call unreal_mode
-
-	mov ax, 25h
-	jmp $
-
 	call load_kernel
 	call switch_to_pm
 
@@ -134,40 +130,50 @@ unreal_mode:
 	ret
 
 
-; Includes
-%include "Bootload/GDT.asm" 						; Global descriptor table
-%include "Bootload/protected_mode_setup.asm"		; Routines to set up and initialize protected mode
-%include "Features/pm_strings.asm"					; String features in 32 bit protected mode
+; 				INCLUDES
+;===========================================;
+%include "Bootload/GDT.asm" 				;		Global descriptor table
+%include "Bootload/DAP.asm"					;		Disk address packet
+%include "Bootload/protected_mode_setup.asm";		Routines to set up and initialize protected mode
+%include "Features/pm_strings.asm"			;		String features in 32 bit protected mode
+;===========================================;
 
 [bits 16]
 
 ; Load the kernel in 16 bit real mode
 load_kernel:
 
+	; Check if BIOS supports extention interrupts before using one
+	mov ah, 41h
+	mov bx, 55AAh
+	mov dl, 80h
+	int 13h
+	jc .no_extentions
+
+
 	; Set up parameters to load disk with
 
-	mov bx, KERNEL_OFFSET
-	mov dl, [BOOT_DRIVE]		; Boot device number 
-	mov dh, 15					; Amount of sectors to load
-	call load_disk				; Call routine
+	mov dl, 80h					; Boot device number - First HDD
+	mov si, DAP_START			; SI will hold the Disk Address Packet offset
+	call load_disk
 
 	ret
+
+.no_extentions:
+
+	mov si, no_extentions_message
+	call print_string
+	jmp $
 
 	
 ; load DH sectors to ES:BX from drive DL
 load_disk:
 
-	push dx 									
-	mov ah, 2h	 		; BIOS read sector function
-	mov al, dh 			; Read DH sectors
-	mov ch, 0 			; Select cylinder 0
-	mov dh, 0 			; Select head 0
-	mov cl, 3 			; Start reading from the third sector (i.e after the boot sector)
+								
+	mov ah, 42h	 		; BIOS read sector extended function
 	int 13h 			; BIOS interrupt
 	jc .disk_error 		; Jump if error (i.e. carry flag set)
-	pop dx 				; Restore DX from the stack
-	cmp dh , al 		; if AL (sectors read) != DH (sectors expected)
-	jne .disk_error 	; display error message
+	
 	ret
 	
 .disk_error:
@@ -209,7 +215,8 @@ genesis:
 
 
 ; Variables
-BOOT_DRIVE			db 0 							; Save boot device number
-disk_error_message 	db "Disk read error!" , 0
-success_message    	db "Successfully switched to protected mode!", 0
+BOOT_DRIVE				db 0 							; Save boot device number
+disk_error_message 		db "Disk read error!" , 0
+no_extentions_message 	db "BIOS does not support extended interrupts", 0
+success_message    		db "Successfully switched to protected mode!", 0
 	
