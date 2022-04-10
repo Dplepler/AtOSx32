@@ -3,23 +3,26 @@ all: 	DiskImages/AtOS.img
 debug: 	DiskImages/AtOSDebug.img
 gdb: 	DiskImages/AtOSGDB.img
 
-DiskImages/AtOS.img : Bootload/Bootloader.bin Kernel/kernel.bin
+DiskImages/AtOS.img : Bootload/stage0.bin Bootload/Bootloader.bin Kernel/kernel.bin
 	dd if=/dev/zero of=DiskImages/AtOS.img bs=1024 count=1440
-	dd if=Bootload/Bootloader.bin of=DiskImages/AtOS.img conv=notrunc
-	dd if=Kernel/kernel.bin of=DiskImages/AtOS.img bs=512 seek=1 conv=notrunc
+	dd if=Bootload/stage0.bin of=DiskImages/AtOS.img conv=notrunc
+	dd if=Bootload/Bootloader.bin of=DiskImages/AtOS.img bs=512 seek=1 conv=notrunc
+	dd if=Kernel/kernel.bin of=DiskImages/AtOS.img bs=512 seek=2 conv=notrunc
 	qemu-system-x86_64 DiskImages/AtOS.img
 
 
-DiskImages/AtOSDebug.img : Bootload/Bootloader.bin Kernel/kernel.bin
+DiskImages/AtOSDebug.img : Bootload/stage0.bin Bootload/Bootloader.bin Kernel/kernel.bin
 	dd if=/dev/zero of=DiskImages/AtOS.img bs=1024 count=1440
-	dd if=Bootload/Bootloader.bin of=DiskImages/AtOS.img conv=notrunc
-	dd if=Kernel/kernel.bin of=DiskImages/AtOS.img bs=512 seek=1 conv=notrunc
+	dd if=Bootload/stage0.bin of=DiskImages/AtOS.img conv=notrunc
+	dd if=Bootload/Bootloader.bin of=DiskImages/AtOS.img bs=512 seek=1 conv=notrunc
+	dd if=Kernel/kernel.bin of=DiskImages/AtOS.img bs=512 seek=2 conv=notrunc
 	qemu-system-x86_64 -hda DiskImages/AtOS.img -monitor stdio
 
-DiskImages/AtOSGDB.img : Bootload/Bootloader.bin Kernel/kernel.bin
+DiskImages/AtOSGDB.img : Bootload/stage0.bin Bootload/Bootloader.bin Kernel/kernel.bin
 	dd if=/dev/zero of=DiskImages/AtOS.img bs=1024 count=1440
-	dd if=Bootload/Bootloader.bin of=DiskImages/AtOS.img conv=notrunc
-	dd if=Kernel/kernel.bin of=DiskImages/AtOS.img bs=512 seek=1 conv=notrunc
+	dd if=Bootload/stage0.bin of=DiskImages/AtOS.img conv=notrunc
+	dd if=Bootload/Bootloader.bin of=DiskImages/AtOS.img bs=512 seek=1 conv=notrunc
+	dd if=Kernel/kernel.bin of=DiskImages/AtOS.img bs=512 seek=2 conv=notrunc
 	qemu-system-x86_64 -S -s DiskImages/AtOS.img
 
 C_SOURCES = $(wildcard Kernel/*.c)
@@ -37,6 +40,7 @@ Kernel/kernel.bin : Kernel/kernel_start.o ${OBJ}
 
 %.bin : %.asm
 	nasm -O0 -f bin -o $@ $<
+
 
 
 clean:

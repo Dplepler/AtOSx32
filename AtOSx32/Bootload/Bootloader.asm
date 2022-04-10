@@ -1,22 +1,14 @@
-[org 7C00h] 				; Set location counter
- 
-KERNEL_OFFSET equ 1000h 	; Location of our kernel in memory
+KERNEL_OFFSET equ 1300h 	; Location of our kernel in memory
 
 ; Start of the boot sector's main routine
 bootload_start:
 	
-	mov [BOOT_DRIVE], dl 	; Save boot device number stored in dl by BIOS
-	
-	; Set up stack
-	mov bp, 9000h
-	mov sp, bp
-	
-	call load_kernel
 	call enable_a20
-
+	call unreal_mode
+	call load_kernel
 	call switch_to_pm
 
-	jmp $ 			; Hang
+	jmp $ 	; Hang
 	
 
 ; Enables A20 address line to access higher memory in 16 bit
@@ -99,6 +91,43 @@ check_a20:
 	
 	ret
 
+; Switch to unreal mode so we can load a big big kernel
+; This will not be documented well since most operations are documented in the protected mode setup file
+unreal_mode:
+
+	; Set segment and stack
+	xor ax, ax       	
+   	mov ds, ax          
+   	mov ss, ax          
+   	mov sp, 9c00h       
+
+	cli 		; Clear interrupts
+	push ds		; Save segment
+
+	lgdt [GDT_DESCRIPTOR]	; Load Global Descriptor Table
+
+	; Temporarily go to protected mode
+	mov eax, cr0          
+   	or al, 1                
+   	mov cr0, eax
+
+	jmp 8h:$+2
+
+	jmp $
+
+   	mov  bx, 8h          ; Select descriptor 1
+   	mov  ds, bx          ; 8h = 1000b
+ 
+	; Back to real mode
+   	and al, 0FEh         
+   	mov cr0, eax        
+
+   	pop ds              ; Get back old segment
+   	sti					; Return interrupts
+
+	ret
+
+
 ; Includes
 %include "Bootload/GDT.asm" 						; Global descriptor table
 %include "Bootload/protected_mode_setup.asm"		; Routines to set up and initialize protected mode
@@ -111,9 +140,9 @@ load_kernel:
 
 	; Set up parameters to load disk with
 	
-	mov ebx, KERNEL_OFFSET
+	mov bx, KERNEL_OFFSET
 	mov dl, [BOOT_DRIVE]		; Boot device number 
-	mov dh, 54					; Amount of sectors to load
+	mov dh, 15					; Amount of sectors to load
 	call load_disk				; Call routine
 
 	ret
@@ -127,7 +156,7 @@ load_disk:
 	mov al, dh 			; Read DH sectors
 	mov ch, 0 			; Select cylinder 0
 	mov dh, 0 			; Select head 0
-	mov cl, 2 			; Start reading from second sector (i.e after the boot sector)
+	mov cl, 3 			; Start reading from the third sector (i.e after the boot sector)
 	int 13h 			; BIOS interrupt
 	jc .disk_error 		; Jump if error (i.e. carry flag set)
 	pop dx 				; Restore DX from the stack
@@ -176,9 +205,5 @@ genesis:
 ; Variables
 BOOT_DRIVE			db 0 							; Save boot device number
 disk_error_message 	db "Disk read error!" , 0
-success_message    	db "Successfully switched to protected mode! DEBUG WOW!", 0
+success_message    	db "Successfully switched to protected mode!", 0
 	
-	
-
-times 510-($-$$) db 0	; Fill memory with 0 so that the size of the bootloader will always be 512 (+2 signature bytes)
-dw 0AA55h				; Boot sector signature - tell the CPU this is our bootloader
