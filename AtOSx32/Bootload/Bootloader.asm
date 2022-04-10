@@ -1,3 +1,5 @@
+[org 7E00h] 		; Load right after the stage0 boot sector
+[bits 16]
 KERNEL_OFFSET equ 1300h 	; Location of our kernel in memory
 
 ; Start of the boot sector's main routine
@@ -111,11 +113,11 @@ unreal_mode:
    	or al, 1                
    	mov cr0, eax
 
-	jmp 8h:$+2
+	jmp .continue
 
-	jmp $
+.continue:
 
-   	mov  bx, 8h          ; Select descriptor 1
+   	mov  bx, 0x08          ; Select descriptor 1
    	mov  ds, bx          ; 8h = 1000b
  
 	; Back to real mode

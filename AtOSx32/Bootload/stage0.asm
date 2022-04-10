@@ -1,7 +1,7 @@
 [org 7C00h] 		; Set location counter
 [bits 16]
 
-BOOT_OFFSET equ 1000h
+BOOT_OFFSET equ 7E00h
 
 stage0_start:
 
