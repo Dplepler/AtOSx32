@@ -5,8 +5,18 @@ KERNEL_OFFSET equ 1300h 	; Location of our kernel in memory
 ; Start of the boot sector's main routine
 bootload_start:
 	
+	; Set segment and stack
+	xor ax, ax       	
+   	mov ds, ax          
+   	mov ss, ax          
+   	mov sp, 9c00h   
+
 	call enable_a20
 	call unreal_mode
+
+	mov ax, 25h
+	jmp $
+
 	call load_kernel
 	call switch_to_pm
 
@@ -95,13 +105,7 @@ check_a20:
 
 ; Switch to unreal mode so we can load a big big kernel
 ; This will not be documented well since most operations are documented in the protected mode setup file
-unreal_mode:
-
-	; Set segment and stack
-	xor ax, ax       	
-   	mov ds, ax          
-   	mov ss, ax          
-   	mov sp, 9c00h       
+unreal_mode:    
 
 	cli 		; Clear interrupts
 	push ds		; Save segment
@@ -121,8 +125,8 @@ unreal_mode:
    	mov  ds, bx          ; 8h = 1000b
  
 	; Back to real mode
-   	and al, 0FEh         
-   	mov cr0, eax        
+   	and al, 0FEh
+   	mov cr0, eax
 
    	pop ds              ; Get back old segment
    	sti					; Return interrupts
@@ -141,7 +145,7 @@ unreal_mode:
 load_kernel:
 
 	; Set up parameters to load disk with
-	
+
 	mov bx, KERNEL_OFFSET
 	mov dl, [BOOT_DRIVE]		; Boot device number 
 	mov dh, 15					; Amount of sectors to load
