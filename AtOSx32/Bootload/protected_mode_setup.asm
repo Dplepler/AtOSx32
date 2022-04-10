@@ -16,7 +16,6 @@ switch_to_pm:
 	mov cr0, eax			; Also, we do not want to change previous values of cr0 
 
 
-
 	; After telling the CPU we want to use protected mode,
 	; there is a risk that it will use the pipeline mode to process instructions instead
 	; A way to avoid that is to clear the pipeline by far jumping to another segment 
@@ -30,18 +29,16 @@ switch_to_pm:
 
 ; These offsets must be 4k aligned
 ;===================;
-PD_OFFSET  equ 3000h; 	Table directory entry offset
-PT_OFFSET  equ 4000h;	First page table offset
-NPT_OFFSET equ 5000h;	Kernel page table offset
+PD_OFFSET  equ 4000h; 	Table directory entry offset
+PT_OFFSET  equ 5000h;	First page table offset
+NPT_OFFSET equ 6000h;	Kernel page table offset
 ;===================;
 
 KERNEL_ENTRY_OFFSET equ 300h 	; Entry in the page directory for our higher half kernel at 0xC0000000
 
 init_protected_mode:
 
-	mov cx, 69h
-	jmp $
-
+	call relocate_kernel 	; Before we start, relocate the kernel beyond 1MB
 	
 	; Set all segment registers to the beginning of the data segment
 	; Note that CS will already be set to the code segment after the far jump to here
@@ -52,7 +49,7 @@ init_protected_mode:
 	mov fs, ax
 	mov gs, ax
 
-	; Set EBP and ESP to the top of the stack
+	; Setup stack
 	mov ebp, 90000h
 	mov esp, ebp
       
@@ -64,15 +61,16 @@ init_protected_mode:
 
 	rep stosd  			; Repeat copying EAX's value to EDI memory location ECX times
 
-	; To let the bootloader continue without failing, we will identity map the first 4 Megabytes (i.e page table)
+	; To let the bootloader continue without failing, we will identity map the first 4 Megabytes (i.e first page table)
 	mov edi, PT_OFFSET		; Some page table offset
 	xor ecx, ecx			; Beginning of physical memory
 	xor edx, edx			; First directory entry
 
 	call fill_table
 
+	; Now let's map the kenrel to make it a higher half kernel
 	mov edi, NPT_OFFSET  			; Page table to fill
-	mov ecx, 1 						; Physical page index where the kernel is located
+	mov ecx, 100h					; Physical page index where the kernel is located
 	mov edx, KERNEL_ENTRY_OFFSET  	; Kernel's page directory index (Will point to 0xC0000000)
 
 	call fill_table
@@ -91,6 +89,19 @@ init_protected_mode:
 
 	jmp genesis 			; Go back to the bootloader to start executing the kernel!
 			
+
+relocate_kernel:
+
+
+	; Relocate 16 sectors of kernel from below 1MB to above 1MB
+	mov ecx, 800h
+	
+	mov esi, INIT_KERNEL_OFFSET
+	mov edi, PHYS_KERNEL_OFFSET
+
+	rep movsd
+
+	ret
 
 ; Map a page table's entries to physical page frames
 ; In: EDI = Page table offset to fill, ECX = Physical page frame index, EDX = Page directory entry index to point to new table

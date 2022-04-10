@@ -1,6 +1,7 @@
 [org 7E00h] 		; Load right after the stage0 boot sector
 [bits 16]
-KERNEL_OFFSET equ 1000h 	; Location of our kernel in memory
+INIT_KERNEL_OFFSET equ 1000h 	; Location of our kernel in memory at first
+PHYS_KERNEL_OFFSET equ 100000h	; Location of our kernel in memory
 
 ; Start of the boot sector's main routine
 bootload_start:
