@@ -4,7 +4,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-bool unmap_page(uint16_t index);
+#define DIRECTORY_ADDR 0xC03FF000
+
+bool unmap_page(unsigned long* addr);
 
 
 #endif

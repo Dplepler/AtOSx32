@@ -53,7 +53,7 @@ void terminal_initialize() {
 	terminal_column = 0;
 	terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GRAY, VGA_COLOR_DARK_GRAY);
 
-	terminal_buffer = (uint16_t*) 0xC03FF000;	// Virtual address of buffer (Physical address is 0xB8000)
+	terminal_buffer = (uint16_t*)VGA_BUFFER_ADDR;	// Virtual address of buffer (Physical address is 0xB8000)
 
 	/* Cleaning the screen and setting background color */
 	for (size_t y = 0; y < VGA_HEIGHT; y++) {
