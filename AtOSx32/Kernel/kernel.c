@@ -12,8 +12,6 @@
 
 int kmain(void) {
 
-	pd_unmap(0);
-
 	/* Initialize terminal interface */
 	terminal_initialize();
 

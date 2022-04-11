@@ -207,9 +207,11 @@ print_string:
 
 [bits 32]
 
-; Beginning of protected mode! How cool
+; Jump to our kernel!
 genesis:
 
+	mov ecx, 0505h
+	jmp $
 	call 0C0000000h 		; Call the virtual address of the Kernel
 	jmp $					; Hang at the end of the kernel
 	

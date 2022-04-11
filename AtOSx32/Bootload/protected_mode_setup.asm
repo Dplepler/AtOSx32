@@ -68,15 +68,15 @@ init_protected_mode:
 
 	call fill_table
 
-	; Now let's map the kenrel to make it a higher half kernel
+	; Now let's map the kernel to make it a higher half kernel
 	mov edi, KPT_OFFSET  			; Page table to fill
 	mov ecx, 100h					; Physical page index where the kernel is located
 	mov edx, KERNEL_ENTRY_OFFSET  	; Kernel's page directory index (Will point to 0xC0000000)
 
 	call fill_table
 
-	; Change the last page entry to point to our VGA buffer
-	add edi, 0FFCh				; Add 1022 * 4 to page offset, point to last-to-last table entry
+	; Change the last-to-last page entry to point to our VGA buffer
+	add edi, 0FF8h				; Add 1022 * 4 to page offset, point to last-to-last table entry
 	mov dword [edi], 0B8003h	; 0xB8000 | 3 = VGA buffer with present and write/read bits set
 
 	; To continue mapping in the kernel, we will map the page directory to itself
@@ -85,7 +85,7 @@ init_protected_mode:
 	or dword [edi], 3			; Turn on flags
 
 	; Now map all page tables too
-	mov edi, 7000h 	; An empty table
+	mov edi, 8000h 	; An empty table
 	mov ecx, 5		; Points to 5000h: Where our first page table lives
 	mov edx, 1023 	; Last entry in the directory table
 
@@ -97,7 +97,7 @@ init_protected_mode:
 	mov eax, cr0			; To enable paging we need to set the correct flags in the cr0 register
 	or 	eax, 80000000h
 	mov cr0, eax
-
+	
 	jmp genesis 			; Go back to the bootloader to start executing the kernel!
 			
 
@@ -122,7 +122,6 @@ fill_table:
 	push edx
 
 	xor ebx, ebx
-	mov eax, ecx
 
 .fill:
 	
@@ -149,7 +148,7 @@ fill_table:
 	add eax, PD_OFFSET 	; Add the page directory offset
 	mov esi, eax
 
-	mov dword [esi], edi		; Put the first page table into the first page directory entry 
+	mov dword [esi], edi		; Put the page table into the page directory entry 
 	or 	dword [esi], 3 			; Turn present flag on
 
 	popa
