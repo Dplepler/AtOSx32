@@ -12,20 +12,16 @@
 
 int kmain(void) {
 
+	pd_unmap(0);
+
 	/* Initialize terminal interface */
 	terminal_initialize();
 
-	char* hello = "hello";
 
-	for (unsigned int i = 0; i < 5; i++) {
-		terminal_putchar(hello[i]);
-	}
+	terminal_draw_square(30, 0, 20, 10, VGA_COLOR_CYAN);
 
-
-	//terminal_draw_square(0, 0, 20, 10, VGA_COLOR_CYAN);
-
-	//terminal_write("hello world!", 5);
-	//terminal_putchar('b');
+	terminal_writestring("hello world!\n");
+	terminal_writestring("YO");
 
 	return 0;
 }

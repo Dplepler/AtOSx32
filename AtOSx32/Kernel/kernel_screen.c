@@ -63,15 +63,15 @@ void terminal_initialize() {
 		}
 	}
 
-	update_cursor(0, 0); 	// Set cursor position to the start of the screen
+	cursor_update(0, 0); 	// Set cursor position to the start of the screen
 }
 
 /*
-enable_cursor turns on the cursor in text mode with a given size
+cursor_enable turns on the cursor in text mode with a given size
 Input: Start of cursor, end of cursor
 Output: None
 */
-void enable_cursor(uint8_t cursor_start, uint8_t cursor_end) {
+void cursor_enable(uint8_t cursor_start, uint8_t cursor_end) {
 
 	/* Prepare and write beginning of cursor data */
 	outportb(0x3D4, 0x0A); 
@@ -83,22 +83,19 @@ void enable_cursor(uint8_t cursor_start, uint8_t cursor_end) {
 }
 
 /*
-disable_cursor disables the current cursor in text mode
-Input: None
-Output: None
+cursor_disable disables the current cursor in text mode
 */
-void disable_cursor() {
+void cursor_disable() {
 
 	outportb(0x3D4, 0x0A);
 	outportb(0x3D5, 0x20);
 }
 
 /*
-update_cursor updates the coordinates of the cursor with a given new position
+cursor_update updates the coordinates of the cursor with a given new position
 Input: Desired x coordinate of cursor, desired y coordinate of cursor
-Output: None
 */
-void update_cursor(int x, int y) {
+void cursor_update(int x, int y) {
 
 	uint16_t pos = y * VGA_WIDTH + x; 	// Calculate desired position with the linear data
  
@@ -112,11 +109,10 @@ void update_cursor(int x, int y) {
 }
  
 /*
-get_cursor_position gets the current cursor coordinates
-Input: None
+cursor_get_position gets the current cursor coordinates
 Output: 2 byte position (x, y)
 */
-uint16_t get_cursor_position() {
+uint16_t cursor_get_position() {
 
     uint16_t pos = 0;
 
@@ -135,7 +131,6 @@ uint16_t get_cursor_position() {
 /*
 terminal_setcolor sets the color of the terminal
 Input: Color to set the terminal with
-Output: None
 */
 void terminal_setcolor(vga_color color) {
 	terminal_color = color;
@@ -187,11 +182,11 @@ Input: Character array to write, amount to write
 */
 void terminal_write(const char* data, size_t amount) {
 
-	terminal_putchar(data[0]);
-
 	for (size_t i = 0; i < amount; i++) {
 		terminal_putchar(data[i]);
 	}
+
+	cursor_update(terminal_column, terminal_row);
 }
 
 /*
@@ -202,12 +197,15 @@ void terminal_writestring(const char* data) {
 	terminal_write(data, strlen(data));
 }
 
+/*
+terminal_draw_square draws a square to the screen
+Input: X coordinate of left top corner, Y coordinate of left top corner, X coordinate of right bottom corner, Y coordinate of right bottom corner, color
+*/
 void terminal_draw_square(const uint8_t x, const uint8_t y, const uint8_t destx, const uint8_t desty, const vga_color color) {
 
 	for (uint8_t i = y; i < y + desty; i++) {
 		for (uint8_t i2 = x; i2 < x + destx; i2++) {
-			terminal_put_colored_char_at('p', vga_entry_color(color, color), x + i2, y + i);
+			terminal_put_colored_char_at(' ', vga_entry_color(color, color), x + i2, y + i);
 		}
 	}
-
 }

@@ -42,11 +42,8 @@ typedef enum vga_color {
 uint8_t vga_entry_color(vga_color ccolor, vga_color bcolor);
 uint16_t vga_entry(unsigned char c, uint8_t color);
 size_t strlen(const char* str);
+
 void terminal_initialize();
-void enable_cursor(uint8_t cursor_start, uint8_t cursor_end);
-void disable_cursor();
-void update_cursor(int x, int y);
-uint16_t get_cursor_position();
 void terminal_setcolor(vga_color color);
 void terminal_putentryat(char c, uint8_t color, const uint8_t x, const uint8_t y);
 void terminal_putchar(char c);
@@ -54,5 +51,10 @@ void terminal_put_colored_char_at(char c, uint8_t color, const uint8_t x, const 
 void terminal_write(const char* data, size_t amount);
 void terminal_writestring(const char* data);
 void terminal_draw_square(const uint8_t x, const uint8_t y, const uint8_t destx, const uint8_t desty, const vga_color color);
+
+void cursor_enable(uint8_t cursor_start, uint8_t cursor_end);
+void cursor_disable();
+void cursor_update(int x, int y);
+uint16_t cursor_get_position();
 
 #endif
