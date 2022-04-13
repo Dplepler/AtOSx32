@@ -9,8 +9,11 @@
 #endif
 
 #include "kernel_screen.h"
+#include "paging.h"
 
 int kmain(void) {
+
+	//page_unmap(0); 	// Remove identity mapping
 
 	/* Initialize terminal interface */
 	terminal_initialize();

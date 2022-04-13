@@ -11,7 +11,7 @@ bool page_unmap(unsigned long* addr) {
 
     pt_addr[pt_index] = 0x0;    // Unmap entry
 
-    pd_remove_empty_pt(pt_addr, pd_index);
+    pd_remove_empty_pt(pt_addr, pd_index);    
 
     return true;
 }

@@ -28,11 +28,11 @@ switch_to_pm:
 [bits 32]
 
 ; These offsets must be 4k aligned
-;===================;
-PD_OFFSET  equ 4000h; 	Table directory entry offset
-PT_OFFSET  equ 5000h;	First page table offset
-KPT_OFFSET equ 6000h;	Kernel page table offset
-;===================;
+;=======================;
+PD_OFFSET  equ 1000h	; 	Table directory entry offset
+PT_OFFSET  equ 2000h	;	First page table offset
+KPT_OFFSET equ 302000h  ;	Kernel page table offset
+;=======================;
 
 KERNEL_ENTRY_OFFSET equ 300h 	; Entry in the page directory for our higher half kernel at 0xC0000000
 
@@ -70,7 +70,7 @@ init_protected_mode:
 
 	; Now let's map the kernel to make it a higher half kernel
 	mov edi, KPT_OFFSET  			; Page table to fill
-	mov ecx, 100h					; Physical page index where the kernel is located
+	mov ecx, 500h					; Physical page index where the kernel is located
 	mov edx, KERNEL_ENTRY_OFFSET  	; Kernel's page directory index (Will point to 0xC0000000)
 
 	call fill_table
@@ -85,7 +85,7 @@ init_protected_mode:
 	mov eax, cr0			; To enable paging we need to set the correct flags in the cr0 register
 	or 	eax, 80000000h
 	mov cr0, eax
-	
+
 	jmp genesis 			; Go back to the bootloader to start executing the kernel!
 			
 			
