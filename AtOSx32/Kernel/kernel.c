@@ -13,7 +13,7 @@
 
 int kmain(void) {
 
-	//page_unmap(0); 	// Remove identity mapping
+	page_unmap(0); 	// Remove identity mapping
 
 	/* Initialize terminal interface */
 	terminal_initialize();

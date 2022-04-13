@@ -1,5 +1,11 @@
 #include "paging.h"
 
+unsigned long* page_physical_address(unsigned long* virtual_addr) {
+
+
+
+}
+
 bool page_unmap(unsigned long* addr) {
 
     if (((unsigned long)addr << 20)) { return false; }          // Address should always be page aligned
@@ -7,7 +13,7 @@ bool page_unmap(unsigned long* addr) {
     unsigned long pd_index = (unsigned long)addr >> 22;         // Page directory index
     unsigned long pt_index = (unsigned long)addr >> 12 & 0x3FF; // Page table index
 
-    unsigned long* pt_addr = (unsigned long*)PAGE_TABLES_ADDR + (pd_index * 0x400);  // Get page table address
+    unsigned long* pt_addr = (unsigned long*)PT_OFFSET + (pd_index * 0x400);  // Get page table address
 
     pt_addr[pt_index] = 0x0;    // Unmap entry
 
@@ -39,6 +45,6 @@ void pd_remove_empty_pt(unsigned long* pt_addr, unsigned long pd_index) {
 
     if (page_is_empty(pt_addr)) {
 
-        ((unsigned long*)DIRECTORY_ADDR)[pd_index] = 0x2;   // Set entry as not present
+        ((unsigned long*)PD_ADDRESS)[pd_index] = 0x2;   // Set entry as not present
     }
 }
