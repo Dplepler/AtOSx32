@@ -169,7 +169,6 @@ load_kernel:
 	
 ; load DH sectors to ES:BX from drive DL
 load_disk:
-
 								
 	mov ah, 42h	 		; BIOS read sector extended function
 	int 13h 			; BIOS interrupt
@@ -210,8 +209,6 @@ print_string:
 ; Jump to our kernel!
 genesis:
 
-	mov ecx, 0505h
-	jmp $
 	call 0C0000000h 		; Call the virtual address of the Kernel
 	jmp $					; Hang at the end of the kernel
 	

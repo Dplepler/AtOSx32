@@ -76,20 +76,8 @@ init_protected_mode:
 	call fill_table
 
 	; Change the last-to-last page entry to point to our VGA buffer
-	add edi, 0FF8h				; Add 1022 * 4 to page offset, point to last-to-last table entry
+	add edi, 0FF8h				; Add 1023 * 4 to page offset, point to last-to-last table entry
 	mov dword [edi], 0B8003h	; 0xB8000 | 3 = VGA buffer with present and write/read bits set
-
-	; To continue mapping in the kernel, we will map the page directory to itself
-	add edi, 4					; Point to last page table entry
-	mov dword [edi], PD_OFFSET 	; Map the page directory to itself
-	or dword [edi], 3			; Turn on flags
-
-	; Now map all page tables too
-	mov edi, 8000h 	; An empty table
-	mov ecx, 5		; Points to 5000h: Where our first page table lives
-	mov edx, 1023 	; Last entry in the directory table
-
-	call fill_table
 
 	mov eax, PD_OFFSET 		; The address that points to the directory table, 1024 entries, 32 bits each
 	mov cr3, eax			; We put the address of our directory table in the cr3 register
@@ -99,6 +87,7 @@ init_protected_mode:
 	mov cr0, eax
 	
 	jmp genesis 			; Go back to the bootloader to start executing the kernel!
+			
 			
 
 relocate_kernel:
