@@ -29,9 +29,9 @@ switch_to_pm:
 
 ; These offsets must be 4k aligned
 ;=======================;
-PD_OFFSET  equ 1000h	; 	Table directory entry offset
-PT_OFFSET  equ 2000h	;	First page table offset
-KPT_OFFSET equ 302000h  ;	Kernel page table offset
+PD_OFFSET  equ 1000000h	; 	Table directory entry offset
+PT_OFFSET  equ 1001000h	;	First page table offset
+KPT_OFFSET equ 1002000h ;	Kernel page table offset
 ;=======================;
 
 KERNEL_ENTRY_OFFSET equ 300h 	; Entry in the page directory for our higher half kernel at 0xC0000000
@@ -70,14 +70,19 @@ init_protected_mode:
 
 	; Now let's map the kernel to make it a higher half kernel
 	mov edi, KPT_OFFSET  			; Page table to fill
-	mov ecx, 500h					; Physical page index where the kernel is located
+	mov ecx, 100h					; Physical page index where the kernel is located
 	mov edx, KERNEL_ENTRY_OFFSET  	; Kernel's page directory index (Will point to 0xC0000000)
 
 	call fill_table
 
 	; Change the last-to-last page entry to point to our VGA buffer
-	add edi, 0FF8h				; Add 1023 * 4 to page offset, point to last-to-last table entry
+	add edi, 0FF8h				; Add 1022 * 4 to page offset, point to last-to-last table entry
 	mov dword [edi], 0B8003h	; 0xB8000 | 3 = VGA buffer with present and write/read bits set
+
+	; Map the last directory entry to itself, this way virtual address 0xFFFFF000 will point to our directory table
+	mov edi, 1000FFCh
+	mov dword [edi], PD_OFFSET
+	or dword [edi], 3
 
 	mov eax, PD_OFFSET 		; The address that points to the directory table, 1024 entries, 32 bits each
 	mov cr3, eax			; We put the address of our directory table in the cr3 register

@@ -1,7 +1,7 @@
 [org 7E00h] 		; Load right after the stage0 boot sector
 [bits 16]
 INIT_KERNEL_OFFSET equ 1000h 	; Location of our kernel in memory at first
-PHYS_KERNEL_OFFSET equ 500000h	; Location of our kernel in memory
+PHYS_KERNEL_OFFSET equ 100000h	; Location of our kernel in memory
 
 ; Start of the boot sector's main routine
 bootload_start:
@@ -31,7 +31,7 @@ enable_a20:
 	je .exit
 
 	; Activate A20 address line
-	mov ax,2401h               
+	mov ax, 2401h               
 	int 15h
 
 

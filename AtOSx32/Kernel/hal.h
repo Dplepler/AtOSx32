@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-uint8_t inportb(unsigned short port);
-void outportb(unsigned short port, uint8_t value);
+uint8_t inportb(uint16_t port);
+void outportb(uint16_t port, uint8_t value);
 
 #endif

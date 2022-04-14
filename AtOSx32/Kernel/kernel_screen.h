@@ -53,10 +53,12 @@ void terminal_put_colored_char_at(char c, uint8_t color, const uint8_t x, const 
 void terminal_write(const char* data, size_t amount);
 void terminal_writestring(const char* data);
 void terminal_draw_square(const uint8_t x, const uint8_t y, const uint8_t destx, const uint8_t desty, const vga_color color);
+bool terminal_special_chars(char c);
 
 void cursor_enable(uint8_t cursor_start, uint8_t cursor_end);
 void cursor_disable();
 void cursor_update(int x, int y);
 uint16_t cursor_get_position();
+
 
 #endif

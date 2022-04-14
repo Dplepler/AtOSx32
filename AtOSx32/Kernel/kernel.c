@@ -21,7 +21,7 @@ int kmain(void) {
 
 	terminal_draw_square(30, 0, 20, 10, VGA_COLOR_CYAN);
 
-	terminal_writestring("hello world!\n");
+	terminal_writestring("hello world!\n\r");
 	terminal_writestring("YO");
 
 	return 0;

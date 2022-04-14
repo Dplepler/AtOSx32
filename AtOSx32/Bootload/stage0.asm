@@ -76,5 +76,5 @@ print_string:
 BOOT_DRIVE			db 0 							; Save boot device number
 disk_error_message 	db "Disk read error!" , 0
 
-times 510-($-$$) db 0	; Fill memory with 0 so that the size of the bootloader will always be 512 (+2 signature bytes)
+times 510-($-$$) db 0	; Pad memory so that the size of the bootloader will always be 510 (+2 signature bytes)
 dw 0AA55h				; Boot sector signature - tell the CPU this is our bootloader

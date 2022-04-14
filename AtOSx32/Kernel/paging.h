@@ -4,8 +4,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define PD_ADDRESS 0x00001000           // Virtual address of the page directory
-#define PT_OFFSET  PD_ADDRESS + 0x1000  // The page table offset comes right after the page directory
+#define PD_ADDRESS 0x1000   // CHANGE THIS
+#define PT_OFFSET  0x1000   // CHANGE THIS
 
 unsigned long* page_physical_address(unsigned long* virtual_addr);
 bool page_unmap(unsigned long* addr);

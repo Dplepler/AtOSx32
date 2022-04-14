@@ -154,6 +154,9 @@ Output: None
 */
 void terminal_putchar(char c) {
 
+
+	if (terminal_special_chars(c)) { return; }
+
 	terminal_putentryat(c, VGA_COLOR_WHITE, terminal_column, terminal_row);
 
 	// Reset indexes if we're out of bounds
@@ -208,4 +211,20 @@ void terminal_draw_square(const uint8_t x, const uint8_t y, const uint8_t destx,
 			terminal_put_colored_char_at(' ', vga_entry_color(color, color), x + i2, y + i);
 		}
 	}
+}
+
+/*
+terminal_special_chars gets a character and preforms the operation it might specify (e.g '\n' will make a new line)
+Input: Character
+Output: True if character was of a specifier type
+*/
+bool terminal_special_chars(char c) {
+
+	switch (c) {
+
+		case '\n': terminal_row++; return true;
+		case '\r': terminal_column = 0; return true;
+	}
+
+	return false;
 }
