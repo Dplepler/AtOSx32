@@ -75,8 +75,8 @@ init_protected_mode:
 
 	call fill_table
 
-	; Change the last-to-last page entry to point to our VGA buffer
-	add edi, 0FF8h				; Add 1022 * 4 to page offset, point to last-to-last table entry
+	; Change the last page entry to point to our VGA buffer
+	add edi, 0FFCh				; Add 1023 * 4 to page offset, point to last table entry
 	mov dword [edi], 0B8003h	; 0xB8000 | 3 = VGA buffer with present and write/read bits set
 
 	; Map the last directory entry to itself, this way virtual address 0xFFFFF000 will point to our directory table

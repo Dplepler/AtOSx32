@@ -13,11 +13,10 @@
 
 int kmain(void) {
 
-	page_unmap(0); 	// Remove identity mapping
+	pd_remove_entry(0); 	// Remove identity mapping
 
 	/* Initialize terminal interface */
 	terminal_initialize();
-
 
 	terminal_draw_square(30, 0, 20, 10, VGA_COLOR_CYAN);
 

@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include "hal.h"
 
-#define VGA_BUFFER_ADDR 0xC03FE000
+#define VGA_BUFFER_ADDR 0xC03FF000
 
 /* Hardware text mode color constants. */
 typedef enum vga_color {
