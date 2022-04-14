@@ -61,6 +61,11 @@ init_protected_mode:
 
 	rep stosd  			; Repeat copying EAX's value to EDI memory location ECX times
 
+	; Map the last directory entry to itself, this way virtual address 0xFFFFF000 will point to our directory table
+	mov edi, 1000FFCh
+	mov dword [edi], PD_OFFSET
+	or dword [edi], 3
+
 	; To let the bootloader continue without failing, we will identity map the first 4 Megabytes (i.e first page table)
 	mov edi, PT_OFFSET		; Some page table offset
 	xor ecx, ecx			; Beginning of physical memory
@@ -78,11 +83,6 @@ init_protected_mode:
 	; Change the last page entry to point to our VGA buffer
 	add edi, 0FFCh				; Add 1023 * 4 to page offset, point to last table entry
 	mov dword [edi], 0B8003h	; 0xB8000 | 3 = VGA buffer with present and write/read bits set
-
-	; Map the last directory entry to itself, this way virtual address 0xFFFFF000 will point to our directory table
-	mov edi, 1000FFCh
-	mov dword [edi], PD_OFFSET
-	or dword [edi], 3
 
 	mov eax, PD_OFFSET 		; The address that points to the directory table, 1024 entries, 32 bits each
 	mov cr3, eax			; We put the address of our directory table in the cr3 register
@@ -128,7 +128,7 @@ fill_table:
 	inc ecx 
 	inc ebx			
 
-	cmp ebx, 1024 			; We only want to map 1024 entries (that make up a page table)
+	cmp ebx, 1024 	; We only want to map 1024 entries (that make up a page table)
 	jl .fill
 
 	sub edi, 1000h 	; Get the initial page table offset

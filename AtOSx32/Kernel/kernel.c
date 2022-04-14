@@ -13,13 +13,15 @@
 
 int kmain(void) {
 
-	pd_remove_entry(0); 	// Remove identity mapping
+	
+
+	//pd_remove_entry(0); 	// Remove identity mapping
 
 	/* Initialize terminal interface */
 	terminal_initialize();
 
 	terminal_draw_square(30, 0, 20, 10, VGA_COLOR_CYAN);
-
+	
 	terminal_writestring("hello world!\n\r");
 	terminal_writestring("YO");
 

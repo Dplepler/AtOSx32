@@ -5,5 +5,5 @@
 [bits 32]
 [extern kmain] 		; Tell NASM that the main kernel function exists and will be found when we link files
 
-jmp kmain
+call kmain
 jmp $

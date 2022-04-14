@@ -2,8 +2,7 @@
 
 unsigned long* page_physical_address(unsigned long* virtual_addr) {
 
-
-
+    return virtual_addr;
 }
 
 bool pd_remove_entry(unsigned long* addr) {
@@ -27,13 +26,13 @@ bool page_unmap(unsigned long* addr) {
     unsigned long pd_index = (unsigned long)addr >> 22;         // Page directory index
     unsigned long pt_index = (unsigned long)addr >> 12 & 0x3FF; // Page table index
 
-    unsigned long* pt_addr = *((unsigned long*)PD_CALC_ADDRESS + (pd_index * 4));
+    unsigned long* pt_addr = (unsigned long*)(*((unsigned long*)PD_CALC_ADDRESS + (pd_index * 4)));
 
     pt_addr[pt_index] = 0x0;    // Unmap entry
 
     pd_remove_empty_pt(pt_addr, pd_index);  // Remove entire page table from page directory if it's empty
 
-    flush_tlb_single(pt_addr[pt_index]);    // Flush TLB to recognize changes
+    flush_tlb_single(&pt_addr[pt_index]);    // Flush TLB to recognize changes
 
     return true;
 }
