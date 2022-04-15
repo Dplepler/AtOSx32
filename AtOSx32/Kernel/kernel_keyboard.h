@@ -37,8 +37,8 @@ enum KEYBOARD_CTRL_STATS_MASK {
 	KEYBOARD_CTRL_STATS_MASK_PARITY		=	0x80	//10000000
 };
 
-uint8_t keyboard_ctrl_read_status();
-uint8_t keyboard_enc_read_buffer();
+uint16_t keyboard_ctrl_read_status();
+uint16_t keyboard_enc_read_buffer();
 void keyboard_ctrl_send_cmd(uint8_t cmd);
 void keyboard_enc_send_cmd(uint8_t cmd);
 

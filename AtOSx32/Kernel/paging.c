@@ -82,7 +82,7 @@ void pd_flush_tlb(pgulong_t pd_index) {
     pgulong_t* pt_addr = (pgulong_t*)(*((pgulong_t*)PD_CALC_ADDRESS + (pd_index * 4)));
 
     for (uint16_t i = 0; i < 0x400; i++) {
-        flush_tlb_single(pt_addr[i]);
+        flush_tlb_single((pgulong_t*)pt_addr[i]);
     }
 }
 

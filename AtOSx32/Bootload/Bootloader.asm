@@ -135,8 +135,7 @@ unreal_mode:
 ;===========================================;
 %include "Bootload/GDT.asm" 				;		Global descriptor table
 %include "Bootload/DAP.asm"					;		Disk address packet
-%include "Bootload/protected_mode_setup.asm";		Routines to set up and initialize protected mode
-%include "Features/pm_strings.asm"			;		String features in 32 bit protected mode
+%include "Bootload/protected_mode_setup.asm";		Routines to set up and initialize protected mode			;		String features in 32 bit protected mode
 ;===========================================;
 
 [bits 16]
@@ -218,5 +217,4 @@ genesis:
 BOOT_DRIVE				db 0 							; Save boot device number
 disk_error_message 		db "Disk read error!" , 0
 no_extentions_message 	db "BIOS does not support extended interrupts", 0
-success_message    		db "Successfully switched to protected mode!", 0
 	

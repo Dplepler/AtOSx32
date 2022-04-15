@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "hal.h"
+#include "utils.h"
 
 #define VGA_BUFFER_ADDR 0xC03FF000
 
@@ -51,7 +52,8 @@ void terminal_putentryat(char c, uint8_t color, const uint8_t x, const uint8_t y
 void terminal_putchar(char c);
 void terminal_put_colored_char_at(char c, uint8_t color, const uint8_t x, const uint8_t y);
 void terminal_write(const char* data, size_t amount);
-void terminal_writestring(const char* data);
+void terminal_write_string(const char* data);
+void terminal_write_int(int integer, size_t base);
 void terminal_draw_square(const uint8_t x, const uint8_t y, const uint8_t destx, const uint8_t desty, const vga_color color);
 bool terminal_special_chars(char c);
 

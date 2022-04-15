@@ -6,7 +6,7 @@ keyboard_ctrl_read_status reads the status of the keyboard controller
 Input: None
 Output: Data inside port 0x64
 */
-uint8_t keyboard_ctrl_read_status() {
+uint16_t keyboard_ctrl_read_status() {
  
 	return inportb(KEYBOARD_CTRL_STATS_REG);
 }
@@ -16,7 +16,7 @@ keyboard_enc_read_buffer reads the keyboard encoder's buffer data
 Input: None
 Output: Data inside port 0x60
 */
-uint8_t keyboard_enc_read_buffer() {
+uint16_t keyboard_enc_read_buffer() {
  
 	return inportb(KEYBOARD_ENC_INPUT_BUF);
 }

@@ -34,18 +34,6 @@ uint16_t vga_entry(unsigned char c, uint8_t color) {
 	return (uint16_t) c | (uint16_t) color << 8;
 }
  
-/*
-strlen returns the length of a given char array
-Input: Character array
-Output: Length of character array
-*/
-size_t strlen(const char* str) {
-
-	size_t len = 0;
-	while (str[len]) { len++; }
-
-	return len;
-}
  
 void terminal_initialize() {
 
@@ -156,7 +144,7 @@ void terminal_putchar(char c) {
 
 	if (terminal_special_chars(c)) { return; }
 
-	terminal_putentryat(c, VGA_COLOR_WHITE, terminal_column, terminal_row);
+	terminal_putentryat(c, VGA_COLOR_BLACK, terminal_column, terminal_row);
 
 	// Reset indexes if we're out of bounds
 	if (++terminal_column == VGA_WIDTH) {
@@ -192,11 +180,19 @@ void terminal_write(const char* data, size_t amount) {
 }
 
 /*
-terminal_writestring prints a character array to the screen
+terminal_write_string prints a character array to the screen
 Input: Character array to print
 */
-void terminal_writestring(const char* data) {
+void terminal_write_string(const char* data) {
 	terminal_write(data, strlen(data));
+}
+
+/*
+terminal_write_int writes an integer to the screen
+Input: Integer to write, base of integer (i.e 10 for decimal, 16 for hexadecimal..)
+*/
+void terminal_write_int(int integer, size_t base) {
+	terminal_write_string(itoa(integer, base));
 }
 
 /*
