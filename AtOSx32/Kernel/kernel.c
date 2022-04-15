@@ -24,8 +24,6 @@ int kmain(void) {
 	terminal_write_string("hello world!\n\r");
 	terminal_write_string("YO\n\r");
 	terminal_write_int(65535, 16);
-	
-	
 
 	return 0;
 }
