@@ -1,8 +1,28 @@
 #include "paging.h"
 
-pgulong_t* page_physical_address(pgulong_t* virtual_addr) {
+pgulong_t page_get_entry_index(pgulong_t* addr) {
 
-    return virtual_addr;
+    return (pgulong_t)addr >> 12 & 0x3FF;
+}
+
+pgulong_t pd_get_entry_index(pgulong_t* addr) {
+
+    return (pgulong_t)addr >> 22;
+}
+
+pgulong_t* page_get_table_address(pgulong_t pd_index) {
+
+    return (pgulong_t*)(*((pgulong_t*)PD_CALC_ADDRESS + (pd_index * 4)));
+}
+
+pgulong_t* page_physical_address(pgulong_t* addr) {
+
+    pgulong_t pd_index = pd_get_entry_index(addr);
+    pgulong_t pt_index = page_get_entry_index(addr);
+
+    pgulong_t* pt_addr = page_get_table_address(pd_index);
+
+    return (pgulong_t*)((pt_addr[pt_index] & ~0xFFF) + ((pgulong_t)addr & 0xFFF));   
 }
 
 /*
@@ -12,9 +32,9 @@ Output: True if succeeded, otherwise false
 */
 bool pd_remove_entry(pgulong_t* addr) {
 
-    if (!page_is_aligned(addr)) { return false; }   // Address should always be page aligned
+    if (!page_is_aligned(addr)) { return false; }       // Address should always be page aligned
 
-    pgulong_t pd_index = (pgulong_t)addr >> 22;     // Page directory index
+    pgulong_t pd_index = pd_get_entry_index(addr);      // Page directory index
 
     pd_flush_tlb(pd_index);
 
@@ -32,10 +52,10 @@ bool page_unmap(pgulong_t* addr) {
 
     if (!page_is_aligned(addr)) { return false; }           // Address should always be page aligned
 
-    pgulong_t pd_index = (pgulong_t)addr >> 22;             // Page directory index
-    pgulong_t pt_index = (pgulong_t)addr >> 12 & 0x3FF;     // Page table index
+    pgulong_t pd_index = pd_get_entry_index(addr);       // Page directory index
+    pgulong_t pt_index = page_get_entry_index(addr);     // Page table index
 
-    pgulong_t* pt_addr = (pgulong_t*)(*((pgulong_t*)PD_CALC_ADDRESS + (pd_index * 4)));
+    pgulong_t* pt_addr = page_get_table_address(pd_index);
 
     pt_addr[pt_index] = 0x0;    // Unmap entry
 
@@ -79,7 +99,7 @@ Input: Page directory entry index
 */
 void pd_flush_tlb(pgulong_t pd_index) {
 
-    pgulong_t* pt_addr = (pgulong_t*)(*((pgulong_t*)PD_CALC_ADDRESS + (pd_index * 4)));
+    pgulong_t* pt_addr = page_get_table_address(pd_index);
 
     for (uint16_t i = 0; i < 0x400; i++) {
         flush_tlb_single((pgulong_t*)pt_addr[i]);
