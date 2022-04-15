@@ -1,20 +1,33 @@
 #include "paging.h"
 
-pgulong_t page_get_entry_index(pgulong_t* addr) {
 
-    return (pgulong_t)addr >> 12 & 0x3FF;
-}
-
+/*
+pd_get_entry_index returns a page directory index from a given virtual address
+*/
 pgulong_t pd_get_entry_index(pgulong_t* addr) {
 
     return (pgulong_t)addr >> 22;
 }
 
+/*
+page_get_entry index returns a page table index from a given virtual address
+*/
+pgulong_t page_get_entry_index(pgulong_t* addr) {
+
+    return (pgulong_t)addr >> 12 & 0x3FF;
+}
+
+/*
+page_get_table_address returns the address of a page table from a given page directory index
+*/
 pgulong_t* page_get_table_address(pgulong_t pd_index) {
 
     return (pgulong_t*)(*((pgulong_t*)PD_CALC_ADDRESS + (pd_index * 4)));
 }
 
+/*
+page_physical_address converts a virtual address to a physical one
+*/
 pgulong_t* page_physical_address(pgulong_t* addr) {
 
     pgulong_t pd_index = pd_get_entry_index(addr);
