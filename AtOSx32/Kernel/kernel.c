@@ -9,13 +9,13 @@
 #endif
 
 #include "kernel_screen.h"
+#include "kernel_keyboard.h"
 #include "paging.h"
 
 int kmain(void) {
 
-	
+	pd_remove_entry(0); 	// Remove identity mapping
 
-	//pd_remove_entry(0); 	// Remove identity mapping
 
 	/* Initialize terminal interface */
 	terminal_initialize();

@@ -154,7 +154,6 @@ Output: None
 */
 void terminal_putchar(char c) {
 
-
 	if (terminal_special_chars(c)) { return; }
 
 	terminal_putentryat(c, VGA_COLOR_WHITE, terminal_column, terminal_row);
