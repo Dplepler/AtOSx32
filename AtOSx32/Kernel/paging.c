@@ -56,13 +56,17 @@ bool pd_remove_entry(pgulong_t* addr) {
     return true;
 }
 
-pgulong_t* palloc() {
+/*
+palloc_single allocates a single free page and marks it as used
+Output: Free page frame index
+*/
+pgulong_t* palloc_single() {
 
-    pgulong_t* frame_map = &_kernel_end;    // Start of page frame map
+    pgulong_t* frame_map = &_kernel_end;   // Start of page frame map
     uint32_t i = 0;
 
     /* Search for a free page */
-    for (;CHECK_FREE_FRAME(frame_map[i]); i++) {
+    for (;!CHECK_FREE_FRAME(frame_map[i]); i++) {
         if (i == NPAGES) {
             PANIC("You ran out of RAM :(");
         }
@@ -70,7 +74,43 @@ pgulong_t* palloc() {
 
     MARK_USED(frame_map[i]);
 
-    return (NPAGES + (i * 0x1000));     // Return free page frame
+    return (NPAGES + (i * 0x1000));        // Return free page frame
+}
+
+/* 
+pallocn allocates a specified amount of page frames 
+in addition it will mark these pages as used
+
+Input: Frame address array, amount to allocate
+*/
+void pallocn(pgulong_t** frames, size_t size) {
+
+    for (size_t i = 0; i < size; i++) {
+        frames[i] = palloc_single();
+    }
+}
+
+/*
+palloc allocates pages and returns their offsets
+
+This function will allocate a chunk of pages each time to increase performance
+*/
+pgulong_t* palloc() {
+
+    static bool allocate = true;
+    static uint8_t pallocated = 0;
+    pgulong_t* current_frames[MAX_PAGES_ALLOCATED];
+
+    allocate = pallocated == MAX_PAGES_ALLOCATED;
+
+    /* Allocate 20 pages */
+    if (allocate) { 
+        pallocn(current_frames, MAX_PAGES_ALLOCATED); 
+        pallocated = allocate = 0;    
+    }
+
+    pallocated++;
+    return current_frames[pallocated - 1];
 }
 
 

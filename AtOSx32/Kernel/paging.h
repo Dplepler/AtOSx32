@@ -13,6 +13,8 @@
 #define MARK_USED(frame) (frame = 1)
 #define NPAGES 0xFFEFF
 
+#define MAX_PAGES_ALLOCATED 20
+
 typedef uint32_t pgulong_t;
 extern uint32_t _kernel_end;
 
