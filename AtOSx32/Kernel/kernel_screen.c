@@ -208,6 +208,21 @@ void terminal_draw_square(const uint8_t x, const uint8_t y, const uint8_t destx,
 	}
 }
 
+void terminal_draw_background(const vga_color color) {
+	terminal_draw_square(0, 0, VGA_WIDTH, VGA_HEIGHT, color);
+}
+
+void terminal_display_error(const char* error) {
+
+	terminal_draw_background(VGA_COLOR_LIGHT_RED);
+	terminal_color = VGA_COLOR_LIGHT_RED;
+
+	size_t length = strlen(error);
+	cursor_update(VGA_WIDTH / 2 - length / 2, VGA_HEIGHT / 2);
+
+	terminal_write_string(error);
+}
+
 /*
 terminal_special_chars gets a character and preforms the operation it might specify (e.g '\n' will make a new line)
 Input: Character

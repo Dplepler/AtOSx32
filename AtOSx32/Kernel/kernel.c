@@ -8,7 +8,6 @@
 #error "You need an ix86-elf compiler to build AtOS"
 #endif
 
-#include "kernel_screen.h"
 #include "kernel_keyboard.h"
 #include "paging.h"
 
@@ -21,7 +20,7 @@ int kmain(void) {
 
 	terminal_draw_square(30, 0, 20, 10, VGA_COLOR_CYAN);
 	
-	
+
 
 	return 0;
 }

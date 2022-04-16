@@ -9,6 +9,8 @@
 
 #define VGA_BUFFER_ADDR 0xC03FF000
 
+#define PANIC(msg) (terminal_display_error(msg))
+
 /* Hardware text mode color constants. */
 typedef enum vga_color {
 
@@ -55,7 +57,10 @@ void terminal_write(const char* data, size_t amount);
 void terminal_write_string(const char* data);
 void terminal_write_int(int integer, size_t base);
 void terminal_draw_square(const uint8_t x, const uint8_t y, const uint8_t destx, const uint8_t desty, const vga_color color);
+void terminal_draw_background(const vga_color color);
+void terminal_display_error(const char* error);
 bool terminal_special_chars(char c);
+
 
 void cursor_enable(uint8_t cursor_start, uint8_t cursor_end);
 void cursor_disable();

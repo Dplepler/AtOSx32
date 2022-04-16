@@ -56,6 +56,27 @@ bool pd_remove_entry(pgulong_t* addr) {
     return true;
 }
 
+pgulong_t* palloc() {
+
+    pgulong_t* frame_map = &_kernel_end;    // Start of page frame map
+    uint32_t i = 0;
+
+    /* Search for a free page */
+    for (;CHECK_FREE_FRAME(frame_map[i]); i++) {
+        if (i == NPAGES) {
+            PANIC("You ran out of RAM :(");
+        }
+    }
+
+    MARK_USED(frame_map[i]);
+
+    return (NPAGES + (i * 0x1000));     // Return free page frame
+}
+
+
+
+
+
 bool page_map(pgulong_t* paddr, pgulong_t* vaddr, uint16_t flags) {
 
     pgulong_t pd_index = pd_get_entry_index(vaddr);
