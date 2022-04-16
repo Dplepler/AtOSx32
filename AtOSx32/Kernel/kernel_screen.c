@@ -218,7 +218,9 @@ void terminal_display_error(const char* error) {
 	terminal_color = VGA_COLOR_LIGHT_RED;
 
 	size_t length = strlen(error);
-	cursor_update(VGA_WIDTH / 2 - length / 2, VGA_HEIGHT / 2);
+	
+	terminal_row = VGA_HEIGHT / 2;
+	terminal_column = VGA_WIDTH / 2 - length / 2;
 
 	terminal_write_string(error);
 }

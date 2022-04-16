@@ -9,6 +9,8 @@
 
 #define VGA_BUFFER_ADDR 0xC03FF000
 
+#define PRINT_NEW_LINE terminal_write_string("\n\r")
+
 #define PANIC(msg) (terminal_display_error(msg))
 
 /* Hardware text mode color constants. */
