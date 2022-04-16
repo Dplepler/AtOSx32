@@ -38,7 +38,7 @@ KERNEL_ENTRY_OFFSET equ 300h 	; Entry in the page directory for our higher half 
 
 init_protected_mode:
 
-	call relocate_kernel 	; Before we start, relocate the kernel beyond 1MB
+	call relocate_kernel 		; Before we start, relocate the kernel beyond 1MB
 	
 	; Set all segment registers to the beginning of the data segment
 	; Note that CS will already be set to the code segment after the far jump to here

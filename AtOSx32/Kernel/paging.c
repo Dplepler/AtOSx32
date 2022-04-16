@@ -1,6 +1,8 @@
 #include "paging.h"
 
 
+static pgulong_t frame_bitmap[NPAGES / BITS_IN_BYTE];
+
 /*
 pd_get_entry_index returns a page directory index from a given virtual address
 */
@@ -58,23 +60,22 @@ bool pd_remove_entry(pgulong_t* addr) {
 
 /*
 palloc_single allocates a single free page and marks it as used
-Output: Free page frame index
+Output: Unused page frame address
 */
 pgulong_t* palloc_single() {
 
-    pgulong_t* frame_map = &_kernel_end;   // Start of page frame map
     uint32_t i = 0;
 
     /* Search for a free page */
-    for (;!CHECK_FREE_FRAME(frame_map[i]); i++) {
-        if (i == NPAGES) {
-            PANIC("You ran out of RAM :(");
-        }
+    for (; i < NPAGES; i++) {
+        if (frame_bitmap[i] ^ ~0 && CHECK_FREE_FRAME(frame_bitmap, i)) { break; }   
     }
 
-    MARK_USED(frame_map[i]);
+    if (i == NPAGES) { PANIC("You ran out of RAM :("); }
 
-    return (NPAGES + (i * 0x1000));        // Return free page frame
+    MARK_USED(frame_bitmap, i);
+
+    return i * 0x1000;     // Return free page frame
 }
 
 /* 
@@ -112,9 +113,6 @@ pgulong_t* palloc() {
     pallocated++;
     return current_frames[pallocated - 1];
 }
-
-
-
 
 
 bool page_map(pgulong_t* paddr, pgulong_t* vaddr, uint16_t flags) {

@@ -9,13 +9,19 @@
 #define PD_ADDRESS      0xFFFFF000  
 #define PD_CALC_ADDRESS 0xFFC00000  // Used when calculating with different addresses to get a page table 
 
-#define CHECK_FREE_FRAME(i) (i == 0)
-#define MARK_USED(frame) (frame = 1)
-#define NPAGES 0xFFEFF
+#define NPAGES 0x100000             // Pages in RAM
+#define BITS_IN_BYTE 8
+
+#define CHECK_FREE_FRAME(bitmap, i) (bitmap[(uint32_t)i / BITS_IN_BYTE] &   (1 << ((uint32_t)i % BITS_IN_BYTE)))
+#define MARK_USED(bitmap, i)        (bitmap[(uint32_t)i / BITS_IN_BYTE] |=  (1 << ((uint32_t)i % BITS_IN_BYTE)))
+#define MARK_UNUSED(bitmap, i)      (bitmap[(uint32_t)i / BITS_IN_BYTE] &= ~(1 << ((uint32_t)i % BITS_IN_BYTE)))
+
+#define CHANGE_PD(pd) asm("mov %0, %%eax\nmov %%eax, %%cr3":: "m"(pd))
 
 #define MAX_PAGES_ALLOCATED 20
 
 typedef uint32_t pgulong_t;
+typedef uint32_t* bitmap_t;
 extern uint32_t _kernel_end;
 
 pgulong_t* palloc();
