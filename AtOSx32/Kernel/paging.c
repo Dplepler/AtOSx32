@@ -83,7 +83,7 @@ pgulong_t* palloc_single() {
 
   MARK_USED(frame_bitmap, i);
 
-  return i * 0x1000;     // Return free page frame
+  return (pgulong_t*)(i * 0x1000);     // Return free page frame
 }
 
 /* 
@@ -127,15 +127,17 @@ bool page_map(pgulong_t* paddr, pgulong_t* vaddr, uint16_t flags) {
 
   pgulong_t pd_index = pd_get_entry_index(vaddr);
   pgulong_t pt_index = page_get_entry_index(vaddr);
-
-  pgulong_t* pt_addr = ((pgulong_t*)PD_ADDRESS)[pd_index] & 1 ? page_get_table_address(pd_index) 
-    : palloc();
+  
+  pgulong_t* pt_addr = (((pgulong_t*)PD_ADDRESS)[pd_index] & 1) ? page_get_table_address(pd_index) 
+    : pd_assign_table(pd_index);
 
   if ((pgulong_t)pt_addr & 1) { return false; }   // If page was already mapped, fail
 
-  pt_addr[pt_index] = (pgulong_t)paddr | flags & 0xFFF | 1;
+  pt_addr[pt_index] = (pgulong_t)paddr | (flags & 0xFFF) | 1;
 
   flush_tlb_single(&pt_addr[pt_index]);
+
+  return true;
 }
 
 
@@ -146,7 +148,7 @@ Output: True if succeeded, otherwise false
 */
 bool page_unmap(pgulong_t* addr) {
 
-  if (!page_is_aligned(addr)) { return false; }           // Address should always be page aligned
+  if (!page_is_aligned(addr)) { return false; }        // Address should always be page aligned
 
   pgulong_t pd_index = pd_get_entry_index(addr);       // Page directory index
   pgulong_t pt_index = page_get_entry_index(addr);     // Page table index
@@ -160,6 +162,14 @@ bool page_unmap(pgulong_t* addr) {
   flush_tlb_single(&pt_addr[pt_index]);   // Flush TLB to recognize changes
 
   return true;
+}
+
+pgulong_t* pd_assign_table(pgulong_t pd_index) {
+
+  pgulong_t* pt_addr = palloc();
+  ((pgulong_t*)PD_ADDRESS)[pd_index] = ((pgulong_t)pt_addr | 1);
+
+  return pt_addr;
 }
 
 /*
