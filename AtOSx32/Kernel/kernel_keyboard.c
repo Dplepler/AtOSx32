@@ -8,7 +8,7 @@ Output: Data inside port 0x64
 */
 uint16_t keyboard_ctrl_read_status() {
  
-	return inportb(KEYBOARD_CTRL_STATS_REG);
+  return inportb(KEYBOARD_CTRL_STATS_REG);
 }
 
 /*
@@ -18,7 +18,7 @@ Output: Data inside port 0x60
 */
 uint16_t keyboard_enc_read_buffer() {
  
-	return inportb(KEYBOARD_ENC_INPUT_BUF);
+  return inportb(KEYBOARD_ENC_INPUT_BUF);
 }
 
 /*
@@ -27,12 +27,12 @@ Input: Command to send to port 0x64
 Output: None
 */
 void keyboard_ctrl_send_cmd(uint8_t cmd) {
- 	
- 	// Wait for the keyboard controller buffer to be clear
-	while ((keyboard_ctrl_read_status() & KEYBOARD_CTRL_STATS_MASK_IN_BUF) != 0) { }
+   
+   // Wait for the keyboard controller buffer to be clear
+  while ((keyboard_ctrl_read_status() & KEYBOARD_CTRL_STATS_MASK_IN_BUF) != 0) { }
  
- 	// Send command
-	outportb(KEYBOARD_CTRL_CMD_REG, cmd);
+   // Send command
+  outportb(KEYBOARD_CTRL_CMD_REG, cmd);
 }
 
 /*
@@ -42,14 +42,14 @@ Output: None
 */
 void keyboard_enc_send_cmd(uint8_t cmd) {
  
-	// Wait for the keyboard controller buffer to be clear
+  // Wait for the keyboard controller buffer to be clear
 
-	// Even though we are writing to the keyboard encoder, we still
-	// pass through the controller
-	while ((keyboard_ctrl_read_status() & KEYBOARD_CTRL_STATS_MASK_IN_BUF) != 0) { }
+  // Even though we are writing to the keyboard encoder, we still
+  // pass through the controller
+  while ((keyboard_ctrl_read_status() & KEYBOARD_CTRL_STATS_MASK_IN_BUF) != 0) { }
  
-	// Send command
-	outportb(KEYBOARD_ENC_CMD_REG, cmd);
+  // Send command
+  outportb(KEYBOARD_ENC_CMD_REG, cmd);
 }
 
 
