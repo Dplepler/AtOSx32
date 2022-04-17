@@ -1,4 +1,4 @@
- /* Check if the compiler thinks you are targeting the wrong operating system */
+/* Check if the compiler thinks you are targeting the wrong operating system */
 #if defined(__linux__)
 #error "You are not using a cross-compiler, you will most certainly run into trouble"
 #endif
@@ -13,7 +13,6 @@
 
 int kmain(void) {
 
-	
 	pd_remove_entry(0); 	// Remove identity mapping
 
 	/* Initialize terminal interface */

@@ -4,16 +4,16 @@
 ; Switches from real mode to protected mode
 switch_to_pm:
 
-	cli 						; Disable interrupts: There are no BIOS interrupts in protected mode
+	cli 		; Disable interrupts: There are no BIOS interrupts in protected mode
 
-	lgdt [GDT_DESCRIPTOR] 		; Load Global Descriptor Table onto the CPU
+	lgdt [GDT_DESCRIPTOR]		; Load Global Descriptor Table onto the CPU
 
 
 	; Set the first bit of the cr0 register to 1, telling the CPU we
 	; would like to switch to protected mode
-	mov eax, cr0 	 		; cr0 is a special control register that can tell the CPU we are using protected mode
+	mov eax, cr0 	 				; cr0 is a special control register that can tell the CPU we are using protected mode
 	or 	eax, 00000001b		; We cannot set cr0's last bit to 1 directly, so we use a general purpose register
-	mov cr0, eax			; Also, we do not want to change previous values of cr0 
+	mov cr0, eax					; Also, we do not want to change previous values of cr0 
 
 
 	; After telling the CPU we want to use protected mode,
@@ -30,15 +30,15 @@ switch_to_pm:
 ; These offsets must be 4k aligned
 ;=======================;
 PD_OFFSET  equ 1000000h	; 	Table directory entry offset
-PT_OFFSET  equ 1001000h	;	First page table offset
-KPT_OFFSET equ 1002000h ;	Kernel page table offset
+PT_OFFSET  equ 1001000h	;		First page table offset
+KPT_OFFSET equ 1002000h ;		Kernel page table offset
 ;=======================;
 
 KERNEL_ENTRY_OFFSET equ 300h 	; Entry in the page directory for our higher half kernel at 0xC0000000
 
 init_protected_mode:
 
-	call relocate_kernel 		; Before we start, relocate the kernel beyond 1MB
+	call relocate_kernel 				; Before we start, relocate the kernel beyond 1MB
 	
 	; Set all segment registers to the beginning of the data segment
 	; Note that CS will already be set to the code segment after the far jump to here
@@ -53,8 +53,8 @@ init_protected_mode:
 	mov ebp, 90000h
 	mov esp, ebp
       
-    ; Set all directory entries to not present, with read/write access
-    ; The page directory consists of 1024 entries, each 32 bit
+	; Set all directory entries to not present, with read/write access
+	; The page directory consists of 1024 entries, each 32 bit
 	mov eax, 2h	
 	mov edi, PD_OFFSET
 	mov ecx, 1024
@@ -68,30 +68,30 @@ init_protected_mode:
 
 	; To let the bootloader continue without failing, we will identity map the first 4 Megabytes (i.e first page table)
 	mov edi, PT_OFFSET		; Some page table offset
-	xor ecx, ecx			; Beginning of physical memory
-	xor edx, edx			; First directory entry
+	xor ecx, ecx					; Beginning of physical memory
+	xor edx, edx					; First directory entry
 
 	call fill_table
 
 	; Now let's map the kernel to make it a higher half kernel
-	mov edi, KPT_OFFSET  			; Page table to fill
-	mov ecx, 100h					; Physical page index where the kernel is located
+	mov edi, KPT_OFFSET  						; Page table to fill
+	mov ecx, 100h										; Physical page index where the kernel is located
 	mov edx, KERNEL_ENTRY_OFFSET  	; Kernel's page directory index (Will point to 0xC0000000)
 
 	call fill_table
 
 	; Change the last page entry to point to our VGA buffer
-	add edi, 0FFCh				; Add 1023 * 4 to page offset, point to last table entry
+	add edi, 0FFCh						; Add 1023 * 4 to page offset, point to last table entry
 	mov dword [edi], 0B8003h	; 0xB8000 | 3 = VGA buffer with present and write/read bits set
 
 	mov eax, PD_OFFSET 		; The address that points to the directory table, 1024 entries, 32 bits each
-	mov cr3, eax			; We put the address of our directory table in the cr3 register
+	mov cr3, eax					; We put the address of our directory table in the cr3 register
 
-	mov eax, cr0			; To enable paging we need to set the correct flags in the cr0 register
+	mov eax, cr0					; To enable paging we need to set the correct flags in the cr0 register
 	or 	eax, 80000000h
 	mov cr0, eax
 
-	jmp genesis 			; Go back to the bootloader to start executing the kernel!
+	jmp genesis 					; Go back to the bootloader to start executing the kernel!
 			
 			
 
@@ -119,12 +119,12 @@ fill_table:
 
 .fill:
 	
-	mov eax, 1000h 		; Each page table entry maps 4 kilobytes of data, so we would give the 4k aligned offset each time
-	mul ecx 			; Index times 4096 (4k) bytes
+	mov eax, 1000h 	; Each page table entry maps 4 kilobytes of data, so we would give the 4k aligned offset each time
+	mul ecx 				; Index times 4096 (4k) bytes
 	or eax, 3 			; Set present flag to true, as well as read/write
 
 	mov dword [edi], eax	; Map page frame value to entry
-	add edi, 4  			; Go to next entry
+	add edi, 4  					; Go to next entry
 	inc ecx 
 	inc ebx			
 
@@ -138,7 +138,7 @@ fill_table:
 	; Get the physical address of the page directory entry to add table to
 	; EDX = Page directory entry index
 	mov eax, 4
-	mul edx 			; Each page directory entry is 4 bytes
+	mul edx 						; Each page directory entry is 4 bytes
 	add eax, PD_OFFSET 	; Add the page directory offset
 	mov esi, eax
 

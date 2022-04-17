@@ -1,6 +1,6 @@
-[org 7E00h] 		; Load right after the stage0 boot sector
+[org 7E00h] 										; Load right after the stage0 boot sector
 [bits 16]
-INIT_KERNEL_OFFSET equ 1000h 	; Location of our kernel in memory at first
+INIT_KERNEL_OFFSET equ 1000h 		; Location of our kernel in memory at first
 PHYS_KERNEL_OFFSET equ 100000h	; Location of our kernel in memory
 
 ; Start of the boot sector's main routine
@@ -8,9 +8,9 @@ bootload_start:
 	
 	; Set segment and stack
 	xor ax, ax       	
-   	mov ds, ax          
-   	mov ss, ax          
-   	mov sp, 9c00h
+	mov ds, ax          
+	mov ss, ax          
+	mov sp, 9c00h
 
 	call enable_a20
 	call unreal_mode
@@ -52,7 +52,7 @@ check_a20:
 	push di
 	push si
 
-	cli 	; Disable interupts
+	cli 				; Disable interupts
 
 	xor ax, ax 	; Reset AX
 	mov es, ax	; Set ES to 0
@@ -71,32 +71,32 @@ check_a20:
 	mov al, byte [es:di]
 	push ax
  
-    mov al, byte [ds:si]
-    push ax
- 
-    mov byte [es:di], 0h		; Make sure value is not 0xFF
-    mov byte [ds:si], 0FFh
- 
-    cmp byte [es:di], 0FFh		; If this was changed to 0xFF then there is a wrap around
- 
-    pop ax
-    mov byte [ds:si], al
- 
-    pop ax
-    mov byte [es:di], al
- 
-    xor ax, ax
-    je .exit
- 
-    mov ax, 1	
+	mov al, byte [ds:si]
+	push ax
+
+	mov byte [es:di], 0h			; Make sure value is not 0xFF
+	mov byte [ds:si], 0FFh
+
+	cmp byte [es:di], 0FFh		; If this was changed to 0xFF then there is a wrap around
+
+	pop ax
+	mov byte [ds:si], al
+
+	pop ax
+	mov byte [es:di], al
+
+	xor ax, ax
+	je .exit
+
+	mov ax, 1	
 
 .exit:
 
 	pop si
-    pop di
-    pop es
-    pop ds
-    popf
+	pop di
+  pop es
+  pop ds
+  popf
 	
 	ret
 
@@ -111,22 +111,22 @@ unreal_mode:
 
 	; Temporarily go to protected mode
 	mov eax, cr0          
-   	or al, 1                
-   	mov cr0, eax
+  or al, 1                
+  mov cr0, eax
 
 	jmp .continue
 
 .continue:
 
-   	mov  bx, 0x08          ; Select descriptor 1
-   	mov  ds, bx          ; 8h = 1000b
- 
-	; Back to real mode
-   	and al, 0FEh
-   	mov cr0, eax
+	mov  bx, 0x08        ; Select descriptor 1
+	mov  ds, bx          ; 8h = 1000b
 
-   	pop ds              ; Get back old segment
-   	sti					; Return interrupts
+	; Back to real mode
+	and al, 0FEh
+	mov cr0, eax
+
+	pop ds      ; Get back old segment
+	sti					; Return interrupts
 
 	ret
 

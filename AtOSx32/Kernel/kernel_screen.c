@@ -86,8 +86,8 @@ Input: Desired x coordinate of cursor, desired y coordinate of cursor
 void cursor_update(int x, int y) {
 
 	uint16_t pos = y * VGA_WIDTH + x; 	// Calculate desired position with the linear data
- 
- 	/* Input new y position */
+
+	/* Input new y position */
 	outportb(0x3D4, 0x0F);
 	outportb(0x3D5, (uint8_t)(pos & 0xFF));
 
@@ -102,17 +102,17 @@ Output: 2 byte position (x, y)
 */
 uint16_t cursor_get_position() {
 
-    uint16_t pos = 0;
+	uint16_t pos = 0;
 
-    /* Get y position */
-    outportb(0x3D4, 0x0F);
-    pos |= inportb(0x3D5);
+	/* Get y position */
+	outportb(0x3D4, 0x0F);
+	pos |= inportb(0x3D5);
 
-    /* Get x position */
-    outportb(0x3D4, 0x0E);
-    pos |= ((uint16_t)inportb(0x3D5)) << 8;
+	/* Get x position */
+	outportb(0x3D4, 0x0E);
+	pos |= ((uint16_t)inportb(0x3D5)) << 8;
 
-    return pos;
+	return pos;
 }
 
 
@@ -233,7 +233,6 @@ Output: True if character was of a specifier type
 bool terminal_special_chars(char c) {
 
 	switch (c) {
-
 		case '\n': terminal_row++; return true;
 		case '\r': terminal_column = 0; return true;
 	}
