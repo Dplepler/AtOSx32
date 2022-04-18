@@ -34,6 +34,7 @@ void bitmap_mark_kernel();
 pgulong_t* page_physical_address(pgulong_t* addr);
 pgulong_t page_get_entry_index(pgulong_t* addr);
 pgulong_t* page_get_table_address(pgulong_t pd_index);
+bool page_map(pgulong_t* paddr, pgulong_t* vaddr, uint16_t flags);
 bool page_unmap(pgulong_t* addr);
 bool page_is_empty(pgulong_t* pt_addr);
 bool page_is_aligned(pgulong_t* addr);

@@ -25,7 +25,7 @@ GDT_START:
 		; 64 bit segment (1 bit)  	off
 		; AVL (1 bit) 							off
 			
-		dw 0xffff 		; Limit (bits 0 - 15)
+		dw 0xfffff 		; Limit (bits 0 - 15)
 		dw 0x0 				; Base (bits 0 - 15)
 		db 0x0 				; Base (bits 16 - 23)
 		db 10011010b 	; First set of flags
@@ -50,7 +50,7 @@ GDT_START:
 		; 64 bit segment (1 bit)  	off
 		; AVL (1 bit) 							off
 	
-		dw 0xffff 		; Limit (bits 0 - 15)
+		dw 0xfffff 		; Limit (bits 0 - 15)
 		dw 0x0 				; Base (bits 0 - 15)
 		db 0x0 				; Base (bits 16 - 23)
 		db 10010010b 	; First set of flags

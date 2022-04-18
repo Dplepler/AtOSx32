@@ -1,15 +1,19 @@
-all: 	DiskImages/AtOS.img
+all:	 clean DiskImages/AtOS.img
 
-debug: 	DiskImages/AtOSDebug.img
-gdb: 	DiskImages/AtOSGDB.img
+debug: DiskImages/AtOSDebug.img
+gdb: 	 DiskImages/AtOSGDB.img
 
-DiskImages/AtOS.img : makeImg
+clean:
+	rm -rf Kernel/*.bin Kernel/*.o
+	rm -rf Bootload/*.bin
+
+DiskImages/AtOS.img: makeImg
 	qemu-system-x86_64 DiskImages/AtOS.img
 
-DiskImages/AtOSDebug.img : makeImg
+DiskImages/AtOSDebug.img: makeImg
 	qemu-system-x86_64 -hda DiskImages/AtOS.img -monitor stdio
 
-DiskImages/AtOSGDB.img : makeImg
+DiskImages/AtOSGDB.img: makeImg
 	qemu-system-x86_64 -S -s DiskImages/AtOS.img
 
 makeImg: Bootload/stage0.bin Bootload/Bootloader.bin Kernel/kernel.bin
@@ -17,6 +21,7 @@ makeImg: Bootload/stage0.bin Bootload/Bootloader.bin Kernel/kernel.bin
 	dd if=Bootload/stage0.bin of=DiskImages/AtOS.img conv=notrunc
 	dd if=Bootload/Bootloader.bin of=DiskImages/AtOS.img bs=512 seek=1 conv=notrunc
 	dd if=Kernel/kernel.bin of=DiskImages/AtOS.img bs=512 seek=2 conv=notrunc
+	
 
 C_SOURCES = $(wildcard Kernel/*.c)
 
@@ -29,13 +34,10 @@ Kernel/kernel.bin : Kernel/kernel_start.o ${OBJ}
 	i686-elf-gcc -c $< -o $@ -std=gnu99 -ffreestanding -Wall -Wextra
 
 %.o : %.asm
-	nasm $< -f elf -o $@
+	nasm $< -f elf32 -o $@
 
 %.bin : %.asm
 	nasm -O0 -f bin -o $@ $<
 
 
 
-clean:
-	rm -rf Kernel/*.bin Kernel/*.o
-	rm -rf Bootload/*.bin

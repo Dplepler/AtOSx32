@@ -12,6 +12,7 @@
 #include "paging.h"
 
 int kmain(void) {
+  
 
   pd_remove_entry(0); 	// Remove identity mapping
 
@@ -22,6 +23,7 @@ int kmain(void) {
 
   bitmap_mark_kernel();
 
+  page_map(0x1000, 0x1000, 2);
 
   return 0;
 }

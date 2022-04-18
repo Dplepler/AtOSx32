@@ -12,23 +12,23 @@ SECTIONS
 	_kernel_start = .;
 
 	/* Add a symbol that indicates the start address of the kernel. */
-	.text ALIGN (4K) : AT (ADDR (.text) - 0xC0000000)
+	.text ALIGN (4K) : AT (ADDR (.text) - _kernel_start)
 	{
 		*(.text)
 	}
-	.rodata ALIGN (4K) : AT (ADDR (.rodata) - 0xC0000000)
+	.rodata ALIGN (4K) : AT (ADDR (.rodata) - _kernel_start)
 	{
 		*(.rodata)
 	}
-	.data ALIGN (4K) : AT (ADDR (.data) - 0xC0000000)
+	.data ALIGN (4K) : AT (ADDR (.data) - _kernel_start)
 	{
 		*(.data)
 	}
-	.bss ALIGN (4K) : AT (ADDR (.bss) - 0xC0000000)
+	.bss ALIGN (4K) : AT (ADDR (.bss) - _kernel_start)
 	{
 		*(COMMON)
 		*(.bss)
 	}
-	/* Add a symbol that indicates the end address of the kernel. */
+	/* Indicates the end address of the kernel. */
 	_kernel_end = .;
 }

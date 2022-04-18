@@ -151,9 +151,7 @@ load_kernel:
 	jc .no_extentions
 
 
-	; Set up parameters to load disk with
-
-	mov dl, 80h					; Boot device number - First HDD
+	mov dl, 80h					  ; Boot device number - First HDD
 	mov si, DAP_START			; SI will hold the Disk Address Packet offset
 	call load_disk
 
@@ -168,16 +166,17 @@ load_kernel:
 	
 ; load DH sectors to ES:BX from drive DL
 load_disk:
-								
-	mov ah, 42h	 		; BIOS read sector extended function
-	int 13h 			; BIOS interrupt
-	jc .disk_error 		; Jump if error (i.e. carry flag set)
+
+	mov ah, 42h	 		; BIOS read sector extended function  
+	int 13h 			  ; BIOS interrupt
+
+	jc .disk_error 	; Jump if error (i.e. carry flag set)
 	
 	ret
 	
 .disk_error:
 
-	; Print error
+	; Print error 
 	mov si, disk_error_message
 	call print_string
 	jmp $ 						; Hang

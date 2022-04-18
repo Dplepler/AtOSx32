@@ -75,6 +75,7 @@ pgulong_t* palloc_single() {
   uint32_t i = 0;
 
   /* Search for a free page */
+  /* We calculate 32 bits each time, so we can easily skip big chunks of used memory */
   for (; i < NPAGES; i++) {
     if (frame_bitmap[i] ^ ~0 && CHECK_FREE_FRAME(frame_bitmap, i)) { break; }   
   }
@@ -93,7 +94,6 @@ in addition it will mark these pages as used
 Input: Frame address array, amount to allocate
 */
 void pallocn(pgulong_t** frames, size_t size) {
-
   for (size_t i = 0; i < size; i++) {
     frames[i] = palloc_single();
   }
@@ -108,10 +108,10 @@ pgulong_t* palloc() {
 
   static bool allocate = true;
   static uint8_t pallocated = 0;
-  pgulong_t* current_frames[MAX_PAGES_ALLOCATED];
+  static pgulong_t* current_frames[MAX_PAGES_ALLOCATED];
 
-  allocate = pallocated == MAX_PAGES_ALLOCATED;
-
+  if (pallocated == MAX_PAGES_ALLOCATED) { allocate = true; }
+  
   /* Allocate 20 pages */
   if (allocate) { 
     pallocn(current_frames, MAX_PAGES_ALLOCATED); 
@@ -127,11 +127,11 @@ bool page_map(pgulong_t* paddr, pgulong_t* vaddr, uint16_t flags) {
 
   pgulong_t pd_index = pd_get_entry_index(vaddr);
   pgulong_t pt_index = page_get_entry_index(vaddr);
-  
+
   pgulong_t* pt_addr = (((pgulong_t*)PD_ADDRESS)[pd_index] & 1) ? page_get_table_address(pd_index) 
     : pd_assign_table(pd_index);
 
-  if ((pgulong_t)pt_addr & 1) { return false; }   // If page was already mapped, fail
+  if ((pgulong_t)pt_addr[pt_index] & 1) { return false; }   // If page was already mapped, fail
 
   pt_addr[pt_index] = (pgulong_t)paddr | (flags & 0xFFF) | 1;
 

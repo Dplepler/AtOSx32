@@ -97,9 +97,8 @@ init_protected_mode:
 
 relocate_kernel:
 
-
-	; Relocate 16 sectors of kernel from below 1MB to above 1MB
-	mov ecx, 800h
+	; Relocate 50 sectors of kernel from below 1MB to above 1MB
+	mov ecx, 1900h
 	
 	mov esi, INIT_KERNEL_OFFSET
 	mov edi, PHYS_KERNEL_OFFSET
