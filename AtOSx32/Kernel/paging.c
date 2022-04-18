@@ -128,11 +128,14 @@ bool page_map(pgulong_t* paddr, pgulong_t* vaddr, uint16_t flags) {
   pgulong_t pd_index = pd_get_entry_index(vaddr);
   pgulong_t pt_index = page_get_entry_index(vaddr);
 
+  
+
   pgulong_t* pt_addr = (((pgulong_t*)PD_ADDRESS)[pd_index] & 1) ? page_get_table_address(pd_index) 
     : pd_assign_table(pd_index);
 
-  if ((pgulong_t)pt_addr[pt_index] & 1) { return false; }   // If page was already mapped, fail
 
+  if ((pgulong_t)pt_addr[pt_index] & 1) { return false; }   // If page was already mapped, fail
+  
   pt_addr[pt_index] = (pgulong_t)paddr | (flags & 0xFFF) | 1;
 
   flush_tlb_single(&pt_addr[pt_index]);
