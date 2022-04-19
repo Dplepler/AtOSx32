@@ -9,7 +9,7 @@
 #endif
 
 #include "kernel_keyboard.h"
-#include "paging.h"
+#include "vmm.h"
 
 int kmain(void) {
   
