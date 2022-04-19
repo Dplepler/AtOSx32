@@ -15,7 +15,7 @@ bool page_unmap(pgulong_t* addr);
 bool page_is_empty(pgulong_t* pt_addr);
 bool page_is_aligned(pgulong_t* addr);
 
-pgulong_t* pd_assign_table(pgulong_t pd_index);
+pgulong_t* pd_assign_table(pgulong_t pd_index, uint16_t flags);
 pgulong_t pd_get_entry_index(pgulong_t* addr);
 bool pd_remove_entry(pgulong_t* addr);
 void pd_remove_empty_pt(pgulong_t* pt_addr, pgulong_t pd_index);

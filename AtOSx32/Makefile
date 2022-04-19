@@ -1,7 +1,7 @@
 all:	 clean DiskImages/AtOS.img
 
-debug: DiskImages/AtOSDebug.img
-gdb: 	 DiskImages/AtOSGDB.img
+debug: clean DiskImages/AtOSDebug.img
+gdb: 	 clean DiskImages/AtOSGDB.img
 
 clean:
 	rm -rf Kernel/*.bin Kernel/*.o

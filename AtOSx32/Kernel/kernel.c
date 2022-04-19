@@ -13,7 +13,6 @@
 
 int kmain(void) {
   
-
   pd_remove_entry(0); 	// Remove identity mapping
 
   /* Initialize terminal interface */

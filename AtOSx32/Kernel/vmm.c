@@ -18,7 +18,7 @@ pgulong_t page_get_entry_index(pgulong_t* addr) {
 page_get_table_address returns the address of a page table from a given page directory index
 */
 pgulong_t* page_get_table_address(pgulong_t pd_index) {
-  return (pgulong_t*)(*((pgulong_t*)PD_CALC_ADDRESS + (pd_index * 4)));
+  return (pgulong_t*)PD_CALC_ADDRESS + (pd_index * 4);
 }
 
 /*
@@ -63,7 +63,7 @@ bool page_map(pgulong_t* paddr, pgulong_t* vaddr, uint16_t flags) {
   pgulong_t pt_index = page_get_entry_index(vaddr);
 
   pgulong_t* pt_addr = (((pgulong_t*)PD_ADDRESS)[pd_index] & 1) ? page_get_table_address(pd_index) 
-    : pd_assign_table(pd_index);
+    : pd_assign_table(pd_index, flags);
 
   if ((pgulong_t)pt_addr[pt_index] & 1) { return false; }   // If page was already mapped, fail
   
@@ -101,10 +101,13 @@ bool page_unmap(pgulong_t* addr) {
 /*
 pd_assign_table assigns a newly allocated page table to a page directory
 */
-pgulong_t* pd_assign_table(pgulong_t pd_index) {
+pgulong_t* pd_assign_table(pgulong_t pd_index, uint16_t flags) {
 
-  pgulong_t* pt_addr = palloc();
-  ((pgulong_t*)PD_ADDRESS)[pd_index] = ((pgulong_t)pt_addr | 1);
+  pgulong_t* pt_phys_addr = palloc();
+  ((pgulong_t*)PD_ADDRESS)[pd_index] = ((pgulong_t)pt_phys_addr | (flags & 0xFFF) | 1);
+
+  pgulong_t* pt_addr = page_get_table_address(pd_index);
+  page_clean(pt_addr);
 
   return pt_addr;
 }
@@ -121,6 +124,17 @@ bool page_is_empty(pgulong_t* pt_addr) {
   }
 
   return true;
+}
+
+void page_clean(pgulong_t pd_index) {
+
+  pgulong_t* pt_addr = pd_index * 0x400000;   // Get page table virtual address
+
+  for (uint16_t i = 0; i < 0x400; i++) {
+    *(pt_addr + i) = 0x0;
+  }
+
+  flush_tlb_single(pt_addr);
 }
 
 /*
