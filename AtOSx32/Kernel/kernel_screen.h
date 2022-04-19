@@ -32,10 +32,13 @@ typedef enum vga_color {
   VGA_COLOR_LIGHT_CYAN = 11,
   VGA_COLOR_LIGHT_RED = 12,
   VGA_COLOR_LIGHT_MAGENTA = 13,
-  VGA_COLOR_LIGHT_BROWN = 14,
+  VGA_COLOR_YELLOW = 14,
   VGA_COLOR_WHITE = 15,
 
 } vga_color;
+
+
+
 
 // typedef struct _SCREEN_ATTRIBUTES_STRUCT {
 
@@ -60,8 +63,9 @@ void terminal_put_colored_char_at(char c, uint8_t color, const uint8_t x, const 
 void terminal_write(const char* data, size_t amount);
 void terminal_write_string(const char* data);
 void terminal_write_int(int integer, size_t base);
-void terminal_draw_square(const uint8_t x, const uint8_t y, const uint8_t destx, const uint8_t desty, const vga_color color);
+void terminal_draw_rec(const uint8_t x, const uint8_t y, const uint8_t destx, const uint8_t desty, const vga_color color);
 void terminal_draw_background(const vga_color color);
+void perry(const uint8_t x, const uint8_t y);
 void terminal_display_error(const char* error);
 bool terminal_special_chars(char c);
 

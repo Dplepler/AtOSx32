@@ -74,7 +74,6 @@ bool page_map(pgulong_t* paddr, pgulong_t* vaddr, uint16_t flags) {
   return true;
 }
 
-
 /*
 page_unmap unmaps a page
 Input: Page frame's virtual address to unmap

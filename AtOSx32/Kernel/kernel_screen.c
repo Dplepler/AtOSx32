@@ -199,17 +199,26 @@ void terminal_write_int(int integer, size_t base) {
 terminal_draw_square draws a square to the screen
 Input: X coordinate of left top corner, Y coordinate of left top corner, X coordinate of right bottom corner, Y coordinate of right bottom corner, color
 */
-void terminal_draw_square(const uint8_t x, const uint8_t y, const uint8_t destx, const uint8_t desty, const vga_color color) {
+void terminal_draw_rec(const uint8_t x, const uint8_t y, const uint8_t destx, const uint8_t desty, const vga_color color) {
 
-  for (uint8_t i = y; i < y + desty; i++) {
-    for (uint8_t i2 = x; i2 < x + destx; i2++) {
-      terminal_put_colored_char_at(' ', vga_entry_color(color, color), x + i2, y + i);
+  for (uint8_t i = y; i < desty; i++) {
+    for (uint8_t i2 = x; i2 < destx; i2++) {
+      terminal_put_colored_char_at(' ', vga_entry_color(color, color), i2, i);
     }
   }
 }
 
 void terminal_draw_background(const vga_color color) {
-  terminal_draw_square(0, 0, VGA_WIDTH, VGA_HEIGHT, color);
+  terminal_draw_rec(0, 0, VGA_WIDTH, VGA_HEIGHT, color);
+}
+
+void perry(const uint8_t x, const uint8_t y) {
+
+  terminal_draw_rec(x, y, x + 30, y + 10, VGA_COLOR_CYAN);
+  terminal_draw_rec(x + 3, y + 2, x + 7, y + 4, VGA_COLOR_BLACK);
+  terminal_draw_rec(x + 23, y + 2, x + 27, y + 4, VGA_COLOR_BLACK);
+  terminal_draw_rec(x + 1, y + 5, x + 29, y + 6, VGA_COLOR_BROWN);
+
 }
 
 void terminal_display_error(const char* error) {

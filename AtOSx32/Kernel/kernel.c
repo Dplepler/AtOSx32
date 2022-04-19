@@ -18,11 +18,14 @@ int kmain(void) {
   /* Initialize terminal interface */
   terminal_initialize();
 
-  terminal_draw_square(30, 0, 20, 10, VGA_COLOR_CYAN);
-
   bitmap_mark_kernel();
 
-  page_map(0x1000, 0x1000, 2);
+  perry(0, 0);
+  perry(50, 0);
+  perry(0, 15);
+  perry(50, 15);
+
+  perry(25, 5);
 
   return 0;
 }
