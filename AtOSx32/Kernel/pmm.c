@@ -19,7 +19,7 @@ void bitmap_mark_kernel() {
 
 /*
 palloc_single allocates a single free page and marks it as used
-Output: Unused page frame address
+Output: Previously unused page frame's physical address
 */
 pgulong_t* palloc_single() {
 
@@ -51,9 +51,9 @@ void pallocn(pgulong_t** frames, size_t size) {
 }
 
 /*
-palloc allocates pages and returns their offsets
+palloc returns a newly allocated page's address
 
-This function will allocate a chunk of pages each time to increase performance
+This function will allocate a chunk of pages each time (but will only return one) to increase performance
 */
 pgulong_t* palloc() {
 

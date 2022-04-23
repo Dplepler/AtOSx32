@@ -54,25 +54,28 @@ bool pd_remove_entry(pgulong_t* addr) {
 
 /*
 page_map maps a physical address to a desired virtual address
-Input: Physical address to map, it's desired virtual address and some entry flags
+Input: Desired virtual address and entry flags
+
 Output: True if succeeded, otherwise false
 */
-bool page_map(pgulong_t* paddr, pgulong_t* vaddr, uint16_t flags) {
+bool page_map(pgulong_t* addr, uint16_t flags) {
 
-  pgulong_t pd_index = pd_get_entry_index(vaddr);
-  pgulong_t pt_index = page_get_entry_index(vaddr);
+  pgulong_t pd_index = pd_get_entry_index(addr);
+  pgulong_t pt_index = page_get_entry_index(addr);
 
   pgulong_t* pt_addr = (((pgulong_t*)PD_ADDRESS)[pd_index] & 1) ? page_get_table_address(pd_index) 
     : pd_assign_table(pd_index, flags);
 
-  if ((pgulong_t)pt_addr[pt_index] & 1) { return false; }   // If page was already mapped, fail
+  if ((pgulong_t)pt_addr[pt_index] & 1) { return false; }   // If page table index was already mapped, fail
   
-  pt_addr[pt_index] = (pgulong_t)paddr | (flags & 0xFFF) | 1;
+  pt_addr[pt_index] = palloc();
+  pt_addr[pt_index] |= (flags & 0xFFF) | 1;
 
   flush_tlb_single(&pt_addr[pt_index]);
 
   return true;
 }
+
 
 /*
 page_unmap unmaps a page
@@ -99,6 +102,8 @@ bool page_unmap(pgulong_t* addr) {
 
 /*
 pd_assign_table assigns a newly allocated page table to a page directory
+Input: Page directory index to add page table to, flags to initialize with
+Output: Address of new page table
 */
 pgulong_t* pd_assign_table(pgulong_t pd_index, uint16_t flags) {
 
@@ -154,7 +159,7 @@ Input: Page directory entry index
 void pd_flush_tlb(pgulong_t pd_index) {
 
   pgulong_t* pt_addr = page_get_table_address(pd_index);
-
+  
   for (uint16_t i = 0; i < 0x400; i++) {
     flush_tlb_single((pgulong_t*)pt_addr[i]);
   }
