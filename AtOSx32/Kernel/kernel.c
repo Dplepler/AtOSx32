@@ -20,11 +20,6 @@ int kmain(void) {
 
   bitmap_mark_kernel();
 
-  perry(0, 0);
-  perry(50, 0);
-  perry(0, 15);
-  perry(50, 15);
-
   perry(25, 5);
 
   return 0;
