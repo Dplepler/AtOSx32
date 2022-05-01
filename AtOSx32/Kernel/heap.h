@@ -5,6 +5,11 @@
 
 #define HEAP_SIGNATURE 0xB00B5555
 
+#define INIT_SIZE 32
+
+#define MIN_EXP 8
+#define MAX_EXP 32
+
 typedef struct _HEAP_HEADER_STRUCT {
 
   uint32_t signature;   // Signature magic
