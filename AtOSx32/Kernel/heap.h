@@ -25,7 +25,7 @@ typedef struct _HEAP_HEADER_STRUCT {
 } heap_header;
 
 void* malloc(size_t size);
-
+void heap_allocate_header(size_t size);
 
 
 

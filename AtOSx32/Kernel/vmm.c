@@ -17,8 +17,8 @@ pgulong_t page_get_entry_index(pgulong_t* addr) {
 /*
 page_get_table_address returns the address of a page table from a given page directory index
 */
-pgulong_t* page_get_table_address(pgulong_t pd_index) {
-  return (pgulong_t*)PD_CALC_ADDRESS + (pd_index * 4);
+pgulong_t* page_get_table_address(uint16_t pd_index) {
+  return (pgulong_t*)PD_OFFSET + (pd_index * 4);
 }
 
 /*
@@ -53,12 +53,44 @@ bool pd_remove_entry(pgulong_t* addr) {
 }
 
 /*
+page_get_free_entry_index returns the first unused index in a given table
+Input: Page table address
+Output: Free entry's index, if there are none, function returns -1
+*/
+uint16_t page_get_free_entry_index(pgulong_t* table_addr) {
+
+  for (uint16_t i = 0; i < ENTRIES; i++) {
+    if (!(table_addr[i] & 1)) { return i; }
+  }
+
+  return ~0;
+}
+
+pgulong_t* page_get_free_addr() {
+
+  int16_t pt_index = 0;
+  uint16_t i = 0;
+  for (; i < ENTRIES; i++) {
+    if ((pt_index = page_get_free_entry_index(&((pgulong_t*)PD_OFFSET)[i])) != ~0) { break; }
+  }
+
+  if (pt_index == ~0) { return NULL; }
+
+  pgulong_t addr = (pgulong_t)i << 22;
+  addr |= pt_index << 12;
+
+  return (pgulong_t*)addr;
+}
+
+/*
 page_map maps a physical address to a desired virtual address
 Input: Desired virtual address and entry flags
 
 Output: True if succeeded, otherwise false
 */
 bool page_map(pgulong_t* addr, uint16_t flags) {
+
+  if (!addr) { addr = page_get_free_addr(); }
 
   pgulong_t pd_index = pd_get_entry_index(addr);
   pgulong_t pt_index = page_get_entry_index(addr);
@@ -68,7 +100,7 @@ bool page_map(pgulong_t* addr, uint16_t flags) {
 
   if ((pgulong_t)pt_addr[pt_index] & 1) { return false; }   // If page table index was already mapped, fail
   
-  pt_addr[pt_index] = palloc();
+  pt_addr[pt_index] = (pgulong_t)palloc();
   pt_addr[pt_index] |= (flags & 0xFFF) | 1;
 
   flush_tlb_single(&pt_addr[pt_index]);
@@ -123,22 +155,22 @@ Output: True if page table is empty, otherwise false
 */
 bool page_is_empty(pgulong_t* pt_addr) {
 
-  for (uint16_t i = 0; i < 0x400; i++) {
-    if (pt_addr[i]) { return false; }
+  for (uint16_t i = 0; i < ENTRIES; i++) {
+    if (pt_addr[i] & 1) { return false; }
   }
 
   return true;
 }
 
-void page_clean(pgulong_t pd_index) {
+void page_clean(pgulong_t* addr) {
 
-  pgulong_t* pt_addr = pd_index * 0x400000;   // Get page table virtual address
+  if (!page_is_aligned(addr)) { return; }
 
-  for (uint16_t i = 0; i < 0x400; i++) {
-    *(pt_addr + i) = 0x0;
+  for (uint16_t i = 0; i < ENTRIES; i++) {
+    *(addr + i) = 0x0;
   }
 
-  flush_tlb_single(pt_addr);
+  flush_tlb_single(addr);
 }
 
 /*
@@ -160,7 +192,7 @@ void pd_flush_tlb(pgulong_t pd_index) {
 
   pgulong_t* pt_addr = page_get_table_address(pd_index);
   
-  for (uint16_t i = 0; i < 0x400; i++) {
+  for (uint16_t i = 0; i < ENTRIES; i++) {
     flush_tlb_single((pgulong_t*)pt_addr[i]);
   }
 }
