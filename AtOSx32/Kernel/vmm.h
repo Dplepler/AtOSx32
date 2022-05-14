@@ -13,7 +13,7 @@ pgulong_t page_get_entry_index(pgulong_t* addr);
 pgulong_t* page_get_table_address(uint16_t pd_index);
 uint16_t page_get_free_entry_index(pgulong_t* table_addr);
 pgulong_t* page_get_free_addr();
-bool page_map(pgulong_t* addr, uint16_t flags);
+pgulong_t* page_map(pgulong_t* addr, uint16_t flags);
 bool page_unmap(pgulong_t* addr);
 bool page_is_empty(pgulong_t* pt_addr);
 bool page_is_aligned(pgulong_t* addr);
@@ -26,7 +26,7 @@ void pd_remove_empty_pt(pgulong_t* pt_addr, pgulong_t pd_index);
 void pd_flush_tlb(pgulong_t pd_index);
 void page_clean(pgulong_t* addr);
 
-static inline bool sbrk() {
+static inline pgulong_t* sbrk() {
   return page_map(NULL, 0);
 }
 

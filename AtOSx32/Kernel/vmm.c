@@ -84,11 +84,11 @@ pgulong_t* page_get_free_addr() {
 
 /*
 page_map maps a physical address to a desired virtual address
-Input: Desired virtual address and entry flags
+Input: Desired virtual address and entry flags, if no specific address is desired, parameter can be NULL
 
-Output: True if succeeded, otherwise false
+Output: Mapped address, NULL if failed
 */
-bool page_map(pgulong_t* addr, uint16_t flags) {
+pgulong_t* page_map(pgulong_t* addr, uint16_t flags) {
 
   if (!addr) { addr = page_get_free_addr(); }
 
@@ -98,14 +98,14 @@ bool page_map(pgulong_t* addr, uint16_t flags) {
   pgulong_t* pt_addr = (((pgulong_t*)PD_ADDRESS)[pd_index] & 1) ? page_get_table_address(pd_index) 
     : pd_assign_table(pd_index, flags);
 
-  if ((pgulong_t)pt_addr[pt_index] & 1) { return false; }   // If page table index was already mapped, fail
+  if ((pgulong_t)pt_addr[pt_index] & 1) { return NULL; }   // If page table index was already mapped, fail
   
   pt_addr[pt_index] = (pgulong_t)palloc();
   pt_addr[pt_index] |= (flags & 0xFFF) | 1;
 
   flush_tlb_single(&pt_addr[pt_index]);
 
-  return true;
+  return addr;
 }
 
 

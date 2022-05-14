@@ -12,6 +12,8 @@
 #define BITS_IN_LONG 32
 #define BITS_IN_BYTE 8
 
+#define PAGE_SIZE 0x1000
+
 #define FREE_PAGES_OFFSET 0x1000
 
 #define CHECK_FREE_FRAME(bitmap, i) (!CHECK_USED_FRAME(bitmap, i))

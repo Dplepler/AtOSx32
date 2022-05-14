@@ -16,6 +16,8 @@ typedef struct _HEAP_HEADER_STRUCT {
   size_t size;          // Requested size
   size_t rsize;         // Actual size created where rsize >= size
 
+  unsigned int index;
+
   struct _HEAP_HEADER_STRUCT*  flink;
   struct _HEAP_HEADER_STRUCT*  blink;
 

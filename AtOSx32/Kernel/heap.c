@@ -23,14 +23,43 @@ unsigned int heap_get_index(size_t size) {
 
 void insert_header(heap_header* header) {
 
-  unsigned int index = heap_get_index(header->rsize - sizeof(heap_header));
+  header->index = heap_get_index(header->rsize - sizeof(heap_header));
 
-  if (free_pages[index]) {
-    header->flink = free_pages[index];
-    free_pages[index]->blink = header;
+  if (free_pages[header->index]) {
+    header->flink = free_pages[header->index];
+    free_pages[header->index]->blink = header;
   }
 
-  free_pages[index] = header;
+  free_pages[header->index] = header;
+}
+
+void remove_header(heap_header* header) {
+
+  if (free_pages[header->index] == header) { free_pages[header->index] = header->flink; }
+
+  if (header->flink) { header->flink->blink = header->blink; }
+  if (header->blink) { header->blink->flink = header->flink; }
+
+  header->flink = NULL;
+  header->blink = NULL;
+}
+
+void allocate_header(unsigned int size) {
+
+  size += sizeof(heap_header);
+
+  unsigned int page_amount = size / PAGE_SIZE;
+
+  if (size % PAGE_SIZE) { ++page_amount; }
+
+  heap_header* header = (heap_header*)sbrk();
+
+  header->signature = HEAP_SIGNATURE;
+  header->rsize = page_amount * PAGE_SIZE;
+  header->size = size;
+  header->blink = NULL;
+
+
 }
 
 
