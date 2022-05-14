@@ -68,7 +68,7 @@ uint16_t page_get_free_entry_index(pgulong_t* table_addr) {
 
 pgulong_t* page_get_free_addr() {
 
-  int16_t pt_index = 0;
+  uint16_t pt_index = 0;
   uint16_t i = 0;
   for (; i < ENTRIES; i++) {
     if ((pt_index = page_get_free_entry_index(&((pgulong_t*)PD_OFFSET)[i])) != ~0) { break; }

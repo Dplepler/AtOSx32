@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Wed Apr 13 04:19:19 2022
+# Make data base, printed on Fri May 13 10:57:22 2022
 
 # Variables
 
@@ -20,7 +20,7 @@ GNUMAKEFLAGS :=
 DESKTOP_SESSION = ubuntu
 # default
 .SHELLFLAGS := -c
-# makefile (from 'Makefile', line 30)
+# makefile (from 'Makefile', line 28)
 OBJ = $(C_SOURCES:.c=.o)
 # environment
 XDG_SESSION_CLASS = user
@@ -49,7 +49,7 @@ VSCODE_NLS_CONFIG = {"locale":"en-us","availableLanguages":{},"_languagePackSupp
 # environment
 _ = /usr/share/code/code
 # environment
-JOURNAL_STREAM = 8:62018
+JOURNAL_STREAM = 8:63177
 # environment
 XDG_CONFIG_DIRS = /etc/xdg/xdg-ubuntu:/etc/xdg
 # makefile (from 'Makefile', line 1)
@@ -67,7 +67,7 @@ DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
 # environment
 VSCODE_VERBOSE_LOGGING = true
 # environment
-MANAGERPID = 1464
+MANAGERPID = 1463
 # environment
 LESSOPEN = | /usr/bin/lesspipe %s
 # environment
@@ -79,7 +79,7 @@ PATH = /home/dplepler/opt/cross/bin:/home/dplepler/opt/cross/bin:/usr/local/sbin
 # environment
 GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
 # environment
-SESSION_MANAGER = local/ubuntu:@/tmp/.ICE-unix/1683,unix/ubuntu:/tmp/.ICE-unix/1683
+SESSION_MANAGER = local/ubuntu:@/tmp/.ICE-unix/1677,unix/ubuntu:/tmp/.ICE-unix/1677
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
 # environment
@@ -89,7 +89,7 @@ VSCODE_LOG_STACK = false
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
-INVOCATION_ID = 8ae7c52a6db147c9840b34e6babe4f14
+INVOCATION_ID = a964acc5c737474f9d8baecf3f4b15ea
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync check-symlink load
 # environment
@@ -99,7 +99,7 @@ XDG_SESSION_DESKTOP = ubuntu
 # environment
 SSH_AUTH_SOCK = /run/user/1000/keyring/ssh
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 2716
+GIO_LAUNCHED_DESKTOP_FILE_PID = 4155
 # automatic
 %F = $(notdir $%)
 # environment
@@ -111,7 +111,7 @@ PWD = /home/dplepler/Documents/Projects/AtOSx64/AtOSx32
 # default
 .LOADED := 
 # environment
-SSH_AGENT_PID = 1649
+SSH_AGENT_PID = 1643
 # environment
 ORIGINAL_XDG_CURRENT_DESKTOP = ubuntu:GNOME
 # environment
@@ -123,7 +123,7 @@ HOME = /home/dplepler
 # environment
 LESSCLOSE = /usr/bin/lesspipe %s %s
 # environment
-VSCODE_CODE_CACHE_PATH = /home/dplepler/.config/Code/CachedData/8dfae7a5cd50421d10cd99cb873990460525a898
+VSCODE_CODE_CACHE_PATH = /home/dplepler/.config/Code/CachedData/dfd34e8260c270da74b5c2d86d61aee4b6d56977
 # environment
 LOGNAME = dplepler
 # environment
@@ -147,7 +147,7 @@ SHLVL = 0
 # environment
 GNOME_SHELL_SESSION_MODE = ubuntu
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-5f02a38e-662b-49db-9076-42fa6db9f342.sock
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-f2882983-e3d4-40c8-9605-332178d7d2cf.sock
 # default
 MAKE_VERSION := 4.2.1
 # environment
@@ -165,7 +165,7 @@ MAKE_COMMAND := make
 # automatic
 *F = $(notdir $*)
 # environment
-VSCODE_IPC_HOOK = /run/user/1000/vscode-6eff2ff2-1.66.1-main.sock
+VSCODE_IPC_HOOK = /run/user/1000/vscode-6eff2ff2-1.66.2-main.sock
 # makefile
 MAKEFLAGS = pqrR
 # environment
@@ -190,7 +190,7 @@ LC_ALL = C
 GJS_DEBUG_TOPICS = JS ERROR;JS LOG
 # automatic
 ^F = $(notdir $^)
-# makefile (from 'Makefile', line 28)
+# makefile (from 'Makefile', line 26)
 C_SOURCES = $(wildcard Kernel/*.c)
 # default
 SUFFIXES := 
@@ -207,7 +207,7 @@ GJS_DEBUG_OUTPUT = stderr
 # environment
 LANG = C
 # environment
-VSCODE_PID = 2716
+VSCODE_PID = 4155
 # variable set hash-table stats:
 # Load=99/1024=10%, Rehash=0, Collisions=15/129=12%
 
@@ -217,36 +217,35 @@ VSCODE_PID = 2716
 
 # Directories
 
-# Kernel (device 2053, inode 1446501): 14 files, no impossibilities.
-# . (device 2053, inode 1315768): 10 files, no impossibilities.
-# Bootload (device 2053, inode 1315769): 2 files, no impossibilities so far.
+# Kernel (device 2053, inode 1446501): 18 files, no impossibilities.
+# . (device 2053, inode 1315768): 8 files, no impossibilities.
 
-# 26 files, no impossibilities in 3 directories.
+# 26 files, no impossibilities in 2 directories.
 
 # Implicit Rules
 
 %.o: %.c
-#  recipe to execute (from 'Makefile', line 36):
+#  recipe to execute (from 'Makefile', line 34):
 	i686-elf-gcc -c $< -o $@ -std=gnu99 -ffreestanding -Wall -Wextra
 
 %.o: %.asm
-#  recipe to execute (from 'Makefile', line 39):
-	nasm $< -f elf -o $@
+#  recipe to execute (from 'Makefile', line 37):
+	nasm $< -f elf32 -o $@
 
 %.bin: %.asm
-#  recipe to execute (from 'Makefile', line 42):
+#  recipe to execute (from 'Makefile', line 40):
 	nasm -O0 -f bin -o $@ $<
 
 # 3 implicit rules, 0 (0.0%) terminal.
 
 # Files
 
-gdb: DiskImages/AtOSGDB.img
+gdb: clean DiskImages/AtOSGDB.img
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
 
-all: DiskImages/AtOS.img
+all: clean DiskImages/AtOS.img
 #  Command line target.
 #  Implicit rule search has been done.
 #  File does not exist.
@@ -255,31 +254,17 @@ all: DiskImages/AtOS.img
 # variable set hash-table stats:
 # Load=0/32=0%, Rehash=0, Collisions=0/3=0%
 
-DiskImages/AtOS.img: Bootload/stage0.bin Bootload/Bootloader.bin Kernel/kernel.bin
-#  Implicit rule search has not been done.
-#  Last modified 2022-04-13 04:11:55.467936299
-#  File has been updated.
-#  Needs to be updated (-q is set).
-# variable set hash-table stats:
-# Load=0/32=0%, Rehash=0, Collisions=0/3=0%
-#  recipe to execute (from 'Makefile', line 7):
-	dd if=/dev/zero of=DiskImages/AtOS.img bs=1024 count=1440
-	dd if=Bootload/stage0.bin of=DiskImages/AtOS.img conv=notrunc
-	dd if=Bootload/Bootloader.bin of=DiskImages/AtOS.img bs=512 seek=1 conv=notrunc
-	dd if=Kernel/kernel.bin of=DiskImages/AtOS.img bs=512 seek=2 conv=notrunc
-	qemu-system-x86_64 DiskImages/AtOS.img
-
-# Not a target:
-Kernel/memory.o:
+DiskImages/AtOS.img: makeImg
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
+#  recipe to execute (from 'Makefile', line 11):
+	qemu-system-x86_64 DiskImages/AtOS.img
 
 # Not a target:
 Kernel/kernel_keyboard.o:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
- 
 #  File has not been updated.
 
 # Not a target:
@@ -289,26 +274,38 @@ Kernel/kernel_screen.o:
 #  File has not been updated.
 
 # Not a target:
+Kernel/vmm.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+ 
+# Not a target:
 Kernel/hal.o:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
 
 # Not a target:
-Bootload/stage0.asm:
-#  Implicit rule search has been done.
-#  Last modified 2022-04-10 06:17:07.037610117
-#  File has been updated.
-#  Successfully updated.
+.SUFFIXES:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-04-10 08:24:52.568446093
+#  Last modified 2022-04-19 11:51:44.123479872
 #  File has been updated.
 #  Successfully updated.
 
-debug: DiskImages/AtOSDebug.img
+debug: clean DiskImages/AtOSDebug.img
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+Kernel/pmm.o:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -320,43 +317,28 @@ Kernel/kernel_start.o:
 #  File has not been updated.
 
 # Not a target:
+Kernel/utils.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
 Kernel/kernel.o:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
 
 # Not a target:
-Kernel/paging.o:
+Kernel/heap.o:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
 
-Bootload/stage0.bin: Bootload/stage0.asm
-#  Implicit rule search has been done.
-#  Implicit/static pattern stem: 'Bootload/stage0'
-#  File does not exist.
-#  File has been updated.
-#  Needs to be updated (-q is set).
-# automatic
-# @ := Bootload/stage0.bin
-# automatic
-# % := 
-# automatic
-# * := Bootload/stage0
-# automatic
-# + := Bootload/stage0.asm
-# automatic
-# | := 
-# automatic
-# < := Bootload/stage0.asm
-# automatic
-# ^ := Bootload/stage0.asm
-# automatic
-# ? := Bootload/stage0.asm
-# variable set hash-table stats:
-# Load=8/32=25%, Rehash=0, Collisions=1/13=8%
-#  recipe to execute (from 'Makefile', line 42):
-	nasm -O0 -f bin -o $@ $<
+# Not a target:
+Bootload/stage0.bin:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 # Not a target:
 .DEFAULT:
@@ -364,41 +346,64 @@ Bootload/stage0.bin: Bootload/stage0.asm
 #  Modification time never checked.
 #  File has not been updated.
 
-DiskImages/AtOSDebug.img: Bootload/stage0.bin Bootload/Bootloader.bin Kernel/kernel.bin
+DiskImages/AtOSDebug.img: makeImg
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  recipe to execute (from 'Makefile', line 15):
-	dd if=/dev/zero of=DiskImages/AtOS.img bs=1024 count=1440
-	dd if=Bootload/stage0.bin of=DiskImages/AtOS.img conv=notrunc
-	dd if=Bootload/Bootloader.bin of=DiskImages/AtOS.img bs=512 seek=1 conv=notrunc
-	dd if=Kernel/kernel.bin of=DiskImages/AtOS.img bs=512 seek=2 conv=notrunc
+#  recipe to execute (from 'Makefile', line 14):
 	qemu-system-x86_64 -hda DiskImages/AtOS.img -monitor stdio
 
-Kernel/kernel.bin: Kernel/kernel_start.o Kernel/kernel_keyboard.o Kernel/paging.o Kernel/memory.o Kernel/hal.o Kernel/kernel.o Kernel/kernel_screen.o
+Kernel/kernel.bin: Kernel/kernel_start.o Kernel/heap.o Kernel/pmm.o Kernel/kernel_keyboard.o Kernel/vmm.o Kernel/utils.o Kernel/hal.o Kernel/kernel.o Kernel/kernel_screen.o
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  recipe to execute (from 'Makefile', line 33):
+#  recipe to execute (from 'Makefile', line 31):
 	i686-elf-gcc -T linker.ld -o $@ -ffreestanding -nostdlib Kernel/kernel_start.o $^ -lgcc
 
 clean:
 #  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-#  recipe to execute (from 'Makefile', line 47):
+#  Implicit/static pattern stem: ''
+#  File does not exist.
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# automatic
+# @ := clean
+# automatic
+# % := 
+# automatic
+# * := 
+# automatic
+# + := 
+# automatic
+# | := 
+# automatic
+# < := 
+# automatic
+# ^ := 
+# automatic
+# ? := 
+# variable set hash-table stats:
+# Load=8/32=25%, Rehash=0, Collisions=1/11=9%
+#  recipe to execute (from 'Makefile', line 7):
 	rm -rf Kernel/*.bin Kernel/*.o
 	rm -rf Bootload/*.bin
 
-DiskImages/AtOSGDB.img: Bootload/stage0.bin Bootload/Bootloader.bin Kernel/kernel.bin
+makeImg: Bootload/stage0.bin Bootload/Bootloader.bin Kernel/kernel.bin
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  recipe to execute (from 'Makefile', line 22):
+#  recipe to execute (from 'Makefile', line 20):
 	dd if=/dev/zero of=DiskImages/AtOS.img bs=1024 count=1440
 	dd if=Bootload/stage0.bin of=DiskImages/AtOS.img conv=notrunc
 	dd if=Bootload/Bootloader.bin of=DiskImages/AtOS.img bs=512 seek=1 conv=notrunc
 	dd if=Kernel/kernel.bin of=DiskImages/AtOS.img bs=512 seek=2 conv=notrunc
+	
+
+DiskImages/AtOSGDB.img: makeImg
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 17):
 	qemu-system-x86_64 -S -s DiskImages/AtOS.img
 
 # Not a target:
@@ -408,19 +413,19 @@ Bootload/Bootloader.bin:
 #  File has not been updated.
 
 # files hash-table stats:
-# Load=21/1024=2%, Rehash=0, Collisions=2/58=3%
+# Load=23/1024=2%, Rehash=0, Collisions=0/62=0%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 51 / storage = 626 B / avg = 12 B
-# current buf: size = 8162 B / used = 626 B / count = 51 / avg = 12 B
+# strcache buffers: 1 (0) / strings = 52 / storage = 602 B / avg = 11 B
+# current buf: size = 8162 B / used = 602 B / count = 52 / avg = 11 B
 
-# strcache performance: lookups = 81 / hit rate = 37%
+# strcache performance: lookups = 82 / hit rate = 36%
 # hash-table stats:
-# Load=51/8192=1%, Rehash=0, Collisions=3/81=4%
-# Finished Make data base on Wed Apr 13 04:19:19 2022
+# Load=52/8192=1%, Rehash=0, Collisions=6/82=7%
+# Finished Make data base on Fri May 13 10:57:22 2022
 
  

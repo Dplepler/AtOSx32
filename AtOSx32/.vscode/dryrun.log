@@ -1,15 +1,17 @@
-make --dry-run --always-make --keep-going --print-directory
+make DiskImages/AtOS.img --dry-run --always-make --keep-going --print-directory
 make: Entering directory '/home/dplepler/Documents/Projects/AtOSx64/AtOSx32'
 nasm -O0 -f bin -o Bootload/stage0.bin Bootload/stage0.asm
 nasm -O0 -f bin -o Bootload/Bootloader.bin Bootload/Bootloader.asm
-nasm Kernel/kernel_start.asm -f elf -o Kernel/kernel_start.o
+nasm Kernel/kernel_start.asm -f elf32 -o Kernel/kernel_start.o
+i686-elf-gcc -c Kernel/heap.c -o Kernel/heap.o -std=gnu99 -ffreestanding -Wall -Wextra
+i686-elf-gcc -c Kernel/pmm.c -o Kernel/pmm.o -std=gnu99 -ffreestanding -Wall -Wextra
 i686-elf-gcc -c Kernel/kernel_keyboard.c -o Kernel/kernel_keyboard.o -std=gnu99 -ffreestanding -Wall -Wextra
-i686-elf-gcc -c Kernel/paging.c -o Kernel/paging.o -std=gnu99 -ffreestanding -Wall -Wextra
-i686-elf-gcc -c Kernel/memory.c -o Kernel/memory.o -std=gnu99 -ffreestanding -Wall -Wextra
+i686-elf-gcc -c Kernel/vmm.c -o Kernel/vmm.o -std=gnu99 -ffreestanding -Wall -Wextra
+i686-elf-gcc -c Kernel/utils.c -o Kernel/utils.o -std=gnu99 -ffreestanding -Wall -Wextra
 i686-elf-gcc -c Kernel/hal.c -o Kernel/hal.o -std=gnu99 -ffreestanding -Wall -Wextra
 i686-elf-gcc -c Kernel/kernel.c -o Kernel/kernel.o -std=gnu99 -ffreestanding -Wall -Wextra
 i686-elf-gcc -c Kernel/kernel_screen.c -o Kernel/kernel_screen.o -std=gnu99 -ffreestanding -Wall -Wextra
-i686-elf-gcc -T linker.ld -o Kernel/kernel.bin -ffreestanding -nostdlib Kernel/kernel_start.o Kernel/kernel_start.o Kernel/kernel_keyboard.o Kernel/paging.o Kernel/memory.o Kernel/hal.o Kernel/kernel.o Kernel/kernel_screen.o -lgcc
+i686-elf-gcc -T linker.ld -o Kernel/kernel.bin -ffreestanding -nostdlib Kernel/kernel_start.o Kernel/kernel_start.o Kernel/heap.o Kernel/pmm.o Kernel/kernel_keyboard.o Kernel/vmm.o Kernel/utils.o Kernel/hal.o Kernel/kernel.o Kernel/kernel_screen.o -lgcc
 dd if=/dev/zero of=DiskImages/AtOS.img bs=1024 count=1440
 dd if=Bootload/stage0.bin of=DiskImages/AtOS.img conv=notrunc
 dd if=Bootload/Bootloader.bin of=DiskImages/AtOS.img bs=512 seek=1 conv=notrunc

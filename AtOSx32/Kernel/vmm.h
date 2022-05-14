@@ -27,7 +27,7 @@ void pd_flush_tlb(pgulong_t pd_index);
 void page_clean(pgulong_t* addr);
 
 static inline bool sbrk() {
-  return page_map(page_get_free_addr(), 0);
+  return page_map(NULL, 0);
 }
 
 
