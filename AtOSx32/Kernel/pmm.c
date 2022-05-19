@@ -51,7 +51,7 @@ void pallocn(pgulong_t** frames, size_t size) {
 }
 
 /*
-palloc returns a newly allocated page's address
+palloc allocates a page and returns it's physical address
 
 This function will allocate a chunk of pages each time (but will only return one) to increase performance
 */

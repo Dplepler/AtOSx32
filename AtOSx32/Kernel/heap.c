@@ -52,7 +52,7 @@ void allocate_header(unsigned int size) {
 
   if (size % PAGE_SIZE) { ++page_amount; }
 
-  heap_header* header = (heap_header*)sbrk();
+  heap_header* header = (heap_header*)sbrk(page_amount);
 
   header->signature = HEAP_SIGNATURE;
   header->rsize = page_amount * PAGE_SIZE;

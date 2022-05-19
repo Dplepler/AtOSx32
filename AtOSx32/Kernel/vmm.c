@@ -53,25 +53,29 @@ bool pd_remove_entry(pgulong_t* addr) {
 }
 
 /*
-page_get_free_entry_index returns the first unused index in a given table
-Input: Page table address
+page_get_free_entry_index returns the first unused index + n pages in a given table 
+Input: Page table address, amount of contigious pages that should be unused
 Output: Free entry's index, if there are none, function returns -1
 */
-uint16_t page_get_free_entry_index(pgulong_t* table_addr) {
+uint16_t page_get_free_entry_index(pgulong_t* table_addr, size_t length) {
 
   for (uint16_t i = 0; i < ENTRIES; i++) {
-    if (!(table_addr[i] & 1)) { return i; }
+    if (i + length > ENTRIES) { break; }
+    for (uint32_t i2 = i; i2 < i + length; i2++) {
+      if (table_addr[i2] & 1) { break; }
+      if (i2 == i + length - 1) { return i; }   // Found free space, return it's offset
+    }
   }
 
   return ~0;
 }
 
-pgulong_t* page_get_free_addr() {
+pgulong_t* page_get_free_addr(size_t length) {
 
   uint16_t pt_index = 0;
   uint16_t i = 0;
   for (; i < ENTRIES; i++) {
-    if ((pt_index = page_get_free_entry_index(&((pgulong_t*)PD_OFFSET)[i])) != ~0) { break; }
+    if ((pt_index = page_get_free_entry_index(&((pgulong_t*)PD_OFFSET)[i], length)) != ~0) { break; }
   }
 
   if (pt_index == ~0) { return NULL; }
@@ -88,9 +92,9 @@ Input: Desired virtual address and entry flags, if no specific address is desire
 
 Output: Mapped address, NULL if failed
 */
-pgulong_t* page_map(pgulong_t* addr, uint16_t flags) {
+pgulong_t* page_map(pgulong_t* addr, size_t length, uint16_t flags) {
 
-  if (!addr) { addr = page_get_free_addr(); }
+  if (!addr) { addr = page_get_free_addr(length); }
 
   pgulong_t pd_index = pd_get_entry_index(addr);
   pgulong_t pt_index = page_get_entry_index(addr);
@@ -98,12 +102,17 @@ pgulong_t* page_map(pgulong_t* addr, uint16_t flags) {
   pgulong_t* pt_addr = (((pgulong_t*)PD_ADDRESS)[pd_index] & 1) ? page_get_table_address(pd_index) 
     : pd_assign_table(pd_index, flags);
 
-  if ((pgulong_t)pt_addr[pt_index] & 1) { return NULL; }   // If page table index was already mapped, fail
-  
-  pt_addr[pt_index] = (pgulong_t)palloc();
-  pt_addr[pt_index] |= (flags & 0xFFF) | 1;
+  for (unsigned int i = 0; i < length; i++) {
 
-  flush_tlb_single(&pt_addr[pt_index]);
+    if ((pgulong_t)pt_addr[pt_index] & 1) { return NULL; }   // If page table index was already mapped, fail
+    
+    pt_addr[pt_index] = (pgulong_t)palloc();
+    pt_addr[pt_index] |= (flags & 0xFFF) | 1;
+
+    flush_tlb_single(&pt_addr[pt_index]);
+
+    pt_index++;
+  }
 
   return addr;
 }
