@@ -23,7 +23,7 @@ unsigned int heap_get_index(size_t size) {
 
 void insert_header(heap_header* header) {
 
-  header->index = heap_get_index(header->rsize - sizeof(heap_header));
+  header->index = heap_get_index(header->size - sizeof(heap_header));
 
   if (free_pages[header->index]) {
     header->flink = free_pages[header->index];
@@ -44,7 +44,7 @@ void remove_header(heap_header* header) {
   header->blink = NULL;
 }
 
-void allocate_header(unsigned int size) {
+heap_header* allocate_header(unsigned int size) {
 
   size += sizeof(heap_header);
 
@@ -55,18 +55,26 @@ void allocate_header(unsigned int size) {
   heap_header* header = (heap_header*)sbrk(page_amount);
 
   header->signature = HEAP_SIGNATURE;
-  header->rsize = page_amount * PAGE_SIZE;
-  header->size = size;
+  header->size = page_amount * PAGE_SIZE;
+  header->req_size = size - sizeof(heap_header);
   header->blink = NULL;
+  header->flink = NULL;
+  header->split_flink = NULL;
+  header->split_blink = NULL;
 
-
+  return header;
 }
 
 
 void* malloc(size_t size) {
 
   if (size < (1 << MIN_EXP)) { size = 1 << MIN_EXP; }  
+  heap_header* header = free_pages[heap_get_index(size)];
 
+  while (header) {
+    if (header->size - sizeof(heap_header) >= size + sizeof(heap_header)) { break; }
+    header = header->flink;
+  }
 
-
+  if (!header) { header = allocate_header(size); }
 }

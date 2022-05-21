@@ -12,9 +12,9 @@
 
 typedef struct _HEAP_HEADER_STRUCT {
 
-  uint32_t signature;   // Signature magic
-  size_t size;          // Requested size
-  size_t rsize;         // Actual size created where rsize >= size
+  uint32_t signature;    // Signature magic
+  size_t req_size;       // Requested size
+  size_t size;           // Actual size created where rsize >= size
 
   unsigned int index;
 
@@ -26,8 +26,12 @@ typedef struct _HEAP_HEADER_STRUCT {
 
 } heap_header;
 
-unsigned int heap_get_index(size_t size);
+
 void* malloc(size_t size);
+unsigned int heap_get_index(size_t size);
+void insert_header(heap_header* header);
+void remove_header(heap_header* header);
+heap_header* allocate_header(unsigned int size);
 
 
 
