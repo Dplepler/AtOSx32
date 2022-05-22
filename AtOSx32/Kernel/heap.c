@@ -1,7 +1,7 @@
 #include "heap.h"
 
 heap_header*  free_pages[INIT_SIZE] = { NULL };
-uint8_t       used_pages[INIT_SIZE] = { 0 };
+bool          used_pages[INIT_SIZE] = { false };
 
 /*
 Find an index based on the requested size
@@ -21,7 +21,7 @@ unsigned int heap_get_index(size_t size) {
   return index - 1;   // Get previous index, which is our desired one
 }
 
-void insert_header(heap_header* header) {
+void heap_insert_header(heap_header* header) {
 
   header->index = heap_get_index(header->size - sizeof(heap_header));
 
@@ -33,7 +33,7 @@ void insert_header(heap_header* header) {
   free_pages[header->index] = header;
 }
 
-void remove_header(heap_header* header) {
+void heap_remove_header(heap_header* header) {
 
   if (free_pages[header->index] == header) { free_pages[header->index] = header->flink; }
 
@@ -44,7 +44,7 @@ void remove_header(heap_header* header) {
   header->blink = NULL;
 }
 
-heap_header* allocate_header(unsigned int size) {
+heap_header* heap_allocate_header(unsigned int size) {
 
   size += sizeof(heap_header);
 
@@ -61,20 +61,46 @@ heap_header* allocate_header(unsigned int size) {
   header->flink = NULL;
   header->split_flink = NULL;
   header->split_blink = NULL;
+  header->index = heap_get_index(header->size - sizeof(heap_header));
 
   return header;
+}
+
+void heap_split_header(heap_header* header) {
+
+  heap_header* split_header = (heap_header*)((uint32_t)header + header->req_size + sizeof(heap_header));
+  split_header->signature = HEAP_SIGNATURE;
+  split_header->size = header->size - (header->req_size + sizeof(heap_header));   // Remainder size will now become the new header's size
+
+  split_header->flink = header->split_flink;
+  split_header->blink = header;
+
+  if (header->split_flink) { header->split_flink->split_blink = split_header; }
+  header->split_flink = split_header;
+
+  header->size -= split_header->size;
+
+  heap_insert_header(split_header);
 }
 
 
 void* malloc(size_t size) {
 
   if (size < (1 << MIN_EXP)) { size = 1 << MIN_EXP; }  
-  heap_header* header = free_pages[heap_get_index(size)];
+  unsigned int index = heap_get_index(size);
+
+  heap_header* header = free_pages[index];
 
   while (header) {
     if (header->size - sizeof(heap_header) >= size + sizeof(heap_header)) { break; }
     header = header->flink;
   }
 
-  if (!header) { header = allocate_header(size); }
+  if (!header) { header = heap_allocate_header(size); }
+  else { 
+    heap_remove_header(header); 
+    used_pages[index] = true;
+  }
+
+
 }

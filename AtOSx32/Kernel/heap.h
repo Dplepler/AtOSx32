@@ -29,9 +29,10 @@ typedef struct _HEAP_HEADER_STRUCT {
 
 void* malloc(size_t size);
 unsigned int heap_get_index(size_t size);
-void insert_header(heap_header* header);
-void remove_header(heap_header* header);
-heap_header* allocate_header(unsigned int size);
+void heap_insert_header(heap_header* header);
+void heap_remove_header(heap_header* header);
+void heap_split_header(heap_header* header);
+heap_header* heap_allocate_header(unsigned int size);
 
 
 
