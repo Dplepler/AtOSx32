@@ -8,6 +8,9 @@
 
 #define ENTRIES 0x400     // Amount of table entries
 
+void* memset(void* addr, uint8_t c, size_t n);
+void* memcpy(void* s1, const void* s2, size_t n);
+
 pgulong_t* page_physical_address(pgulong_t* addr);
 pgulong_t page_get_entry_index(pgulong_t* addr);
 pgulong_t* page_get_table_address(uint16_t pd_index);
