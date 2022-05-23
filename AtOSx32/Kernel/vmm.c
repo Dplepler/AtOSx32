@@ -84,13 +84,13 @@ page_get_free_entry_index returns the first unused index + n pages in a given ta
 Input: Page table address, amount of contigious pages that should be unused
 Output: Free entry's index, if there are none, function returns -1
 */
-uint16_t page_get_free_entry_index(pgulong_t* table_addr, size_t length) {
+int page_get_free_entry_index(pgulong_t* table_addr, size_t length) {
 
   for (uint16_t i = 0; i < ENTRIES; i++) {
     if (i + length > ENTRIES) { break; }
     for (uint32_t i2 = i; i2 < i + length; i2++) {
       if (table_addr[i2] & 1) { break; }
-      if (i2 == i + length - 1) { return i; }   // Found free space, return it's offset
+      if (i2 == i + length - 1) { return (int)i; }   // Found free space, return it's offset
     }
   }
 
@@ -99,10 +99,11 @@ uint16_t page_get_free_entry_index(pgulong_t* table_addr, size_t length) {
 
 pgulong_t* page_get_free_addr(size_t length) {
 
-  uint16_t pt_index = 0;
+  int pt_index = 0;
   uint16_t i = 0;
   for (; i < ENTRIES; i++) {
-    if ((pt_index = page_get_free_entry_index(&((pgulong_t*)PD_OFFSET)[i], length)) != ~0) { break; }
+    pt_index = page_get_free_entry_index(&((pgulong_t*)PD_OFFSET)[i], length);
+    if (pt_index != ~0) { break; }
   }
 
   if (pt_index == ~0) { return NULL; }

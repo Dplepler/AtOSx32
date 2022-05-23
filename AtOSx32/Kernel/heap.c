@@ -1,7 +1,7 @@
 #include "heap.h"
 
-heap_header*  free_pages[INIT_SIZE] = { NULL };
-bool          used_pages[INIT_SIZE] = { false };
+heap_header*  free_pages[INIT_SIZE]     = { NULL };
+//int           complete_pages[INIT_SIZE] = { 0 };    // Amount of pages
 
 /*
 Find an index based on the requested size
@@ -68,7 +68,7 @@ heap_header* heap_allocate_header(unsigned int size) {
 
 void heap_split_header(heap_header* header) {
 
-  if (heap_get_index(header->size - (header->req_size + sizeof(heap_header))) >= 0) { return; }   // Nothing to split
+  if (1 << (header->size - (header->req_size + sizeof(heap_header))) < (1 << MIN_EXP)) { return; }   // Nothing to split
 
   heap_header* split_header = (heap_header*)((uint32_t)header + header->req_size + sizeof(heap_header));
   split_header->signature = HEAP_SIGNATURE;
@@ -85,6 +85,28 @@ void heap_split_header(heap_header* header) {
   heap_insert_header(split_header);
 }
 
+void heap_melt_left(heap_header* header) {
+
+  if (!header->split_blink) { return; }
+
+  header->split_blink->size += header->size;
+  header->split_blink->split_flink = header->split_flink;
+  if (header->split_flink) { header->split_flink->split_blink = header->split_blink; }
+}
+
+void heap_eat_right(heap_header* header) {
+
+  if (!header->split_flink) { return; }
+
+  heap_remove_header(header);   // Header might be the first in the free pages index, we should remove it
+
+  header->size += header->split_flink->size;
+  if (header->split_flink->split_flink) { header->split_flink->split_flink->split_blink = header; }  
+
+  header->split_flink = header->split_flink->split_flink;
+}
+
+
 
 void* malloc(size_t size) {
 
@@ -98,13 +120,22 @@ void* malloc(size_t size) {
     header = header->flink;
   }
 
-  if (!header) { header = heap_allocate_header(size); }
-  else { 
-    heap_remove_header(header); 
-    used_pages[index] = true;
-  }
+  if (!header) { header = heap_allocate_header(size); }   // Get a new header
+  else { heap_remove_header(header); }
 
   heap_split_header(header); // If there's data that will never be used, split it to a new header
 
   return (void*)((uint32_t)header + sizeof(heap_header));
+}
+
+void free(void* ptr) {
+
+  if (!ptr) { return; }   // Nothing to free
+
+  heap_header* header = (heap_header*)((uint32_t)ptr - sizeof(heap_header));
+  if (header->signature != HEAP_SIGNATURE) { return; }        // Not an allocated memory
+
+
+
+
 }
