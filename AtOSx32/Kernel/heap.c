@@ -1,7 +1,6 @@
 #include "heap.h"
 
 heap_header*  free_pages[INIT_SIZE]     = { NULL };
-//int           complete_pages[INIT_SIZE] = { 0 };    // Amount of pages
 
 /*
 Find an index based on the requested size
@@ -85,25 +84,31 @@ void heap_split_header(heap_header* header) {
   heap_insert_header(split_header);
 }
 
-void heap_melt_left(heap_header* header) {
+heap_header* heap_melt_left(heap_header* header) {
 
   if (!header->split_blink) { return; }
 
-  header->split_blink->size += header->size;
-  header->split_blink->split_flink = header->split_flink;
-  if (header->split_flink) { header->split_flink->split_blink = header->split_blink; }
+  heap_header* blink = header->split_blink;
+
+  blink->size += header->size;
+  blink->split_flink = header->split_flink;
+  if (header->split_flink) { header->split_flink->split_blink = blink; }
+
+  return blink;
 }
 
 void heap_eat_right(heap_header* header) {
 
   if (!header->split_flink) { return; }
 
-  heap_remove_header(header);   // Header might be the first in the free pages index, we should remove it
+  heap_header* flink = header->split_flink;
 
-  header->size += header->split_flink->size;
-  if (header->split_flink->split_flink) { header->split_flink->split_flink->split_blink = header; }  
+  heap_remove_header(flink);   // Header might be the first in the free pages index, we should remove it
 
-  header->split_flink = header->split_flink->split_flink;
+  header->size += flink->size;
+  if (flink->split_flink) { flink->split_flink->split_blink = header; }  
+
+  flink = flink->split_flink;
 }
 
 
@@ -135,7 +140,6 @@ void free(void* ptr) {
   heap_header* header = (heap_header*)((uint32_t)ptr - sizeof(heap_header));
   if (header->signature != HEAP_SIGNATURE) { return; }        // Not an allocated memory
 
-
-
-
+  while (header->split_blink) { header = heap_melt_left(header); heap_remove_header(header); }
+  while (header->split_flink) { heap_eat_right(header); }
 }
