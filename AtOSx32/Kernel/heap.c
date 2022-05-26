@@ -1,6 +1,7 @@
 #include "heap.h"
 
 heap_header*  free_pages[INIT_SIZE]     = { NULL };
+unsigned int  complete_pages[INIT_SIZE] = { 0 };    // Count freed allocated pages
 
 /*
 Find an index based on the requested size
@@ -47,11 +48,9 @@ heap_header* heap_allocate_header(unsigned int size) {
 
   size += sizeof(heap_header);
 
-  unsigned int page_amount = size / PAGE_SIZE;
+  unsigned int page_amount = heap_get_page_count(size);
 
-  if (size % PAGE_SIZE) { ++page_amount; }
-
-  heap_header* header = (heap_header*)sbrk(page_amount);
+  heap_header* header = (heap_header*)page_map(NULL, size, 0);
 
   header->signature = HEAP_SIGNATURE;
   header->size = page_amount * PAGE_SIZE;
@@ -86,7 +85,7 @@ void heap_split_header(heap_header* header) {
 
 heap_header* heap_melt_left(heap_header* header) {
 
-  if (!header->split_blink) { return; }
+  if (!header->split_blink) { return NULL; }
 
   heap_header* blink = header->split_blink;
 
@@ -113,6 +112,7 @@ void heap_eat_right(heap_header* header) {
 
 
 
+
 void* malloc(size_t size) {
 
   if (size < (1 << MIN_EXP)) { size = 1 << MIN_EXP; }  
@@ -126,7 +126,10 @@ void* malloc(size_t size) {
   }
 
   if (!header) { header = heap_allocate_header(size); }   // Get a new header
-  else { heap_remove_header(header); }
+  else { 
+    heap_remove_header(header);
+    if (!header->split_flink && !header->split_blink) { complete_pages[header->index]--; }
+  }
 
   heap_split_header(header); // If there's data that will never be used, split it to a new header
 
@@ -142,4 +145,13 @@ void free(void* ptr) {
 
   while (header->split_blink) { header = heap_melt_left(header); heap_remove_header(header); }
   while (header->split_flink) { heap_eat_right(header); }
+
+  unsigned int index = heap_get_index(header->size - sizeof(heap_header));
+
+  /* If we saved too much free unused pages we should free this one */
+  if (complete_pages[index] == MAX_COMPLETE) { page_unmap((pgulong_t*)header, heap_get_page_count(header->size)); return; }
+
+  complete_pages[index]++;
+  
+  heap_insert_header(header);
 }

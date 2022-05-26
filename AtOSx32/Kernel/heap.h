@@ -10,6 +10,8 @@
 #define MIN_EXP 8
 #define MAX_EXP 32
 
+#define MAX_COMPLETE 5
+
 typedef struct _HEAP_HEADER_STRUCT {
 
   uint32_t signature;    // Signature magic
@@ -26,8 +28,12 @@ typedef struct _HEAP_HEADER_STRUCT {
 
 } heap_header;
 
+static inline size_t heap_get_page_count(size_t length) {
+  return (length / PAGE_SIZE) + ((length % PAGE_SIZE) ? 1 : 0);
+} 
 
 void* malloc(size_t size);
+void free(void* ptr);
 unsigned int heap_get_index(size_t size);
 void heap_insert_header(heap_header* header);
 void heap_remove_header(heap_header* header);

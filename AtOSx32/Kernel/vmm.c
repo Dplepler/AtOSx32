@@ -117,6 +117,7 @@ pgulong_t* page_get_free_addr(size_t length) {
 /*
 page_map maps a physical address to a desired virtual address
 Input: Desired virtual address and entry flags, if no specific address is desired, parameter can be NULL
+Length in pages, flags
 
 Output: Mapped address, NULL if failed
 */
@@ -130,7 +131,7 @@ pgulong_t* page_map(pgulong_t* addr, size_t length, uint16_t flags) {
   pgulong_t* pt_addr = (((pgulong_t*)PD_ADDRESS)[pd_index] & 1) ? page_get_table_address(pd_index) 
     : pd_assign_table(pd_index, flags);
 
-  for (unsigned int i = 0; i < length; i++) {
+  for (unsigned int i = 0; i < length; i++, pt_index++) {
 
     if ((pgulong_t)pt_addr[pt_index] & 1) { return NULL; }   // If page table index was already mapped, fail
     
@@ -138,8 +139,6 @@ pgulong_t* page_map(pgulong_t* addr, size_t length, uint16_t flags) {
     pt_addr[pt_index] |= (flags & 0xFFF) | 1;
 
     flush_tlb_single(&pt_addr[pt_index]);
-
-    pt_index++;
   }
 
   return addr;
@@ -148,10 +147,10 @@ pgulong_t* page_map(pgulong_t* addr, size_t length, uint16_t flags) {
 
 /*
 page_unmap unmaps a page
-Input: Page frame's virtual address to unmap
+Input: Page frame's virtual address to unmap, length in pages
 Output: True if succeeded, otherwise false
 */
-bool page_unmap(pgulong_t* addr) {
+bool page_unmap(pgulong_t* addr, size_t length) {
 
   if (!page_is_aligned(addr)) { return false; }        // Address should always be page aligned
 
@@ -160,12 +159,13 @@ bool page_unmap(pgulong_t* addr) {
 
   pgulong_t* pt_addr = page_get_table_address(pd_index);
 
-  pt_addr[pt_index] = 0x0;    // Unmap entry
+  for (unsigned int i = 0; i < length; i++, pt_index++) {
+    pt_addr[pt_index] = 0x0;                // Unmap entry
+    flush_tlb_single(&pt_addr[pt_index]);   // Flush TLB to recognize changes
+  }
 
-  pd_remove_empty_pt(pt_addr, pd_index);  // Remove entire page table from page directory if it's empty
-
-  flush_tlb_single(&pt_addr[pt_index]);   // Flush TLB to recognize changes
-
+  if (page_is_empty(pt_addr)) { pd_remove_empty_pt(pd_index); }  // Remove entire page table from page directory if it's empty  
+  
   return true;
 }
 
@@ -211,14 +211,11 @@ void page_clean(pgulong_t* addr) {
 }
 
 /*
-Check if page table is empty, if so remove it from the page directory
+Removes a page table from the page directory
 Input: Page table's address to check, Page directory index to remove from
 */
-void pd_remove_empty_pt(pgulong_t* pt_addr, pgulong_t pd_index) {
-
-  if (page_is_empty(pt_addr)) {
-    ((pgulong_t*)PD_ADDRESS)[pd_index] = 0x2;   // Set entry as not present
-  }
+void pd_remove_empty_pt(pgulong_t pd_index) {
+  ((pgulong_t*)PD_ADDRESS)[pd_index] = 0x2;   // Set entry as not present
 }
 
 /*
