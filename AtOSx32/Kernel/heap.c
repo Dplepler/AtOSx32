@@ -159,15 +159,17 @@ void* realloc(void* ptr, size_t size) {
   if (!ptr) { return malloc(size); }
   if (!size) { free(ptr); return NULL; }
 
+  heap_header* header = ((heap_header*)ptr - sizeof(heap_header));
+  if (header->req_size == size) { return ptr; }
+
   /* Normal reallocation */
   void* np = malloc(size);
-  heap_header* header = ((heap_header*)ptr - sizeof(heap_header));
+  
   memcpy(np, ptr, (header->req_size > size ? size : header->req_size));
 
   free(ptr);
   return np;
 }
-
 
 void* calloc(size_t n, size_t size) {
 
