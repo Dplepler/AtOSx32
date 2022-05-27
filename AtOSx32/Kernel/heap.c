@@ -110,9 +110,6 @@ void heap_eat_right(heap_header* header) {
   flink = flink->split_flink;
 }
 
-
-
-
 void* malloc(size_t size) {
 
   if (size < (1 << MIN_EXP)) { size = 1 << MIN_EXP; }  
@@ -154,4 +151,28 @@ void free(void* ptr) {
   complete_pages[index]++;
   
   heap_insert_header(header);
+}
+
+void* realloc(void* ptr, size_t size) {
+
+  /* For special cases */
+  if (!ptr) { return malloc(size); }
+  if (!size) { free(ptr); return NULL; }
+
+  /* Normal reallocation */
+  void* np = malloc(size);
+  heap_header* header = ((heap_header*)ptr - sizeof(heap_header));
+  memcpy(np, ptr, (header->req_size > size ? size : header->req_size));
+
+  free(ptr);
+  return np;
+}
+
+
+void* calloc(size_t n, size_t size) {
+
+  void* ptr = malloc(n * size);
+  memset(ptr, 0, n * size);
+
+  return ptr;
 }
