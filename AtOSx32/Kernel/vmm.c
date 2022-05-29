@@ -97,11 +97,18 @@ int page_get_free_entry_index(pgulong_t* table_addr, size_t length) {
   return ~0;
 }
 
+// TODO: SEARCH FOR FREE MEMORY EXTENDING TO MULTIPLE TABLES IF NEEDED (length > 0x1000)
+int page_get_free_memory_index(size_t length) {
+
+
+}
+
 pgulong_t* page_get_free_addr(size_t length) {
 
   int pt_index = 0;
   uint16_t i = 0;
   for (; i < ENTRIES; i++) {
+    if (!(((pgulong_t*)PD_OFFSET)[i] & 1) && length <= 0x1000) { pt_index = 0; break; }
     pt_index = page_get_free_entry_index(&((pgulong_t*)PD_OFFSET)[i], length);
     if (pt_index != ~0) { break; }
   }
@@ -124,10 +131,11 @@ Output: Mapped address, NULL if failed
 pgulong_t* page_map(pgulong_t* addr, size_t length, uint16_t flags) {
 
   if (!addr) { addr = page_get_free_addr(length); }
+  if (!addr) { return NULL; }
 
   pgulong_t pd_index = pd_get_entry_index(addr);
   pgulong_t pt_index = page_get_entry_index(addr);
-
+  
   pgulong_t* pt_addr = (((pgulong_t*)PD_ADDRESS)[pd_index] & 1) ? page_get_table_address(pd_index) 
     : pd_assign_table(pd_index, flags);
 

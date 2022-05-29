@@ -113,10 +113,6 @@ void heap_eat_right(heap_header* header) {
 void* malloc(size_t size) {
 
   unsigned int index = heap_get_index(size);
-  //if (index < MIN_EXP) { index = MIN_EXP; }
-  PRINTN(index);
-
-  while(1) { }
 
   heap_header* header = free_pages[index];
 
