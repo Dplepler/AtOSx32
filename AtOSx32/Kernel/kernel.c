@@ -9,7 +9,7 @@
 #endif
 
 #include "kernel_keyboard.h"
-#include "vmm.h"
+#include "heap.h"
 
 int kmain(void) {
   
@@ -21,6 +21,16 @@ int kmain(void) {
   bitmap_mark_kernel();
 
   perry(25, 5);
+
+  char* str = malloc(10);
+
+  for (unsigned int i = 0; i < 10; i++) {
+    str[i] = 'a';
+  }
+
+  for (unsigned int i = 0; i < 10; i++) {
+    terminal_putchar(str[i]);
+  }
 
   return 0;
 }
