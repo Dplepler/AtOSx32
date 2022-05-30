@@ -79,44 +79,55 @@ bool pd_remove_entry(pgulong_t* addr) {
   return true;
 }
 
-/*
-page_get_free_entry_index returns the first unused index + n pages in a given table 
-Input: Page table address, amount of contigious pages that should be unused
-Output: Free entry's index, if there are none, function returns -1
-*/
-int page_get_free_entry_index(pgulong_t* table_addr, size_t length) {
+int page_get_free_memory_index(size_t req_pd_entries, size_t req_pt_entries) {
+
+  req_pt_entries -= (0x400 * req_pd_entries);
+
+  if (!req_pd_entries) {
+    // TODO: Do something different when we only need page table indexes
+  }
+
+  pgulong_t* addr = NULL;
 
   for (uint16_t i = 0; i < ENTRIES; i++) {
-    if (i + length > ENTRIES) { break; }
-    for (uint32_t i2 = i; i2 < i + length; i2++) {
-      if (table_addr[i2] & 1) { break; }
-      if (i2 == i + length - 1) { return (int)i; }   // Found free space, return it's offset
+    if (ENTRIES - i < req_pd_entries) { break; }
+    uint32_t i2 = i;
+    for (; i2 < i + req_pd_entries; i2++) {
+      if (i2 >= ENTRIES) { return ~0; }
+      addr = &((pgulong_t*)PD_OFFSET)[i2];
+      if (*addr & 1) { break; }                     // Bad
+      if (i2 == i + req_pd_entries - 1) { break; }  // Good
     }
+
+    if (i2 == i + req_pd_entries - 1) {
+      addr = &((pgulong_t*)PD_OFFSET)[i2 + 1];
+      for (uint32_t i3 = i2 + 1; i3 < req_pt_entries; i3++) {
+        if (*addr & 1) { break; }                          // Bad
+        if (i3 == req_pt_entries - 1) { return (int)i; }  // Good
+      }
+    }
+    
   }
 
   return ~0;
 }
 
-// TODO: SEARCH FOR FREE MEMORY EXTENDING TO MULTIPLE TABLES IF NEEDED (length > 0x1000)
-int page_get_free_memory_index(size_t length) {
-
-
-}
-
 pgulong_t* page_get_free_addr(size_t length) {
 
-  int pt_index = 0;
-  uint16_t i = 0;
-  for (; i < ENTRIES; i++) {
-    if (!(((pgulong_t*)PD_OFFSET)[i] & 1) && length <= 0x1000) { pt_index = 0; break; }
-    pt_index = page_get_free_entry_index(&((pgulong_t*)PD_OFFSET)[i], length);
-    if (pt_index != ~0) { break; }
-  }
+  pgulong_t* addr = NULL;
+  int index = 0;
+  
+  size_t req_pd_entries = length / 0x400000;
 
-  if (pt_index == ~0) { return NULL; }
+  size_t req_pt_entries = length / 0x1000;
+  if (length % 0x1000) { req_pt_entries++; }
 
-  pgulong_t addr = (pgulong_t)i << 22;
-  addr |= pt_index << 12;
+  index = page_get_free_memory_index(req_pd_entries, req_pt_entries);
+
+  if (index == ~0) { return NULL; }
+
+  // pgulong_t addr = (pgulong_t)i << 22;
+  // addr |= pt_index << 12;
 
   return (pgulong_t*)addr;
 }

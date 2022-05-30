@@ -14,7 +14,7 @@ void* memcpy(void* s1, const void* s2, size_t n);
 pgulong_t* page_physical_address(pgulong_t* addr);
 pgulong_t page_get_entry_index(pgulong_t* addr);
 pgulong_t* page_get_table_address(uint16_t pd_index);
-int page_get_free_entry_index(pgulong_t* table_addr, size_t length);
+int page_get_free_memory_index(size_t req_pd_entries, size_t req_pt_entries);
 pgulong_t* page_get_free_addr(size_t length);
 pgulong_t* page_map(pgulong_t* addr, size_t length, uint16_t flags);
 bool page_unmap(pgulong_t* addr, size_t length);
