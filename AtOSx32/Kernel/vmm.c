@@ -83,30 +83,50 @@ int page_get_free_memory_index(size_t req_pd_entries, size_t req_pt_entries) {
 
   req_pt_entries -= (0x400 * req_pd_entries);
 
-  if (!req_pd_entries) {
-    // TODO: Do something different when we only need page table indexes
-  }
-
   pgulong_t* addr = NULL;
 
   for (uint16_t i = 0; i < ENTRIES; i++) {
-    if (ENTRIES - i < req_pd_entries) { break; }
+    if (ENTRIES - i < (int)req_pd_entries) { break; }
     uint32_t i2 = i;
     for (; i2 < i + req_pd_entries; i2++) {
-      if (i2 >= ENTRIES) { return ~0; }
+      if (i2 > ENTRIES) { return ~0; }
       addr = &((pgulong_t*)PD_OFFSET)[i2];
       if (*addr & 1) { break; }                     // Bad
       if (i2 == i + req_pd_entries - 1) { break; }  // Good
     }
 
     if (i2 == i + req_pd_entries - 1) {
-      addr = &((pgulong_t*)PD_OFFSET)[i2 + 1];
+      if (!req_pt_entries) { return (int)i; }   // We're done
+      if (i2 == ENTRIES) { break; }             // Not enough space for extra pt entries
       for (uint32_t i3 = i2 + 1; i3 < req_pt_entries; i3++) {
+        addr = &((pgulong_t*)PD_OFFSET)[i3];
         if (*addr & 1) { break; }                          // Bad
-        if (i3 == req_pt_entries - 1) { return (int)i; }  // Good
+        if (i3 == req_pt_entries - 1) { return (int)i; }   // Good
       }
     }
-    
+  }
+
+  return ~0;
+}
+
+/*
+page_get_free_pt_memory_index returns an index in a page table that contains req_pt_entries * 4kb of free contigious memory
+Input: Required amount of page table entries (n bytes * 4kb of wanted memory)
+Function will return the page table's address in pt_addr
+*/
+int page_get_free_pt_memory_index(size_t req_pt_entries, pgulong_t* pt_addr) {
+
+  for (uint16_t i = 0; i < ENTRIES; i++) {
+    pt_addr = &((pgulong_t*)PD_OFFSET)[i];
+    for (uint16_t i2 = 0; i2 < req_pt_entries; i2++) {
+      uint32_t i3 = i2;
+      for (; i3 < i2 + req_pt_entries; i3++) {
+        if (i2 > ENTRIES) { return ~0; }
+        if (pt_addr[i3] & 1 && i3 == i2) { break; }
+        if (pt_addr[i3] & 1) { i2 = i3; break; }
+        if (i3 == i2 + req_pt_entries - 1) { return (int)i2; }
+      }
+    }
   }
 
   return ~0;
@@ -122,7 +142,8 @@ pgulong_t* page_get_free_addr(size_t length) {
   size_t req_pt_entries = length / 0x1000;
   if (length % 0x1000) { req_pt_entries++; }
 
-  index = page_get_free_memory_index(req_pd_entries, req_pt_entries);
+  pgulong_t* pt_addr = NULL;
+  index = req_pd_entries ? page_get_free_memory_index(req_pd_entries, req_pt_entries) : page_get_free_pt_memory_index(req_pt_entries, pt_addr);
 
   if (index == ~0) { return NULL; }
 
