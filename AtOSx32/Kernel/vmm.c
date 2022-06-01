@@ -79,6 +79,14 @@ bool pd_remove_entry(pgulong_t* addr) {
   return true;
 }
 
+pgulong_t* page_make_address(pgulong_t pd_index, pgulong_t pt_index) {
+
+  pgulong_t addr = pd_index << 22;
+  addr |= pt_index << 12;
+
+  return (pgulong_t*)addr;
+}
+
 int page_get_free_memory_index(size_t req_pd_entries, size_t req_pt_entries) {
 
   req_pt_entries -= (0x400 * req_pd_entries);
@@ -97,11 +105,12 @@ int page_get_free_memory_index(size_t req_pd_entries, size_t req_pt_entries) {
 
     if (i2 == i + req_pd_entries - 1) {
       if (!req_pt_entries) { return (int)i; }   // We're done
-      if (i2 == ENTRIES) { break; }             // Not enough space for extra pt entries
-      for (uint32_t i3 = i2 + 1; i3 < req_pt_entries; i3++) {
-        addr = &((pgulong_t*)PD_OFFSET)[i3];
-        if (*addr & 1) { break; }                          // Bad
-        if (i3 == req_pt_entries - 1) { return (int)i; }   // Good
+      if (i2 == ENTRIES) { break; }             // Not enough space for extra page table entries
+      addr = &((pgulong_t*)PD_OFFSET)[i2 + 1];  // Next page directory
+      if (!((pgulong_t)addr & 1)) { return (int)i; }  // PD is empty, we can use it
+      for (uint32_t i3 = 0; i3 < req_pt_entries; i3++) {
+        if (addr[i3] & 1) { break; }                        // Bad
+        if (i3 == req_pt_entries - 1) { return (int)i; }    // Good
       }
     }
   }
@@ -110,31 +119,31 @@ int page_get_free_memory_index(size_t req_pd_entries, size_t req_pt_entries) {
 }
 
 /*
-page_get_free_pt_memory_index returns an index in a page table that contains req_pt_entries * 4kb of free contigious memory
+page_get_free_pt_memory_index returns an address that contains req_pt_entries * 4kb of free contigious memory
 Input: Required amount of page table entries (n bytes * 4kb of wanted memory)
-Function will return the page table's address in pt_addr
+Output: Virtual address containing the offset of the free memory, NULL if
 */
-int page_get_free_pt_memory_index(size_t req_pt_entries, pgulong_t* pt_addr) {
+pgulong_t* page_get_free_pt_memory_index(size_t req_pt_entries) {
+
+  pgulong_t* addr = NULL;
 
   for (uint16_t i = 0; i < ENTRIES; i++) {
-    pt_addr = &((pgulong_t*)PD_OFFSET)[i];
+    addr = &((pgulong_t*)PD_OFFSET)[i];
+    if (page_is_empty(addr)) { return page_make_address(i, 0); }
     for (uint16_t i2 = 0; i2 < req_pt_entries; i2++) {
-      uint32_t i3 = i2;
-      for (; i3 < i2 + req_pt_entries; i3++) {
-        if (i2 > ENTRIES) { return ~0; }
-        if (pt_addr[i3] & 1 && i3 == i2) { break; }
-        if (pt_addr[i3] & 1) { i2 = i3; break; }
-        if (i3 == i2 + req_pt_entries - 1) { return (int)i2; }
+      if (i2 + req_pt_entries > ENTRIES) { break; }
+      for (uint16_t i3 = i2; i3 < i2 + req_pt_entries; i3++) {
+        if (addr[i3] & 1) { i2 = i3; break; }
+        if (i3 == i2 + req_pt_entries - 1) { return page_make_address(i, i2); }
       }
     }
   }
 
-  return ~0;
+  return NULL;
 }
 
 pgulong_t* page_get_free_addr(size_t length) {
-
-  pgulong_t* addr = NULL;
+  
   int index = 0;
   
   size_t req_pd_entries = length / 0x400000;
@@ -142,15 +151,14 @@ pgulong_t* page_get_free_addr(size_t length) {
   size_t req_pt_entries = length / 0x1000;
   if (length % 0x1000) { req_pt_entries++; }
 
-  pgulong_t* pt_addr = NULL;
-  index = req_pd_entries ? page_get_free_memory_index(req_pd_entries, req_pt_entries) : page_get_free_pt_memory_index(req_pt_entries, pt_addr);
-
-  if (index == ~0) { return NULL; }
-
-  // pgulong_t addr = (pgulong_t)i << 22;
-  // addr |= pt_index << 12;
-
-  return (pgulong_t*)addr;
+  if (req_pd_entries) {
+    index = page_get_free_memory_index(req_pd_entries, req_pt_entries);
+    if (index == ~0) { return NULL; }
+    return page_make_address(index, 0);
+  }
+  else {
+    return page_get_free_pt_memory_index(req_pt_entries);
+  }
 }
 
 /*
@@ -231,6 +239,8 @@ Input: Page table offset address
 Output: True if page table is empty, otherwise false
 */
 bool page_is_empty(pgulong_t* pt_addr) {
+
+  if (!((pgulong_t)pt_addr & 1)) { return true; }
 
   for (uint16_t i = 0; i < ENTRIES; i++) {
     if (pt_addr[i] & 1) { return false; }
