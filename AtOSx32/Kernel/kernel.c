@@ -22,15 +22,14 @@ int kmain(void) {
 
   perry(25, 5);
 
-  char* str = malloc(10);
-
-  for (unsigned int i = 0; i < 10; i++) {
-    str[i] = 'a';
-  }
-
-  for (unsigned int i = 0; i < 10; i++) {
-    terminal_putchar(str[i]);
-  }
+  char* str = malloc(5);
+  //terminal_write_int(str, 16);
+  //PRINT_NEW_LINE;
+  char* mmm = malloc(10);
+  //terminal_write_int(mmm, 16);
+  //PRINT_NEW_LINE;
+  char* aaa = malloc(20);
+  //terminal_write_int(aaa, 16);
 
   return 0;
 }

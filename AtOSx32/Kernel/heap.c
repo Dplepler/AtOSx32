@@ -50,7 +50,7 @@ heap_header* heap_allocate_header(unsigned int size) {
 
   unsigned int page_amount = heap_get_page_count(size);
 
-  heap_header* header = (heap_header*)page_map(NULL, size, 0);
+  heap_header* header = (heap_header*)page_map(NULL, page_amount, 0);
 
   header->signature = HEAP_SIGNATURE;
   header->size = page_amount * PAGE_SIZE;
@@ -69,11 +69,12 @@ void heap_split_header(heap_header* header) {
   if (1 << (header->size - (header->req_size + sizeof(heap_header))) < (1 << MIN_EXP)) { return; }   // Nothing to split
 
   heap_header* split_header = (heap_header*)((uint32_t)header + header->req_size + sizeof(heap_header));
+
   split_header->signature = HEAP_SIGNATURE;
   split_header->size = header->size - (header->req_size + sizeof(heap_header));   // Remainder size will now become the new header's size
-
-  split_header->flink = header->split_flink;
-  split_header->blink = header;
+  split_header->split_flink = header->split_flink;
+  split_header->split_blink = header;
+  split_header->flink = split_header->blink = NULL;
 
   if (header->split_flink) { header->split_flink->split_blink = split_header; }
   header->split_flink = split_header;
@@ -120,15 +121,15 @@ void* malloc(size_t size) {
     if (header->size - sizeof(heap_header) >= size + sizeof(heap_header)) { break; }
     header = header->flink;
   }
-
+  
   if (!header) { header = heap_allocate_header(size); }   // Get a new header
   else { 
     heap_remove_header(header);
     if (!header->split_flink && !header->split_blink) { complete_pages[header->index]--; }
   }
 
-  heap_split_header(header); // If there's data that will never be used, split it to a new header
-
+  heap_split_header(header);    // If there's data that will never be used, split it to a new header
+  
   return (void*)((uint32_t)header + sizeof(heap_header));
 }
 

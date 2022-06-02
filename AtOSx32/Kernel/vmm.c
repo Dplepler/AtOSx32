@@ -179,7 +179,7 @@ pgulong_t* page_map(pgulong_t* addr, size_t length, uint16_t flags) {
 
   pgulong_t pd_index = pd_get_entry_index(addr);
   pgulong_t pt_index = page_get_entry_index(addr);
- 
+
   pgulong_t* pt_addr = (((pgulong_t*)PD_ADDRESS)[pd_index] & 1) ? page_get_table_address(pd_index) 
     : pd_assign_table(pd_index, flags);
 
@@ -229,6 +229,7 @@ Output: Address of new page table
 pgulong_t* pd_assign_table(pgulong_t pd_index, uint16_t flags) {
 
   pgulong_t* pt_phys_addr = palloc();
+
   ((pgulong_t*)PD_ADDRESS)[pd_index] = ((pgulong_t)pt_phys_addr | (flags & 0xFFF) | 1);
 
   pgulong_t* pt_addr = page_get_table_address(pd_index);

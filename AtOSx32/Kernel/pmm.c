@@ -8,7 +8,8 @@ bitmap_mark_kernel marks the entire kernel as used
 */
 void bitmap_mark_kernel() {
 
-  size_t kernel_pages = (pgulong_t)(((uint32_t)&_kernel_end) - ((uint32_t)&_kernel_start)) / 0x1000;      
+  size_t kernel_pages = (pgulong_t)(((uint32_t)&_kernel_end) - ((uint32_t)&_kernel_start)) / 0x1000;
+  if ((((uint32_t)&_kernel_end) - ((uint32_t)&_kernel_start)) % 0x1000) { kernel_pages++; }      
   const uint32_t kernel_first_index = (KERNEL_PHYSICAL) / 0x1000;    
 
   /* Mark all kernel's page frames as used in the bitmap */
@@ -23,7 +24,7 @@ Output: Previously unused page frame's physical address
 */
 pgulong_t* palloc_single() {
 
-  uint32_t i = 0;
+  uint32_t i = 0x100; 
 
   /* Search for a free page */
   /* We calculate 32 bits each time, so we can easily skip big chunks of used memory */
