@@ -121,9 +121,9 @@ int page_get_free_memory_index(size_t req_pd_entries, size_t req_pt_entries) {
 /*
 page_get_free_pt_memory_index returns an address that contains req_pt_entries * 4kb of free contigious memory
 Input: Required amount of page table entries (n bytes * 4kb of wanted memory)
-Output: Virtual address containing the offset of the free memory, NULL if
+Output: Virtual address containing the offset of the free memory, err will contain the error if there is one
 */
-pgulong_t* page_get_free_pt_memory_index(size_t req_pt_entries) {
+pgulong_t* page_get_free_pt_memory_index(size_t req_pt_entries, int* err) {
 
   pgulong_t* addr = NULL;
 
@@ -138,14 +138,16 @@ pgulong_t* page_get_free_pt_memory_index(size_t req_pt_entries) {
       }
     }
   }
-
+  
+  
+  *err = NOT_ENOUGH_SPACE;
   return NULL;
 }
 
-pgulong_t* page_get_free_addr(size_t length) {
-  
+pgulong_t* page_get_free_addr(size_t length, int* err) {
+
   int index = 0;
-  
+
   size_t req_pd_entries = length / 0x400000;
 
   size_t req_pt_entries = length / 0x1000;
@@ -153,11 +155,11 @@ pgulong_t* page_get_free_addr(size_t length) {
 
   if (req_pd_entries) {
     index = page_get_free_memory_index(req_pd_entries, req_pt_entries);
-    if (index == ~0) { return NULL; }
+    if (index == ~0) { *err = NOT_ENOUGH_SPACE; return NULL; }
     return page_make_address(index, 0);
   }
   else {
-    return page_get_free_pt_memory_index(req_pt_entries);
+    return page_get_free_pt_memory_index(req_pt_entries, err);
   }
 }
 
@@ -170,12 +172,14 @@ Output: Mapped address, NULL if failed
 */
 pgulong_t* page_map(pgulong_t* addr, size_t length, uint16_t flags) {
 
-  if (!addr) { addr = page_get_free_addr(length); }
-  if (!addr) { return NULL; }
+  int err = NO_ERROR;
+  
+  if (!addr) { addr = page_get_free_addr(length, &err); }
+  if (err == NOT_ENOUGH_SPACE) { return NULL; }
 
   pgulong_t pd_index = pd_get_entry_index(addr);
   pgulong_t pt_index = page_get_entry_index(addr);
-  
+ 
   pgulong_t* pt_addr = (((pgulong_t*)PD_ADDRESS)[pd_index] & 1) ? page_get_table_address(pd_index) 
     : pd_assign_table(pd_index, flags);
 

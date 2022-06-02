@@ -9,9 +9,10 @@ SECTIONS
 
 	. = 0xC0000000;
 
+  /* Add a symbol that indicates the start address of the kernel. */
 	_kernel_start = .;
 
-	/* Add a symbol that indicates the start address of the kernel. */
+	
 	.text ALIGN (4K) : AT (ADDR (.text) - _kernel_start)
 	{
 		*(.text)
