@@ -1,5 +1,6 @@
 #include "vmm.h"
 
+int counter = 0;
 
 void* memset(void* addr, uint8_t c, size_t n) {
 
@@ -128,19 +129,16 @@ pgulong_t* page_get_free_pt_memory_index(size_t req_pt_entries, int* err) {
   pgulong_t* addr = NULL;
 
   for (uint16_t i = 0; i < ENTRIES; i++) {
-
-    addr = ((pgulong_t*)PD_ADDRESS)[i];
-
-    if (page_is_empty(addr)) { return page_make_address(i, 0); }
-    for (uint16_t i2 = 0; i2 < req_pt_entries; i2++) {
-      if (i2 + req_pt_entries > ENTRIES) { break; }
+    addr = page_get_table_address(i);
+    if (page_is_empty(i)) { return page_make_address(i, 0); }
+    for (uint16_t i2 = 0; i2 + req_pt_entries <= ENTRIES; i2++) {
       for (uint16_t i3 = i2; i3 < i2 + req_pt_entries; i3++) {
         if (addr[i3] & 1) { i2 = i3; break; }
         if (i3 == i2 + req_pt_entries - 1) { return page_make_address(i, i2); }
       }
     }
   }
-  
+
   *err = NOT_ENOUGH_SPACE;
   return NULL;
 }
@@ -175,6 +173,8 @@ pgulong_t* page_map(pgulong_t* addr, size_t length, uint16_t flags) {
 
   int err = NO_ERROR;
   
+  counter++;
+
   if (!addr) { addr = page_get_free_addr(length, &err); }
   if (err == NOT_ENOUGH_SPACE) { return NULL; }
 
@@ -217,7 +217,7 @@ bool page_unmap(pgulong_t* addr, size_t length) {
     flush_tlb_single(&pt_addr[pt_index]);   // Flush TLB to recognize changes
   }
 
-  if (page_is_empty(pt_addr)) { pd_remove_empty_pt(pd_index); }  // Remove entire page table from page directory if it's empty  
+  if (page_is_empty(pt_index)) { pd_remove_empty_pt(pd_index); }  // Remove entire page table from page directory if it's empty  
   
   return true;
 }
@@ -244,12 +244,14 @@ Check if a page table is empty
 Input: Page table offset address
 Output: True if page table is empty, otherwise false
 */
-bool page_is_empty(pgulong_t* pt_addr) {
+bool page_is_empty(pgulong_t pd_index) {
 
-  if (!((pgulong_t)pt_addr & 1)) { return true; }
+  if (!(((pgulong_t*)PD_ADDRESS)[pd_index] & 1)) { return true; }
+
+  pgulong_t* addr = page_get_table_address(pd_index);
 
   for (uint16_t i = 0; i < ENTRIES; i++) {
-    if (pt_addr[i] & 1) { return false; }
+    if (addr[i] & 1) { return false; }
   }
 
   return true;

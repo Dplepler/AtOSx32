@@ -52,11 +52,6 @@ heap_header* heap_allocate_header(unsigned int size) {
 
   heap_header* header = (heap_header*)page_map(NULL, page_amount, 0);
 
-  
-  //for (uint32_t i = 0; i < 0xFFFFFF; i++) {}
-
-  terminal_write_int(header, 16);
-
   header->signature = HEAP_SIGNATURE;
   header->size = page_amount * PAGE_SIZE;
   header->req_size = size - sizeof(heap_header);
@@ -133,7 +128,7 @@ void* malloc(size_t size) {
     if (!header->split_flink && !header->split_blink) { complete_pages[header->index]--; }
   }
 
-  //heap_split_header(header);    // If there's data that will never be used, split it to a new header
+  heap_split_header(header);    // If there's data that will never be used, split it to a new header
   
   return (void*)((uint32_t)header + sizeof(heap_header));
 }

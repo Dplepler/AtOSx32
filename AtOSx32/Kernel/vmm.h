@@ -25,12 +25,11 @@ pgulong_t page_get_entry_index(pgulong_t* addr);
 pgulong_t pd_get_entry_index(pgulong_t* addr);
 
 bool page_unmap(pgulong_t* addr, size_t length);
-bool page_is_empty(pgulong_t* pt_addr);
+bool page_is_empty(pgulong_t pd_index);
 bool page_is_aligned(pgulong_t* addr);
 bool pd_remove_entry(pgulong_t* addr);
 
 int page_get_free_memory_index(size_t req_pd_entries, size_t req_pt_entries);
-
 
 void pd_remove_empty_pt(pgulong_t pd_index);
 void pd_flush_tlb(pgulong_t pd_index);
