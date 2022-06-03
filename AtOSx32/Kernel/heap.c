@@ -52,6 +52,9 @@ heap_header* heap_allocate_header(unsigned int size) {
 
   heap_header* header = (heap_header*)page_map(NULL, page_amount, 0);
 
+  
+  //for (uint32_t i = 0; i < 0xFFFFFF; i++) {}
+
   terminal_write_int(header, 16);
 
   header->signature = HEAP_SIGNATURE;
