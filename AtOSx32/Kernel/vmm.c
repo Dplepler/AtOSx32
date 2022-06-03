@@ -128,7 +128,7 @@ pgulong_t* page_get_free_pt_memory_index(size_t req_pt_entries, int* err) {
   pgulong_t* addr = NULL;
 
   for (uint16_t i = 0; i < ENTRIES; i++) {
-    addr = &((pgulong_t*)PD_OFFSET)[i];
+    addr = ((pgulong_t*)PD_OFFSET)[i];
     if (page_is_empty(addr)) { return page_make_address(i, 0); }
     for (uint16_t i2 = 0; i2 < req_pt_entries; i2++) {
       if (i2 + req_pt_entries > ENTRIES) { break; }
@@ -138,7 +138,6 @@ pgulong_t* page_get_free_pt_memory_index(size_t req_pt_entries, int* err) {
       }
     }
   }
-  
   
   *err = NOT_ENOUGH_SPACE;
   return NULL;

@@ -22,7 +22,7 @@ unsigned int heap_get_index(size_t size) {
 }
 
 void heap_insert_header(heap_header* header) {
-
+  
   header->index = heap_get_index(header->size - sizeof(heap_header));
 
   if (free_pages[header->index]) {
@@ -51,6 +51,8 @@ heap_header* heap_allocate_header(unsigned int size) {
   unsigned int page_amount = heap_get_page_count(size);
 
   heap_header* header = (heap_header*)page_map(NULL, page_amount, 0);
+
+  terminal_write_int(header, 16);
 
   header->signature = HEAP_SIGNATURE;
   header->size = page_amount * PAGE_SIZE;
@@ -128,7 +130,7 @@ void* malloc(size_t size) {
     if (!header->split_flink && !header->split_blink) { complete_pages[header->index]--; }
   }
 
-  heap_split_header(header);    // If there's data that will never be used, split it to a new header
+  //heap_split_header(header);    // If there's data that will never be used, split it to a new header
   
   return (void*)((uint32_t)header + sizeof(heap_header));
 }
