@@ -108,7 +108,7 @@ void heap_eat_right(heap_header* header) {
   header->size += flink->size;
   if (flink->split_flink) { flink->split_flink->split_blink = header; }  
 
-  flink = flink->split_flink;
+  header->split_flink = flink->split_flink;
 }
 
 void* malloc(size_t size) {
