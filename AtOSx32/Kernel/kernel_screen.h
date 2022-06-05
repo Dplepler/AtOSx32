@@ -9,7 +9,7 @@
 
 #define VGA_BUFFER_ADDR 0xC03FF000
 
-#define PRINT_NEW_LINE terminal_write_string("\n\r")
+#define NL terminal_write_string("\n\r")
 
 #define PRINT(str)    (terminal_write_string(str))
 #define PRINTN(num)   (terminal_write_int(num, 10))

@@ -22,7 +22,7 @@ unsigned int heap_get_index(size_t size) {
 }
 
 void heap_insert_header(heap_header* header) {
-  
+
   header->index = heap_get_index(header->size - sizeof(heap_header));
 
   if (free_pages[header->index]) {
@@ -59,7 +59,7 @@ heap_header* heap_allocate_header(unsigned int size) {
   header->flink = NULL;
   header->split_flink = NULL;
   header->split_blink = NULL;
-  header->index = heap_get_index(header->size - sizeof(heap_header));
+  header->index = heap_get_index(size);
 
   return header;
 }
@@ -69,46 +69,19 @@ void heap_split_header(heap_header* header) {
   if (1 << (header->size - (header->req_size + sizeof(heap_header))) < (1 << MIN_EXP)) { return; }   // Nothing to split
 
   heap_header* split_header = (heap_header*)((uint32_t)header + header->req_size + sizeof(heap_header));
-
+  
   split_header->signature = HEAP_SIGNATURE;
   split_header->size = header->size - (header->req_size + sizeof(heap_header));   // Remainder size will now become the new header's size
   split_header->split_flink = header->split_flink;
   split_header->split_blink = header;
   split_header->flink = split_header->blink = NULL;
-
+  split_header->req_size = header->size - sizeof(heap_header);
+ 
   if (header->split_flink) { header->split_flink->split_blink = split_header; }
   header->split_flink = split_header;
 
   header->size -= split_header->size;
-
   heap_insert_header(split_header);
-}
-
-heap_header* heap_melt_left(heap_header* header) {
-
-  if (!header->split_blink) { return NULL; }
-
-  heap_header* blink = header->split_blink;
-
-  blink->size += header->size;
-  blink->split_flink = header->split_flink;
-  if (header->split_flink) { header->split_flink->split_blink = blink; }
-
-  return blink;
-}
-
-void heap_eat_right(heap_header* header) {
-
-  if (!header->split_flink) { return; }
-
-  heap_header* flink = header->split_flink;
-
-  heap_remove_header(flink);   // Header might be the first in the free pages index, we should remove it
-
-  header->size += flink->size;
-  if (flink->split_flink) { flink->split_flink->split_blink = header; }  
-
-  header->split_flink = flink->split_flink;
 }
 
 void* malloc(size_t size) {
@@ -118,7 +91,7 @@ void* malloc(size_t size) {
   heap_header* header = free_pages[index];
 
   while (header) {
-    if (header->size - sizeof(heap_header) >= size + sizeof(heap_header)) { break; }
+    if (header->size - sizeof(heap_header) >= size) { break; }
     header = header->flink;
   }
   
@@ -129,7 +102,7 @@ void* malloc(size_t size) {
   }
 
   heap_split_header(header);    // If there's data that will never be used, split it to a new header
-  
+
   return (void*)((uint32_t)header + sizeof(heap_header));
 }
 
@@ -138,10 +111,7 @@ void free(void* ptr) {
   if (!ptr) { return; }   // Nothing to free
 
   heap_header* header = (heap_header*)((uint32_t)ptr - sizeof(heap_header));
-  if (header->signature != HEAP_SIGNATURE) { return; }        // Not an allocated memory
-
-  while (header->split_blink) { header = heap_melt_left(header); heap_remove_header(header); }
-  while (header->split_flink) { heap_eat_right(header); }
+  if (header->signature != HEAP_SIGNATURE) { return; }        // Not an allocated memory 
 
   unsigned int index = heap_get_index(header->size - sizeof(heap_header));
 
@@ -159,7 +129,7 @@ void* realloc(void* ptr, size_t size) {
   if (!ptr) { return malloc(size); }
   if (!size) { free(ptr); return NULL; }
 
-  heap_header* header = ((heap_header*)ptr - sizeof(heap_header));
+  heap_header* header = (heap_header*)((unsigned long)ptr - sizeof(heap_header));
   if (header->req_size == size) { return ptr; }
 
   /* Normal reallocation */

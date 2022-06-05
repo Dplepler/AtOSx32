@@ -23,15 +23,9 @@ int kmain(void) {
   perry(25, 5);
 
   char* str = malloc(5);
-  terminal_write_int(str, 16);
-  PRINT_NEW_LINE;
   free(str);
   char* mmm = malloc(10);
-  PRINT("YOOHOO!");
-  terminal_write_int(mmm, 16);
-  PRINT_NEW_LINE;
-  // char* aaa = malloc(20);
-  // terminal_write_int(aaa, 16);
+  mmm = realloc(mmm, 10);
 
   return 0;
 }

@@ -218,7 +218,6 @@ void perry(const uint8_t x, const uint8_t y) {
   terminal_draw_rec(x + 3, y + 2, x + 7, y + 4, VGA_COLOR_BLACK);
   terminal_draw_rec(x + 23, y + 2, x + 27, y + 4, VGA_COLOR_BLACK);
   terminal_draw_rec(x + 1, y + 5, x + 29, y + 6, VGA_COLOR_BROWN);
-
 }
 
 void terminal_display_error(const char* error) {
