@@ -22,10 +22,11 @@ int kmain(void) {
 
   perry(25, 5);
 
-  char* str = malloc(5);
-  free(str);
-  char* mmm = malloc(10);
-  mmm = realloc(mmm, 10);
+  int* arr = malloc(10);
 
+  memset(arr, 'a', 9);
+  arr[9] = 0;
+
+  PRINT(arr);
   return 0;
 }

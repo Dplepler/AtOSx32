@@ -1,6 +1,6 @@
 #include "heap.h"
 
-heap_header*  free_pages[INIT_SIZE]     = { NULL };
+heap_header*  free_headers[INIT_SIZE]   = { NULL };
 unsigned int  complete_pages[INIT_SIZE] = { 0 };    // Count freed allocated pages
 
 /*
@@ -25,17 +25,17 @@ void heap_insert_header(heap_header* header) {
 
   header->index = heap_get_index(header->size - sizeof(heap_header));
 
-  if (free_pages[header->index]) {
-    header->flink = free_pages[header->index];
-    free_pages[header->index]->blink = header;
+  if (free_headers[header->index]) {
+    header->flink = free_headers[header->index];
+    free_headers[header->index]->blink = header;
   }
 
-  free_pages[header->index] = header;
+  free_headers[header->index] = header;
 }
 
 void heap_remove_header(heap_header* header) {
 
-  if (free_pages[header->index] == header) { free_pages[header->index] = header->flink; }
+  if (free_headers[header->index] == header) { free_headers[header->index] = header->flink; }
 
   if (header->flink) { header->flink->blink = header->blink; }
   if (header->blink) { header->blink->flink = header->flink; }
@@ -84,11 +84,12 @@ void heap_split_header(heap_header* header) {
   heap_insert_header(split_header);
 }
 
+/* Allocate dynamic memory */
 void* malloc(size_t size) {
 
   unsigned int index = heap_get_index(size);
 
-  heap_header* header = free_pages[index];
+  heap_header* header = free_headers[index];
 
   while (header) {
     if (header->size - sizeof(heap_header) >= size) { break; }
@@ -106,6 +107,7 @@ void* malloc(size_t size) {
   return (void*)((uint32_t)header + sizeof(heap_header));
 }
 
+/* Free allocated dynamic memory */
 void free(void* ptr) {
 
   if (!ptr) { return; }   // Nothing to free
@@ -115,14 +117,16 @@ void free(void* ptr) {
 
   unsigned int index = heap_get_index(header->size - sizeof(heap_header));
 
-  /* If we saved too much free unused pages we should free this one */
-  if (complete_pages[index] == MAX_COMPLETE) { page_unmap((pgulong_t*)header, heap_get_page_count(header->size)); return; }
-
-  complete_pages[index]++;
+  if (!header->split_flink && !header->split_blink) {
+    /* If we saved too much free unused pages we should free this one */
+    if (complete_pages[index] == MAX_COMPLETE) { page_unmap((pgulong_t*)header, heap_get_page_count(header->size)); return; }
+    complete_pages[index]++;
+  }
   
   heap_insert_header(header);
 }
 
+/* Resize an allocated memory block */
 void* realloc(void* ptr, size_t size) {
 
   /* For special cases */
@@ -141,6 +145,7 @@ void* realloc(void* ptr, size_t size) {
   return np;
 }
 
+/* Allocate and reset dynamic memory */
 void* calloc(size_t n, size_t size) {
 
   void* ptr = malloc(n * size);
