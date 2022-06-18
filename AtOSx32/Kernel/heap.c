@@ -116,7 +116,7 @@ void free(void* ptr) {
   if (header->signature != HEAP_SIGNATURE) { return; }        // Not an allocated memory 
 
   unsigned int index = heap_get_index(header->size - sizeof(heap_header));
-
+  
   if (!header->split_flink && !header->split_blink) {
     /* If we saved too much free unused pages we should free this one */
     if (complete_pages[index] == MAX_COMPLETE) { page_unmap((pgulong_t*)header, heap_get_page_count(header->size)); return; }

@@ -45,5 +45,4 @@ void heap_eat_right(heap_header* header);
 heap_header* heap_allocate_header(unsigned int size);
 
 
-
 #endif

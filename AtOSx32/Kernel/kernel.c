@@ -27,6 +27,10 @@ int kmain(void) {
   memset(arr, 'a', 9);
   arr[9] = 0;
 
-  PRINT(arr);
+  free(arr);
+  int* hello = malloc(20);
+  //PRINTN(hello);
+  //PRINTN(arr);
+
   return 0;
 }
