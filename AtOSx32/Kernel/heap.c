@@ -90,7 +90,7 @@ void* malloc(size_t size) {
   unsigned int index = heap_get_index(size);
 
   heap_header* header = free_headers[index];
-
+  
   while (header) {
     if (header->size - sizeof(heap_header) >= size) { break; }
     header = header->flink;
@@ -122,7 +122,7 @@ void free(void* ptr) {
     if (complete_pages[index] == MAX_COMPLETE) { page_unmap((pgulong_t*)header, heap_get_page_count(header->size)); return; }
     complete_pages[index]++;
   }
-  
+
   heap_insert_header(header);
 }
 
