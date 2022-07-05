@@ -21,18 +21,6 @@ int kmain(void) {
   bitmap_mark_kernel();
 
   perry(25, 5);
-
-  int* arr = malloc(10);
-  PRINTNH(arr);
-  NL;
-
-  memset(arr, 'a', 9);
-  arr[9] = 0;
-
-  free(arr);
-  int* hello = malloc(10);
-  PRINTNH(hello);
-
-
+  
   return 0;
 }
