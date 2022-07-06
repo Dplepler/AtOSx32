@@ -1,7 +1,9 @@
 #ifndef INTERRUPTS_H
 #define INTERRUPTS_H
 
-#include <stdint.h>
+#include "vmm.h"
+
+#define IDT_SIZE
 
 /* Gate types
 0b0101 or 0x5: Task Gate, note that in this case, the offset value is unused and should be set to zero.
@@ -18,7 +20,7 @@
 */
 
 /* Descriptor table entry */
-typedef struct INTERRUPT_DESCRIPTOR_STRUCT {
+typedef struct _INTERRUPT_DESCRIPTOR_STRUCT {
 
   uint16_t offset_lh; // Lower half of interrupt address
   uint16_t selector;  // Code segment
@@ -28,5 +30,11 @@ typedef struct INTERRUPT_DESCRIPTOR_STRUCT {
 
 } InterruptDescriptor;
 
+typedef struct _DESCRIPTOR_POINTER_STRUCT {
+
+  InterruptDescriptor* offset;
+  unsigned long limit;
+
+} idtptr;
 
 #endif
