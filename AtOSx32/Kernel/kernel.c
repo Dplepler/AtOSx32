@@ -9,6 +9,7 @@
 #endif
 
 #include "kernel_keyboard.h"
+#include "interrupts.h"
 #include "heap.h"
 
 int kmain(void) {
@@ -21,6 +22,9 @@ int kmain(void) {
   bitmap_mark_kernel();
 
   perry(25, 5);
+
+  idtptr idt = init_idt();
+  PRINTNH(idt.offset);
   
   return 0;
 }

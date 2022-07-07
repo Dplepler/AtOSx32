@@ -37,4 +37,9 @@ typedef struct _DESCRIPTOR_POINTER_STRUCT {
 
 } idtptr;
 
+idtptr init_idt();
+
+void idt_create_gate(uint8_t index, uint32_t address, uint16_t select, uint8_t attributes);
+
+
 #endif
