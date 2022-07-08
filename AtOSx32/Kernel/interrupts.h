@@ -3,7 +3,7 @@
 
 #include "vmm.h"
 
-#define IDT_SIZE
+#define IDT_SIZE 256
 
 /* Gate types
 0b0101 or 0x5: Task Gate, note that in this case, the offset value is unused and should be set to zero.

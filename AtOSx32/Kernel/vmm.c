@@ -96,7 +96,7 @@ int page_get_free_memory_index(size_t req_pd_entries, size_t req_pt_entries) {
     uint32_t i2 = i;
     for (; i2 < i + req_pd_entries; i2++) {
       if (i2 > ENTRIES) { return ~0; }
-      addr = ((pgulong_t*)PD_ADDRESS)[i2];
+      addr = (pgulong_t*)((pgulong_t*)PD_ADDRESS)[i2];
       if (*addr & 1) { break; }                     // Bad
       if (i2 == i + req_pd_entries - 1) { break; }  // Good
     }
@@ -104,7 +104,7 @@ int page_get_free_memory_index(size_t req_pd_entries, size_t req_pt_entries) {
     if (i2 == i + req_pd_entries - 1) {
       if (!req_pt_entries) { return (int)i; }   // We're done
       if (i2 == ENTRIES) { break; }             // Not enough space for extra page table entries
-      addr = ((pgulong_t*)PD_ADDRESS)[i2 + 1];  // Next page directory
+      addr = (pgulong_t*)((pgulong_t*)PD_ADDRESS)[i2 + 1];  // Next page directory
       if (!((pgulong_t)addr & 1)) { return (int)i; }  // PD is empty, we can use it
       for (uint32_t i3 = 0; i3 < req_pt_entries; i3++) {
         if (addr[i3] & 1) { break; }                        // Bad
