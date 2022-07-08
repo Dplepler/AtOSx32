@@ -24,10 +24,12 @@ makeImg: Bootload/stage0.bin Bootload/Bootloader.bin Kernel/kernel.bin
 	
 
 C_SOURCES = $(wildcard Kernel/*.c)
+S_SOURCES = $(wildcard Kernel/*.asm)
 
-OBJ = $(C_SOURCES:.c=.o)
+OBJC = $(C_SOURCES:.c=.o)
+OBJS = $(S_SOURCES:.asm=.o)
 
-Kernel/kernel.bin : Kernel/kernel_start.o ${OBJ}
+Kernel/kernel.bin : Kernel/kernel_start.o ${OBJS} ${OBJC}
 	i686-elf-gcc -T linker.ld -o $@ -ffreestanding -nostdlib Kernel/kernel_start.o $^ -lgcc
 
 %.o : %.c

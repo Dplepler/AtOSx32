@@ -2,6 +2,7 @@
 #define INTERRUPTS_H
 
 #include "vmm.h"
+#include "kernel_screen.h"
 
 #define IDT_SIZE 256
 
@@ -37,9 +38,18 @@ typedef struct _DESCRIPTOR_POINTER_STRUCT {
 
 } idtptr;
 
+/* The stack after an interrupt service routine was running */
+typedef struct ISR_STACK_REGS_STRUCT {
+    unsigned int gs, fs, es, ds;                          /* pushed the segs last */
+    unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax;  /* pushed by 'pusha' */
+    unsigned int index, error_code;                       /*'push byte #' and ecodes do this */
+    unsigned int eip, cs, eflags, useresp, ss;            /* pushed by the processor automatically */ 
+} isr_stack;
+
 idtptr init_idt();
 
 void idt_create_gate(uint8_t index, uint32_t address, uint16_t select, uint8_t attributes);
 
+void fault_handler(isr_stack* stack);
 
 #endif
