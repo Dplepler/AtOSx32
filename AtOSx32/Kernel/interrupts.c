@@ -9,7 +9,7 @@ idtptr init_idt() {
   memset(idt, 0, sizeof(InterruptDescriptor) * 256);
   idt_ptr.offset = idt;
 
-  return idt_ptr; 
+  return idt_ptr;  
 }
 
 void idt_create_gate(uint8_t index, uint32_t address, uint16_t select, uint8_t attributes) {

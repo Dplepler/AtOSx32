@@ -24,7 +24,6 @@ int kmain(void) {
   perry(25, 5);
 
   idtptr idt = init_idt();
-  PRINTNH(idt.offset);
   
   return 0;
 }
