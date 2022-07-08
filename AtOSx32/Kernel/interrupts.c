@@ -14,11 +14,9 @@ idtptr init_idt() {
 
 void idt_create_gate(uint8_t index, uint32_t address, uint16_t select, uint8_t attributes) {
 
-  InterruptDescriptor entry;
-  entry.attributes = attributes;
-  entry.offset_lh = (uint16_t)(address & 0xFFFF);
-  entry.offset_hh = (uint16_t)(address >> 16);
-  entry.selector = select;
-
-  idt[index] = entry;
+  idt[index].attributes = attributes;
+  idt[index].offset_lh  = (uint16_t)(address & 0xFFFF);
+  idt[index].offset_hh  = (uint16_t)(address >> 16);
+  idt[index].selector   = select;
 }
+

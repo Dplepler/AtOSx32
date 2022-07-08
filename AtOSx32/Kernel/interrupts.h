@@ -13,11 +13,11 @@
 0b1111 or 0xF: 32-bit Trap Gate
 */
 
-/* Useful attributes
-0x8E: 32 bit Interrupt Gate
-0x8F: 32 bit Trap Gate
-0x85: Task Gate
-*/
+enum {
+    IDT_GATE = 0x8E,
+    IDT_TRAP = 0x8F,
+    IDT_TASK = 0x85
+};
 
 /* Descriptor table entry */
 typedef struct _INTERRUPT_DESCRIPTOR_STRUCT {
