@@ -23,7 +23,12 @@ int kmain(void) {
 
   perry(25, 5);
 
-  idtptr idt = init_idt();
+  init_idt();
+  load_idt();
+  idt_install_gates();
+  while(1) {}
+  int x = 10 / 0;
+
   
   return 0;
 }

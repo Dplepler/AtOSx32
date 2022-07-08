@@ -1,7 +1,7 @@
 #include "interrupts.h"
 
-InterruptDescriptor idt[IDT_SIZE];
-idtptr idt_ptr;
+static InterruptDescriptor idt[IDT_SIZE];
+static idtptr idt_ptr;
 
 extern void isr0();
 extern void isr1();
@@ -36,13 +36,17 @@ extern void isr29();
 extern void isr30();
 extern void isr31();
 
-idtptr init_idt() {
-
+void init_idt() {
   idt_ptr.limit = sizeof(InterruptDescriptor) * 256 - 1;
   memset(idt, 0, sizeof(InterruptDescriptor) * 256);
   idt_ptr.offset = idt;
+  asm ("lidt (%0)\n" :: "r" (&idt_ptr));
+  PRINTNH(&idt_ptr);
+}
 
-  return idt_ptr;  
+void load_idt() {
+  // PRINTNH(&idt_ptr);
+  // cpu_load_idt(&idt_ptr);
 }
 
 void idt_create_gate(uint8_t index, uint32_t address, uint16_t select, uint8_t attributes) {
@@ -54,7 +58,7 @@ void idt_create_gate(uint8_t index, uint32_t address, uint16_t select, uint8_t a
 }
 
 void idt_install_gates() {
-
+  
   idt_create_gate(0,  (unsigned)isr0,  0x8, IDT_GATE);
   idt_create_gate(1,  (unsigned)isr1,  0x8, IDT_GATE);
   idt_create_gate(2,  (unsigned)isr2,  0x8, IDT_GATE);
@@ -87,11 +91,11 @@ void idt_install_gates() {
   idt_create_gate(29, (unsigned)isr29, 0x8, IDT_GATE);
   idt_create_gate(30, (unsigned)isr30, 0x8, IDT_GATE);
   idt_create_gate(31, (unsigned)isr31, 0x8, IDT_GATE);
-
 }
 
 void fault_handler(isr_stack* stack) {
 
+  PANIC("ERNJFNJGR");
   if (stack->index > 31) { return; }
 
   /* Exceptions */

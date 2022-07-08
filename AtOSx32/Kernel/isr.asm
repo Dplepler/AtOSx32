@@ -1,3 +1,5 @@
+[bits 32]
+
 %macro ISR_NO_ERROR 1
 
   push byte 0
@@ -12,6 +14,8 @@
   jmp isr_common_handler
 
 %endmacro
+
+extern fault_handler
 
 global isr0
 isr0: ISR_NO_ERROR 0
@@ -77,8 +81,6 @@ global isr30
 isr30: ISR_NO_ERROR 30
 global isr31
 isr31: ISR_NO_ERROR 31
-
-extern fault_handler
 
 isr_common_handler:
 
