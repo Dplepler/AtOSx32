@@ -7,8 +7,7 @@ switch_to_pm:
 	cli 		; Disable interrupts: There are no BIOS interrupts in protected mode
 
 	lgdt [GDT_DESCRIPTOR]		; Load Global Descriptor Table onto the CPU
-
-
+ 
 	; Set the first bit of the cr0 register to 1, telling the CPU we
 	; would like to switch to protected mode
 	mov eax, cr0 	 				; cr0 is a special control register that can tell the CPU we are using protected mode
@@ -22,8 +21,6 @@ switch_to_pm:
 	; This will automatically set CS to our code segment + clear the pipeline
 	
 	jmp CODE_SEG:init_protected_mode
-
-
 
 [bits 32]
 

@@ -26,7 +26,7 @@ int kmain(void) {
   init_idt();
   load_idt();
   idt_install_gates();
-  while(1) {}
+  
   int x = 10 / 0;
 
   

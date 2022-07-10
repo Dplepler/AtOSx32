@@ -33,9 +33,9 @@ typedef struct _INTERRUPT_DESCRIPTOR_STRUCT {
 
 typedef struct _DESCRIPTOR_POINTER_STRUCT {
 
+  uint16_t limit;
   InterruptDescriptor* offset;
-  unsigned long limit;
-
+  
 } __attribute__((packed)) idtptr;
 
 /* The stack after an interrupt service routine was running */

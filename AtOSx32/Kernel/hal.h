@@ -11,8 +11,8 @@ static inline void flush_tlb_single(unsigned long* addr) {
   __asm__ __volatile__ ("invlpg (%0)" ::"r" (addr) : "memory");
 }
 
-static inline void cpu_load_idt(unsigned long* addr) {
-  asm ("lidt (%0)\n" :: "r" (addr));
+static inline void cpu_load_idt(void* addr) {
+  __asm__ ("lidt (%0)\n" :: "r" (addr));
 }
 
 #endif

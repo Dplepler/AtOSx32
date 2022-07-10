@@ -213,7 +213,7 @@ genesis:
 
 
 ; Variables
-BOOT_DRIVE				db 0 							; Save boot device number
-disk_error_message 		db "Disk read error!" , 0
-no_extentions_message 	db "BIOS does not support extended interrupts", 0
+BOOT_DRIVE				      db 0 	; Save boot device number
+disk_error_message 		  db    "Disk read error!" , 0
+no_extentions_message 	db    "BIOS does not support extended interrupts", 0
 	
