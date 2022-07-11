@@ -40,9 +40,9 @@ extern void idt_flush();
 
 
 void init_idt() {
-  idt_ptr.limit = sizeof(InterruptDescriptor) * 256 - 1;
-  memset(idt, 0, sizeof(InterruptDescriptor) * 256);
-  idt_ptr.offset = idt;
+  idt_ptr.limit = sizeof(InterruptDescriptor) * IDT_SIZE - 1;
+  memset(idt, 0, sizeof(InterruptDescriptor) * IDT_SIZE);
+  idt_ptr.offset = (uint32_t)&idt;
 }
 
 void load_idt() {
@@ -98,7 +98,7 @@ void idt_install_gates() {
 void fault_handler(isr_stack* stack) {
 
   PANIC("ERNJFNJGR");
-  if (stack->index > 31) { return; }
+  if ((stack->index & 0xFF) > 31) { return; }
 
   /* Exceptions */
   char* exceptions[] =  {
@@ -137,7 +137,7 @@ void fault_handler(isr_stack* stack) {
     "Reserved"
   };
 
-  PANIC(exceptions[stack->index]);
+  PANIC(exceptions[stack->index & 0xFF]);
 }
 
 

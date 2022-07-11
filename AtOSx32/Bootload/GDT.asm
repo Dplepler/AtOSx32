@@ -29,7 +29,7 @@ GDT_START:
 		dw 0x0 				; Base (bits 0 - 15)
 		db 0x0 				; Base (bits 16 - 23)
 		db 10011010b 	; First set of flags
-		db 11001111b 	; Second set of flags
+		db 11001111b 	; Second set of flags, limit at bits 0-3
 		db 0x0
 		
 		
@@ -54,7 +54,7 @@ GDT_START:
 		dw 0x0 				; Base (bits 0 - 15)
 		db 0x0 				; Base (bits 16 - 23)
 		db 10010010b 	; First set of flags
-		db 11001111b 	; Second set of flags, limit at bits 16-19
+		db 11001111b 	; Second set of flags, limit at bits 0-3
 		db 0x0 				; Base (bits 24 -31)	
 	
 	

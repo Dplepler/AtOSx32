@@ -90,8 +90,6 @@ init_protected_mode:
 
 	jmp genesis 					; Go back to the bootloader to start executing the kernel!
 			
-			
-
 relocate_kernel:
 
 	; Relocate 50 sectors of kernel from below 1MB to above 1MB

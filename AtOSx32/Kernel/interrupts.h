@@ -31,10 +31,10 @@ typedef struct _INTERRUPT_DESCRIPTOR_STRUCT {
 
 } __attribute__((packed)) InterruptDescriptor;
 
-typedef struct _DESCRIPTOR_POINTER_STRUCT {
+typedef struct _IDT_DESCRIPTOR_POINTER_STRUCT {
 
   uint16_t limit;
-  InterruptDescriptor* offset;
+  uint32_t offset;
   
 } __attribute__((packed)) idtptr;
 

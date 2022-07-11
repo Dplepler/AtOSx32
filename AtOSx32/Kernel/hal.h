@@ -15,4 +15,8 @@ static inline void cpu_load_idt(void* addr) {
   __asm__ ("lidt (%0)\n" :: "r" (addr));
 }
 
+static inline void cpu_load_gdt(void* addr) {
+  __asm__ ("lgdt (%0)\n" :: "r" (addr));
+}
+
 #endif

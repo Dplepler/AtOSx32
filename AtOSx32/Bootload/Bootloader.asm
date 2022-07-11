@@ -133,8 +133,8 @@ unreal_mode:
 
 ; 				INCLUDES
 ;===========================================;
-%include "Bootload/GDT.asm" 				;		Global descriptor table
-%include "Bootload/DAP.asm"					;		Disk address packet
+%include "Bootload/GDT.asm" 				        ;		Global descriptor table
+%include "Bootload/DAP.asm"					        ;		Disk address packet
 %include "Bootload/protected_mode_setup.asm";		Routines to set up and initialize protected mode			;		String features in 32 bit protected mode
 ;===========================================;
 
