@@ -15,7 +15,8 @@
 #define PRINTN(num)   (terminal_write_int(num, 10))
 #define PRINTNH(num)  (terminal_write_int(num, 16))
 
-#define PANIC(msg) (terminal_display_error(msg))
+#define PANIC(msg) terminal_display_error(msg); \
+for(;;) { }
 
 /* Hardware text mode color constants. */
 typedef enum vga_color {

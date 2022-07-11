@@ -24,10 +24,9 @@ int kmain(void) {
 
   perry(25, 5);
 
-  init_idt();
-  load_idt();
-  idt_install_gates();
-  while(1) {}
+
+  setup_gdt();
+  setup_idt();
   int x = 10 / 0;
 
   

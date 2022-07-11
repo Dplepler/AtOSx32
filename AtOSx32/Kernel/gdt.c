@@ -3,6 +3,12 @@
 static gdtDescriptor gdt[GDT_SIZE];
 static gdtptr gdt_ptr;
 
+void setup_gdt() {
+  init_gdt();
+  load_gdt();
+  gdt_install_gates();
+}
+
 void init_gdt() {
   gdt_ptr.limit = sizeof(gdtDescriptor) * GDT_SIZE - 1;
   memset(gdt, 0, sizeof(gdtDescriptor) * GDT_SIZE);
@@ -23,7 +29,7 @@ void gdt_create_gate(uint32_t index, uint32_t base, uint32_t limit, uint8_t acce
   gdt[index].access = access;
 }
 
-void gdt_set_gates() {
+void gdt_install_gates() {
 
   gdt_create_gate(0, 0, 0, 0, 0);   // First gate is ignored by the CPU
   gdt_create_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xCF); // Code
@@ -31,3 +37,4 @@ void gdt_set_gates() {
 
   load_gdt();
 }
+

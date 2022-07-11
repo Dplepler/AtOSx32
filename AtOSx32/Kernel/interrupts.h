@@ -46,6 +46,8 @@ typedef struct ISR_STACK_REGS_STRUCT {
   unsigned int eip, cs, eflags, useresp, ss;            /* pushed by the processor automatically */ 
 } isr_stack;
 
+
+void setup_idt();
 void init_idt();
 void load_idt();
 

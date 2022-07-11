@@ -38,6 +38,11 @@ extern void isr31();
 
 extern void idt_flush();
 
+void setup_idt() {
+  init_idt();
+  load_idt();
+  idt_install_gates();
+}
 
 void init_idt() {
   idt_ptr.limit = sizeof(InterruptDescriptor) * IDT_SIZE - 1;
@@ -97,7 +102,6 @@ void idt_install_gates() {
 
 void fault_handler(isr_stack* stack) {
 
-  PANIC("ERNJFNJGR");
   if ((stack->index & 0xFF) > 31) { return; }
 
   /* Exceptions */
