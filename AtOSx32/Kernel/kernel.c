@@ -24,11 +24,8 @@ int kmain(void) {
 
   perry(25, 5);
 
-
   setup_gdt();
   setup_idt();
-  int x = 10 / 0;
-
   
   return 0;
 }

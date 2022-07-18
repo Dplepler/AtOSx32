@@ -1,7 +1,7 @@
 #include "kernel_keyboard.h"
 
 /*
-keyboard_ctrl_read_status reads the status of the keyboard controller
+reads the status of the keyboard controller
 Output: Data inside port 0x64
 */
 uint16_t keyboard_ctrl_read_status() {
@@ -9,7 +9,7 @@ uint16_t keyboard_ctrl_read_status() {
 }
 
 /*
-keyboard_enc_read_buffer reads the keyboard encoder's buffer data
+reads the keyboard encoder's buffer data
 Output: Data inside port 0x60
 */
 uint16_t keyboard_enc_read_buffer() {
@@ -17,7 +17,7 @@ uint16_t keyboard_enc_read_buffer() {
 }
 
 /*
-keyboard_ctrl_send_cmd sends a command to the keyboard controller
+sends a command to the keyboard controller
 Input: Command to send to port 0x64
 */
 void keyboard_ctrl_send_cmd(uint8_t cmd) {
@@ -29,7 +29,7 @@ void keyboard_ctrl_send_cmd(uint8_t cmd) {
 }
 
 /*
-keyboard_enc_send_cmd sends a command to the keyboard encoder
+sends a command to the keyboard encoder
 Input: Command to send to port 0x60
 */
 void keyboard_enc_send_cmd(uint8_t cmd) {

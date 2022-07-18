@@ -3,16 +3,15 @@
 heap_header*  free_headers[INIT_SIZE]   = { NULL };
 unsigned int  complete_pages[INIT_SIZE] = { 0 };    // Count freed allocated pages
 
-/*
-Find an index based on the requested size
-*/
+
+/* Find an index based on the requested size */
 unsigned int heap_get_index(size_t size) {
 
   if (size < (1 << MIN_EXP)) { return MIN_EXP; }
 
   size_t index = MIN_EXP;
 
-  /* Find an index  */
+  /* Find an index (n) where 2^(n-1) <= size <= 2^n*/
   while (index < MAX_EXP) {
     if ((size_t)(1 << index) > size) { break; }
     index++;
@@ -98,11 +97,11 @@ void* malloc(size_t size) {
   
   if (!header) { header = heap_allocate_header(size); }   // Get a new header
   else { 
-    heap_remove_header(header);
+    heap_remove_header(header);   // Remove from free headers
     if (!header->split_flink && !header->split_blink) { complete_pages[header->index]--; }
   }
 
-  heap_split_header(header);    // If there's data that will never be used, split it to a new header
+  heap_split_header(header);    // If there's extra space that will never be used, split it to a new header
 
   return (void*)((uint32_t)header + sizeof(heap_header));
 }
