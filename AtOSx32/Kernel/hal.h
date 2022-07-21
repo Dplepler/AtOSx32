@@ -19,4 +19,8 @@ static inline void cpu_load_gdt(void* addr) {
   __asm__ ("lgdt (%0)\n" :: "r" (addr));
 }
 
+static inline void set_interrupts() {
+  __asm__ ("sti");
+}
+
 #endif

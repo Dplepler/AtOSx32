@@ -97,7 +97,7 @@ void idt_install_gates() {
   idt_create_gate(30, (uint32_t)isr30, 0x8, IDT_GATE);
   idt_create_gate(31, (uint32_t)isr31, 0x8, IDT_GATE);
 
-  cpu_load_idt(&idt_ptr);
+  load_idt();      // Reload  
 }
 
 void fault_handler(isr_stack* stack) {
