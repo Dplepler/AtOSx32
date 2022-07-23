@@ -101,7 +101,6 @@ check_a20:
 	ret
 
 ; Switch to unreal mode so we can load a big big kernel
-; This will not be documented well since most operations are documented in the protected mode setup file
 unreal_mode:    
 
 	cli 		; Clear interrupts

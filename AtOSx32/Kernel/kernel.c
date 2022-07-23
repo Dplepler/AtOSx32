@@ -11,6 +11,7 @@
 #include "kernel_keyboard.h"
 #include "gdt.h"
 #include "interrupts.h"
+#include "irqs.h"
 #include "heap.h"
 
 int kmain(void) {
