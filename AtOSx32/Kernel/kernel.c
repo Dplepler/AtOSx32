@@ -26,6 +26,7 @@ int kmain(void) {
 
   setup_gdt();
   setup_idt();
+  init_irq(); 
   
   return 0;
 }

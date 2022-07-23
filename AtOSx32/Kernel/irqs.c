@@ -33,6 +33,7 @@ The first 8 IRQs are by default mapped to entries 8-15, these entries are alread
 so we need to remap the IRQs via the Programmble Interrupt Controller; New location will be at entries 32-47
  */
 void irq_remap() {
+
   outportb(MASTER_COMMAND, 0x11);
   outportb(SLAVE_COMMAND,  0x11);
   outportb(MASTER_DATA,    0x20);
@@ -45,7 +46,7 @@ void irq_remap() {
   outportb(SLAVE_DATA,        0);
 }
 
-void irq_init() {
+void init_irq() {
   
   irq_remap();
 
@@ -67,11 +68,12 @@ void irq_init() {
   idt_create_gate(47, (uint32_t)irq15, 0x8, IDT_GATE);
 }
 
+/* Handle a default interrupt request */
 void irq_handler(isr_stack* stack) {
   
   void (*handler)(isr_stack* stack);
 
-  handler = irq_routines[stack->index];
+  handler = irq_routines[stack->index & 0xFF];
   if (handler) { handler(stack); }
 
   /* If we are trying to access an IRQ that belongs to the second PIC, send an End of Interrupt command to it */
@@ -82,3 +84,4 @@ void irq_handler(isr_stack* stack) {
 
   set_interrupts(); 
 }
+

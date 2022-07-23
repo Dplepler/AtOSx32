@@ -17,7 +17,7 @@ enum PIC_TYPES {
 void irq_install_handler(uint8_t irq, void(*handler)(isr_stack* stack));
 void irq_remove_handler(uint8_t irq);
 void irq_remap();
-void irq_init();
+void init_irq();
 void irq_handler(isr_stack* stack);
 
 

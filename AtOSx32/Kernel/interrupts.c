@@ -39,12 +39,14 @@ extern void isr31();
 extern void idt_flush();
 
 void setup_idt() {
+  
   init_idt();
   load_idt();
   idt_install_gates();
 }
 
 void init_idt() {
+  
   idt_ptr.limit = sizeof(InterruptDescriptor) * IDT_SIZE - 1;
   memset(idt, 0, sizeof(InterruptDescriptor) * IDT_SIZE);
   idt_ptr.offset = (uint32_t)&idt;
@@ -55,6 +57,7 @@ void load_idt() {
 }
 
 void idt_create_gate(uint8_t index, uint32_t address, uint16_t select, uint8_t attributes) {
+
   idt[index].attributes = attributes;
   idt[index].offset_lh  = (uint16_t)(address & 0xFFFF);   // Address' high bits
   idt[index].offset_hh  = (uint16_t)(address >> 16);      // Address' low bits
@@ -103,7 +106,8 @@ void idt_install_gates() {
 void fault_handler(isr_stack* stack) {
 
   if ((stack->index & 0xFF) > 31) { return; }
-
+  if ((stack->index & 0xFF) > 18) { PANIC("Reserved"); }    // Exceptions 19-31 are reserved
+  
   /* Exceptions */
   char* exceptions[] =  {
 
@@ -125,23 +129,10 @@ void fault_handler(isr_stack* stack) {
     "Unknown Interrupt",
     "Coprocessor Fault",
     "Alignment Check",
-    "Machine Check",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved"
+    "Machine Check"
   };
 
+  if ((stack->index & 0xFF) > 18) { PANIC("Reserved"); }
   PANIC(exceptions[stack->index & 0xFF]);
 }
-
 
