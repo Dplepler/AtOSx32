@@ -1,6 +1,6 @@
 /* Check if the compiler thinks you are targeting the wrong operating system */
 #if defined(__linux__)
-#error "You are not using a cross-compiler, you will most certainly run into trouble"
+#error "To Compile AtOS, you have to use a cross-compiler"
 #endif
 
 /* Can only compile for 32-bit ix86 targets. */
@@ -27,7 +27,7 @@ int kmain(void) {
 
   setup_gdt();
   setup_idt();
-  init_irq(); 
+  init_irq();
   
   return 0;
 }
