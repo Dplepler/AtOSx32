@@ -23,4 +23,19 @@ static inline void set_interrupts() {
   __asm__ ("sti");
 }
 
+static inline void clear_interrupts() {
+  __asm__ ("cli");
+}
+
+static inline void enable_nmi() {
+  outportb(0x70, inportb(0x70) & 0x7F); // Enable the non maskable interrupt
+  inportb(0x71);                        // Clear port
+
+}
+
+static inline void disable_nmi() {
+  outportb(0x70, inportb(0x70) | 0x80); // Disable the non maskable interrupt
+  inportb(0x71);                        // Clear port
+}
+
 #endif
