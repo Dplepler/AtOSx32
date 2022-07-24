@@ -1,8 +1,7 @@
 #ifndef IRQS_H
 #define IRQS_H
 
-#include "interrupts.h"
-#include "hal.h"
+#include "clock.h"
 
 #define EOI 0x20
 

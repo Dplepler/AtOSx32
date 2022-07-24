@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "hal.h"
+#include "vmm.h"
 
 #define GDT_SIZE 6
 

@@ -13,6 +13,8 @@
 #include "interrupts.h"
 #include "irqs.h"
 #include "heap.h"
+#include "clock.h"
+
 
 int kmain(void) {
   
@@ -28,7 +30,9 @@ int kmain(void) {
   setup_gdt();
   setup_idt();
   init_irq();
-  
+  setup_clock();
+
+
   return 0;
 }
 

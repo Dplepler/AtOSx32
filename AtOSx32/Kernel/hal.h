@@ -19,11 +19,13 @@ static inline void cpu_load_gdt(void* addr) {
   __asm__ ("lgdt (%0)\n" :: "r" (addr));
 }
 
-static inline void set_interrupts() {
+/* Set interrupts */
+static inline void sti() {
   __asm__ ("sti");
 }
 
-static inline void clear_interrupts() {
+/* Clear interrupts (disable them) */
+static inline void cli() {
   __asm__ ("cli");
 }
 
