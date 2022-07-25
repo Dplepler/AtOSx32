@@ -32,7 +32,8 @@ int kmain(void) {
   init_irq();
   setup_clock();
 
-
+  sleep(5);
+  PRINT("SUCCESS!\n");
   return 0;
 }
 

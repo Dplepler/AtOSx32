@@ -1,11 +1,11 @@
 #include "clock.h"
 #include "kernel_screen.h"
+
+static bool         count = false;
 static unsigned long counter = 0;
 
 void setup_clock() {
-
   set_periodic_interrupt();
- 
 }
 
 /* Set clock to trigger IRQ8 */
@@ -24,10 +24,13 @@ void rtc_handler(isr_stack* stack) {
 
   counter++;
 
-  if (counter == 10000) { PRINT("HI!\n"); while(1) { } }
-
   /* To make sure a next IRQ8 will happen, read from the 0xC register */
   outportb(CMOS_REGISTER, 0xC);  
   inportb(CMOS_RW);
 }
 
+
+void sleep(unsigned long sec) {
+  unsigned long prev = counter;
+  while (counter != prev + HERTZ(sec)) {  }
+}
