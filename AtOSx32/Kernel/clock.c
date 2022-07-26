@@ -1,7 +1,6 @@
 #include "clock.h"
 #include "kernel_screen.h"
 
-static bool         count = false;
 static unsigned long counter = 0;
 
 void setup_clock() {
@@ -22,7 +21,7 @@ void set_periodic_interrupt() {
 
 void rtc_handler(isr_stack* stack) {
 
-  counter++;
+  counter++; 
 
   /* To make sure a next IRQ8 will happen, read from the 0xC register */
   outportb(CMOS_REGISTER, 0xC);  
@@ -30,7 +29,19 @@ void rtc_handler(isr_stack* stack) {
 }
 
 
-void sleep(unsigned long sec) {
+void sleep(unsigned long milisec) {
   unsigned long prev = counter;
-  while (counter != prev + HERTZ(sec)) {  }
+  while (counter != prev + HERTZ(milisec)) { }
+}
+
+unsigned long clock_time() {
+  
+  static unsigned long count = 0;
+  static unsigned long activated = false;
+
+  if (!activated) { count = counter; }
+  else { activated = false; return counter - count;  }
+
+  activated = true;
+  return ~0;
 }

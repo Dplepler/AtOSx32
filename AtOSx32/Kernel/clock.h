@@ -4,7 +4,7 @@
 #include "hal.h"
 #include "interrupts.h"
 
-#define HERTZ(s) (1024 * s)
+#define HERTZ(ms) (1024 * (ms / 1000))
 
 enum CMOS_PORTS {
 
@@ -16,5 +16,8 @@ void setup_clock();
 void set_periodic_interrupt();
 void rtc_handler(isr_stack* stack);
 void sleep(unsigned long sec);
+
+unsigned long clock_time();
+
 #endif
 
