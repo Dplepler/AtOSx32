@@ -18,7 +18,7 @@ void set_periodic_interrupt() {
   sti();
 }
 
-
+/* Called 1024 times a second, keep track of the system's time */
 void rtc_handler(isr_stack* stack) {
 
   counter++; 
@@ -28,12 +28,14 @@ void rtc_handler(isr_stack* stack) {
   inportb(CMOS_RW);
 }
 
-
+/* Delay the systems by the given miliseconds */
 void sleep(unsigned long milisec) {
   unsigned long prev = counter;
   while (counter != prev + HERTZ(milisec)) { }
 }
 
+/* The system's timer. First time it's called it will initialize the timer and the 
+ * second time will return the time passed from the first call in miliseconds */
 unsigned long clock_time() {
   
   static unsigned long count = 0;
