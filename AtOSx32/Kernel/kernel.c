@@ -32,10 +32,12 @@ int kmain(void) {
   init_irq();
   setup_clock();
 
-  clock_time();
-  sleep(5000);
-  PRINT("SUCCESS!\n");
-  PRINTN(clock_time());
+  cmos_time time = read_rtc();
+
+  PRINTN(time.day);
+
+
+
   return 0;
 }
 

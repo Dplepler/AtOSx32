@@ -1,7 +1,5 @@
 #include "vmm.h"
 
-int counter = 0;
-
 void* memset(void* addr, uint8_t c, size_t n) {
 
   for (uint32_t i = 0; i < n; i++) {
@@ -169,8 +167,6 @@ Output: Mapped address, NULL if failed
 pgulong_t* page_map(pgulong_t* addr, size_t length, uint16_t flags) {
 
   int err = NO_ERROR;
-  
-  counter++;
 
   if (!addr) { addr = page_get_free_addr(length, &err); }
   if (err == NOT_ENOUGH_SPACE) { return NULL; }

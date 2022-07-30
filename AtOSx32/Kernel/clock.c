@@ -21,6 +21,8 @@ void set_periodic_interrupt() {
 /* Called 1024 times a second, keep track of the system's time */
 void rtc_handler(isr_stack* stack) {
 
+  stack = stack;    // Get rid of unused variable warning
+
   counter++; 
 
   /* To make sure a next IRQ8 will happen, read from the 0xC register */
@@ -117,4 +119,13 @@ cmos_time read_rtc() {
 
   return rtc1;
 }
+
+char* date_to_string(cmos_time date) {
+  
+  char datestr[13]= { '\0' }; 
+
+  
+
+}
+
 

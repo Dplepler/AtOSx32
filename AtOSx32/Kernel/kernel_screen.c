@@ -184,7 +184,7 @@ terminal_write_string prints a character array to the screen
 Input: Character array to print
 */
 void terminal_write_string(const char* data) {
-  terminal_write(data, strlen(data));
+  terminal_write(data, strl(data));
 }
 
 /*
@@ -225,7 +225,7 @@ void terminal_display_error(const char* error) {
   terminal_draw_background(VGA_COLOR_LIGHT_RED);
   terminal_color = VGA_COLOR_LIGHT_RED;
 
-  size_t length = strlen(error);
+  size_t length = strl(error);
   
   terminal_row = VGA_HEIGHT / 2;
   terminal_column = VGA_WIDTH / 2 - length / 2;
