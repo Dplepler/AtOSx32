@@ -34,10 +34,9 @@ int kmain(void) {
 
   cmos_time time = read_rtc();
 
-  PRINT(dtos(time));
-
-
-
+  PRINT(dtoa(time));
+  NL;
+  PRINT(ttoa(time));
   return 0;
 }
 

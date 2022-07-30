@@ -120,8 +120,8 @@ cmos_time read_rtc() {
   return rtc1;
 }
 
-/* Gets a date and turns it into a string with the format of dd/mm/yyyy */
-char* dtos(cmos_time date) {
+/* Gets a date and turns it into an ascii of the format dd/mm/yyyy */
+char* dtoa(cmos_time date) {
   
   static char datestr[13] = { '\0' }; 
     
@@ -134,4 +134,17 @@ char* dtos(cmos_time date) {
   return datestr;
 }
 
+/* Gets time and turns it into an ascii of the format hh:mm:ss */
+char* ttoa(cmos_time time) {
+
+  static char timestr[9] = { '\0' }; 
+    
+  strcat(timestr, itoa(time.hour, 10));
+  strcat(timestr, ":");
+  strcat(timestr, itoa(time.minute, 10));
+  strcat(timestr, ":");
+  strcat(timestr, itoa(time.seconds, 10));
+  
+  return timestr;
+}
 
