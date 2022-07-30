@@ -1,18 +1,12 @@
 #include "kernel_screen.h"
 
-// screen_t* vga_init(size_t row, size_t column, uint8_t color, uint16_t* buffer) {
-
-
-
-// }
-
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
 
-static size_t terminal_row;
-static size_t terminal_column;
-static uint8_t terminal_color;
-static uint16_t* terminal_buffer;
+static size_t terminal_row = 0;
+static size_t terminal_column = 0;
+static uint8_t terminal_color = 0;
+static uint16_t* terminal_buffer = 0;
  
 /*
 vga_entry_color generates a byte containing both given colors
@@ -88,12 +82,15 @@ void cursor_update(int x, int y) {
   uint16_t pos = y * VGA_WIDTH + x; 	// Calculate desired position with the linear data
 
   /* Input new y position */
-  outportb(0x3D4, 0x0F);
+  outportb(0x3D4, 0xF);
   outportb(0x3D5, (uint8_t)(pos & 0xFF));
 
   /* Input new x position */
-  outportb(0x3D4, 0x0E);
+  outportb(0x3D4, 0xE);
   outportb(0x3D5, (uint8_t)((pos >> 8) & 0xFF));
+
+  terminal_column = x;
+  terminal_row = y;
 }
  
 /*
@@ -127,7 +124,6 @@ void terminal_setcolor(vga_color color) {
 /*
 terminal_putentryat puts a character in a given position on the screen
 Input: Character to put, it's color, coords on screen
-Output: None
 */
 void terminal_putentryat(char c, uint8_t color, const uint8_t x, const uint8_t y) {
 
@@ -138,7 +134,6 @@ void terminal_putentryat(char c, uint8_t color, const uint8_t x, const uint8_t y
 /*
 terminal_putchar puts a character at the current position on the screen
 Intput: Character to put
-Output: None
 */
 void terminal_putchar(char c) {
 
@@ -213,7 +208,6 @@ void terminal_draw_background(const vga_color color) {
 }
 
 void perry(const uint8_t x, const uint8_t y) {
-
   terminal_draw_rec(x, y, x + 30, y + 10, VGA_COLOR_CYAN);
   terminal_draw_rec(x + 3, y + 2, x + 7, y + 4, VGA_COLOR_BLACK);
   terminal_draw_rec(x + 23, y + 2, x + 27, y + 4, VGA_COLOR_BLACK);

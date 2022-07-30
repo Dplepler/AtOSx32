@@ -41,19 +41,6 @@ typedef enum vga_color {
 } vga_color;
 
 
-
-
-// typedef struct _SCREEN_ATTRIBUTES_STRUCT {
-
-// 	size_t terminal_row;
-// 	size_t terminal_column;
-// 	uint8_t terminal_color;
-// 	uint16_t* terminal_buffer;
-
-// } screen_t;
-
-//screen_t* vga_init(size_t row, size_t column, uint8_t color, uint16_t* buffer);
-
 uint8_t vga_entry_color(vga_color ccolor, vga_color bcolor);
 uint16_t vga_entry(unsigned char c, uint8_t color);
 
@@ -71,10 +58,10 @@ void perry(const uint8_t x, const uint8_t y);
 void terminal_display_error(const char* error);
 bool terminal_special_chars(char c);
 
-
 void cursor_enable(uint8_t cursor_start, uint8_t cursor_end);
 void cursor_disable();
 void cursor_update(int x, int y);
+
 uint16_t cursor_get_position();
 
 

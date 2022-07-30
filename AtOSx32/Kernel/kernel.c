@@ -32,11 +32,12 @@ int kmain(void) {
   init_irq();
   setup_clock();
 
-  cmos_time time = read_rtc();
-
-  PRINT(dtoa(time));
-  NL;
-  PRINT(ttoa(time));
+  while (true) {
+    cursor_update(0, 0);
+    cmos_time time = read_rtc();
+    PRINT(ttoa(time));
+    sleep(1000);
+  }
   return 0;
 }
 

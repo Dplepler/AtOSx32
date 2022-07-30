@@ -123,8 +123,9 @@ cmos_time read_rtc() {
 /* Gets a date and turns it into an ascii of the format dd/mm/yyyy */
 char* dtoa(cmos_time date) {
   
-  static char datestr[13] = { '\0' }; 
-    
+  static char datestr[13];
+
+  memset(datestr, '\0', 13);  
   strcat(datestr, itoa(date.day, 10));
   strcat(datestr, "/");
   strcat(datestr, itoa(date.month, 10));
@@ -137,8 +138,9 @@ char* dtoa(cmos_time date) {
 /* Gets time and turns it into an ascii of the format hh:mm:ss */
 char* ttoa(cmos_time time) {
 
-  static char timestr[9] = { '\0' }; 
-    
+  static char timestr[9]; 
+  
+  memset(timestr, '\0', 9);
   strcat(timestr, itoa(time.hour, 10));
   strcat(timestr, ":");
   strcat(timestr, itoa(time.minute, 10));
