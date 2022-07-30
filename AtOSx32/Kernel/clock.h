@@ -3,6 +3,7 @@
 
 #include "hal.h"
 #include "interrupts.h"
+#include "utils.h"
 
 #define HERTZ(ms) (1024 * (ms / 1000.0))
 #define BCD_TO_BINARY(bcd) (((bcd & 0xF0) >> 1) + ((bcd & 0xF0) >> 3) + (bcd & 0xF))

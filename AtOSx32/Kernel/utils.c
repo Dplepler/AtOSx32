@@ -27,13 +27,27 @@ char* itoa(int value, size_t base) {
   static char buf[32] = { 0 };
 
   if (!value) { return "0"; }     // If value is 0, return a 0 string
+  if (base > 16) { return NULL; } // Can't convert bases above hexadecimal
 
   size_t i = 30;
 
-  for (;value && i; i--, value /= base) {
+  for (; value && i; i--, value /= base) {
     buf[i] = "0123456789abcdef"[value % base];
   }
   
   return &buf[i+1];
+}
+
+/* Copy src string to dest string */
+char* strcat(char* dest, const char* src) {
+
+  unsigned long i = 0;
+  size_t dest_length = strl(dest);
+  size_t src_length = strl(src);
+
+  for(; i < dest_length; i++) {  }
+  for (; i - dest_length < src_length; i++) { dest[i] = src[i - dest_length]; }  
+
+  return dest;
 }
 
