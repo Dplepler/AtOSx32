@@ -120,12 +120,18 @@ cmos_time read_rtc() {
   return rtc1;
 }
 
-char* date_to_string(cmos_time date) {
+/* Gets a date and turns it into a string with the format of dd/mm/yyyy */
+char* dtos(cmos_time date) {
   
-  char datestr[13]= { '\0' }; 
-
+  static char datestr[13] = { '\0' }; 
+    
+  strcat(datestr, itoa(date.day, 10));
+  strcat(datestr, "/");
+  strcat(datestr, itoa(date.month, 10));
+  strcat(datestr, "/");
+  strcat(datestr, itoa(date.year, 10));
   
-
+  return datestr;
 }
 
 

@@ -34,7 +34,7 @@ int kmain(void) {
 
   cmos_time time = read_rtc();
 
-  PRINTN(time.day);
+  PRINT(dtos(time));
 
 
 

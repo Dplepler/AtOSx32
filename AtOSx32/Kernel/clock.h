@@ -47,6 +47,8 @@ cmos_time rtc_get_time();
 
 bool cmos_update_in_progress();
 
+char* dtos(cmos_time date);
+
 unsigned long clock_time();
 
 #endif
