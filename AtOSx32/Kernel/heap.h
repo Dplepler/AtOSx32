@@ -23,8 +23,8 @@ typedef struct _HEAP_HEADER_STRUCT {
   struct _HEAP_HEADER_STRUCT*  flink;
   struct _HEAP_HEADER_STRUCT*  blink;
 
-  struct _HEAP_HEADER_STRUCT* split_flink;
-  struct _HEAP_HEADER_STRUCT* split_blink;
+  struct _HEAP_HEADER_STRUCT* page_flink;
+  struct _HEAP_HEADER_STRUCT* page_blink;
 
 } heap_header;
 

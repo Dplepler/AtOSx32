@@ -1,87 +1,55 @@
 #include "heap.h"
 
-heap_header*  free_headers[INIT_SIZE]   = { NULL };
-unsigned int  complete_pages[INIT_SIZE] = { 0 };    // Count freed allocated pages
+static heap_header free_blocks[32]    // Each index represents 2^index allocated pages size
 
-
-/* Find an index based on the requested size */
 unsigned int heap_get_index(size_t size) {
 
-  if (size < (1 << MIN_EXP)) { return MIN_EXP; }
+  size_t pages = heap_get_page_count(size);
+  
+  if (pages > 0x100000) { return; }   // More than 4GB of data is forbidden
 
-  size_t index = MIN_EXP;
+  unsigned int index = 0;
 
-  /* Find an index (n) where 2^(n-1) <= size <= 2^n*/
-  while (index < MAX_EXP) {
-    if ((size_t)(1 << index) > size) { break; }
-    index++;
-  }
-
-  return index - 1;   // Get previous index, which is our desired one
+  while (1 << index > pages) { index++; }
+  return index - 1;
 }
 
-void heap_insert_header(heap_header* header) {
 
-  header->index = heap_get_index(header->size - sizeof(heap_header));
+void heap_insert_unused_header(heap_header* header) {
 
-  if (free_headers[header->index]) {
-    header->flink = free_headers[header->index];
-    free_headers[header->index]->blink = header;
+  header->index = heap_get_index(header->size);   // In case index is incorrect
+  
+  /* Insert header as the head node */
+  if (free_blocks[header->index]) { 
+    free_blocks[header->index]->blink = header; 
+    header->flink = free_blocks[header->index];
   }
 
-  free_headers[header->index] = header;
+  free_blocks[header->index] = header;
 }
 
 void heap_remove_header(heap_header* header) {
 
-  if (free_headers[header->index] == header) { free_headers[header->index] = header->flink; }
-
   if (header->flink) { header->flink->blink = header->blink; }
-  if (header->blink) { header->blink->flink = header->flink; }
+
+  if (free_blocks[header->index] == header) { free_blocks[header->index] = header->flink; }
+  else if (header->blink) { header->blink->flink = header->flink; }
 
   header->flink = NULL;
   header->blink = NULL;
-}
-
-heap_header* heap_allocate_header(unsigned int size) {
-
-  size += sizeof(heap_header);
-
-  unsigned int page_amount = heap_get_page_count(size);
-
-  heap_header* header = (heap_header*)page_map(NULL, page_amount, 0);
-
-  header->signature = HEAP_SIGNATURE;
-  header->size = page_amount * PAGE_SIZE;
-  header->req_size = size - sizeof(heap_header);
-  header->blink = NULL;
-  header->flink = NULL;
-  header->split_flink = NULL;
-  header->split_blink = NULL;
-  header->index = heap_get_index(size);
-
-  return header;
 }
 
 void heap_split_header(heap_header* header) {
 
-  if (1 << (header->size - (header->req_size + sizeof(heap_header))) < (1 << MIN_EXP)) { return; }   // Nothing to split
-
-  heap_header* split_header = (heap_header*)((uint32_t)header + header->req_size + sizeof(heap_header));
   
-  split_header->signature = HEAP_SIGNATURE;
-  split_header->size = header->size - (header->req_size + sizeof(heap_header));   // Remainder size will now become the new header's size
-  split_header->split_flink = header->split_flink;
-  split_header->split_blink = header;
-  split_header->flink = split_header->blink = NULL;
-  split_header->req_size = header->size - sizeof(heap_header);
- 
-  if (header->split_flink) { header->split_flink->split_blink = split_header; }
-  header->split_flink = split_header;
 
-  header->size -= split_header->size;
-  heap_insert_header(split_header);
 }
+
+
+heap_header* heap_melt_left(heap_header* header);
+void heap_eat_right(heap_header* header);
+heap_header* heap_allocate_header(unsigned int size);
+
 
 /* Allocate dynamic memory */
 void* malloc(size_t size) {
