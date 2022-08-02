@@ -23,7 +23,7 @@ Input: Command to send to port 0x64
 void keyboard_ctrl_send_cmd(uint8_t cmd) {
    
   /* Wait for the keyboard controller buffer to be clear */
-  while ((keyboard_ctrl_read_status() & KEYBOARD_CTRL_STATS_MASK_IN_BUF) != 0) { }
+  while ((keyboard_ctrl_read_status() & KEYBOARD_CTRL_STATS_MASK_IN_BUF)) { }
  
   outportb(KEYBOARD_CTRL_CMD_REG, cmd);  // Send command
 }
@@ -39,7 +39,7 @@ void keyboard_enc_send_cmd(uint8_t cmd) {
   /* Even though we are writing to the keyboard encoder, we still
   pass through the controller */
   
-  while ((keyboard_ctrl_read_status() & KEYBOARD_CTRL_STATS_MASK_IN_BUF) != 0) { }
+  while ((keyboard_ctrl_read_status() & KEYBOARD_CTRL_STATS_MASK_IN_BUF)) { }
  
   outportb(KEYBOARD_ENC_CMD_REG, cmd);  // Send command
 }
