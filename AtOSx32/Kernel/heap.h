@@ -18,7 +18,8 @@ typedef struct _HEAP_HEADER_STRUCT {
   size_t req_size;       // Requested size
   size_t size;           // Actual size created where rsize >= size
 
-  unsigned int index;
+  uint8_t index;
+  bool used;
 
   struct _HEAP_HEADER_STRUCT*  flink;
   struct _HEAP_HEADER_STRUCT*  blink;
@@ -36,8 +37,8 @@ void* malloc(size_t size);
 void* realloc(void* ptr, size_t size);
 void* calloc(size_t n, size_t size);
 void free(void* ptr);
-unsigned int heap_get_index(size_t size);
-void heap_insert_header(heap_header* header);
+uint8_t heap_get_index(size_t size);
+void heap_insert_unused_header(heap_header* header);
 void heap_remove_header(heap_header* header);
 void heap_split_header(heap_header* header);
 heap_header* heap_melt_left(heap_header* header);

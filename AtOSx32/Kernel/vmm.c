@@ -158,7 +158,7 @@ pgulong_t* page_get_free_addr(size_t length, int* err) {
 }
 
 /*
-page_map maps a physical address to a desired virtual address
+Maps a physical address to a desired virtual address
 Input: Desired virtual address and entry flags, if no specific address is desired, parameter can be NULL
 Length in pages, flags
 

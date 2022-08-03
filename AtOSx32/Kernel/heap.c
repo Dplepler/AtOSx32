@@ -1,24 +1,27 @@
 #include "heap.h"
 
-static heap_header free_blocks[32]    // Each index represents 2^index allocated pages size
+static heap_header* free_blocks[20];      // Each index represents 2^index allocated pages size
+static uint8_t     complete_pages[20];   // Keep track of unused pages so we can free some if there are too many
 
-unsigned int heap_get_index(size_t size) {
+/* Unused memory blocks will be indexed to the free_blocks array based on how many pages they take
+   2^index <= pages < 2^(index+1) */
+uint8_t heap_get_index(size_t size) {
 
   size_t pages = heap_get_page_count(size);
   
-  if (pages > 0x100000) { return; }   // More than 4GB of data is forbidden
+  if (pages > 0x100000) { return ~0; }   // More than 4GB of data is forbidden
 
-  unsigned int index = 0;
+  uint8_t index = 0;
 
-  while (1 << index > pages) { index++; }
+  while ((uint8_t)(1 << index) <= pages) { index++; }
   return index - 1;
 }
 
 
 void heap_insert_unused_header(heap_header* header) {
 
-  header->index = heap_get_index(header->size);   // In case index is incorrect
-  
+  header->index = heap_get_index(header->size - sizeof(heap_header));   // In case index is incorrect
+
   /* Insert header as the head node */
   if (free_blocks[header->index]) { 
     free_blocks[header->index]->blink = header; 
@@ -34,44 +37,112 @@ void heap_remove_header(heap_header* header) {
 
   if (free_blocks[header->index] == header) { free_blocks[header->index] = header->flink; }
   else if (header->blink) { header->blink->flink = header->flink; }
-
-  header->flink = NULL;
-  header->blink = NULL;
+  
+  header->flink = header->blink = NULL;
 }
 
+/* Split a header so we could later use it's remainder data 
+  e.g if user malloced 10 bytes there would be a 4096(page) - 10 bytes of unused data,
+  so we split it to a new header */
 void heap_split_header(heap_header* header) {
 
-  
+  heap_header* split_header = (heap_header*)((unsigned long)header + sizeof(heap_header) + header->req_size);
 
+  split_header->size = split_header->req_size = header->size - header->req_size - sizeof(heap_header);
+  split_header->req_size -= sizeof(heap_header);
+
+  if (!split_header->size) { return; }
+
+  split_header->signature = HEAP_SIGNATURE;
+
+  if (header->page_flink) { header->page_flink->page_blink = split_header; }
+  split_header->page_flink = header->page_flink;
+  split_header->page_blink = header;
+  header->page_flink = split_header;
+  
+  header->size -= split_header->size;
+
+  split_header->used = false;
+  heap_insert_unused_header(split_header);
+}
+
+/* Merge unused data from the same page together */
+heap_header* heap_melt_left(heap_header* header) {
+
+  if (header->used) { return header; }
+
+  while (header->page_blink && !header->page_blink->used) {
+
+    if (header->page_flink) { header->page_flink->page_blink = header->page_blink; }
+  
+    header->page_blink->page_flink = header->page_flink;
+    header->page_blink->size += header->size;
+    
+    heap_remove_header(header);
+    
+    header = header->page_blink;
+  }
+
+  return header;
 }
 
 
-heap_header* heap_melt_left(heap_header* header);
-void heap_eat_right(heap_header* header);
-heap_header* heap_allocate_header(unsigned int size);
+void heap_eat_right(heap_header* header) {
 
+  if (header->used) { return; }
+
+  while (header->page_flink && !header->page_flink->used) {
+    
+    header->size += header->page_flink->size;
+    if (header->page_flink->page_flink) { header->page_flink->page_flink->page_blink = header; }
+    heap_remove_header(header->page_flink);
+    header->page_flink = header->page_flink->page_flink;
+  }
+}
+
+
+/* Create a new header for cases where there aren't any unused ones to use */
+heap_header* heap_allocate_header(unsigned int size) {
+  
+  size_t page_amount = heap_get_page_count(size); 
+  heap_header* header = (heap_header*)page_map(NULL, page_amount, 0);
+
+  header->signature = HEAP_SIGNATURE;
+  header->size = page_amount * PAGE_SIZE;
+  header->req_size = size;
+
+  header->flink = header->blink = header->page_flink = header->page_blink = NULL;
+
+  header->index = heap_get_index(header->size - sizeof(heap_header));
+  
+  heap_split_header(header);
+  return header;
+}
 
 /* Allocate dynamic memory */
 void* malloc(size_t size) {
 
-  unsigned int index = heap_get_index(size);
+  uint8_t index = heap_get_index(size);
 
-  heap_header* header = free_headers[index];
+  heap_header* header = free_blocks[index];
   
   while (header) {
     if (header->size - sizeof(heap_header) >= size) { break; }
     header = header->flink;
   }
   
-  if (!header) { header = heap_allocate_header(size); }   // Get a new header
-  else { 
+  if (!header) { header = heap_allocate_header(size); header->used = true; }   // Get a new header
+  else {
+
+    header->used = true;
     heap_remove_header(header);   // Remove from free headers
-    if (!header->split_flink && !header->split_blink) { complete_pages[header->index]--; }
+    
+    if (!header->page_flink && !header->page_blink) { complete_pages[header->index]--; }
   }
 
   heap_split_header(header);    // If there's extra space that will never be used, split it to a new header
 
-  return (void*)((uint32_t)header + sizeof(heap_header));
+  return (void*)((unsigned long)header + sizeof(heap_header));
 }
 
 /* Free allocated dynamic memory */
@@ -79,18 +150,24 @@ void free(void* ptr) {
 
   if (!ptr) { return; }   // Nothing to free
 
-  heap_header* header = (heap_header*)((uint32_t)ptr - sizeof(heap_header));
+  heap_header* header = (heap_header*)((unsigned long)ptr - sizeof(heap_header));
   if (header->signature != HEAP_SIGNATURE) { return; }        // Not an allocated memory 
 
-  unsigned int index = heap_get_index(header->size - sizeof(heap_header));
-  
-  if (!header->split_flink && !header->split_blink) {
+  uint8_t index = heap_get_index(header->size - sizeof(heap_header));
+
+  header->used = false;
+
+  /* Merge unused blocks located at the same page */ 
+  header = heap_melt_left(header);
+  heap_eat_right(header); 
+
+  if (!header->page_flink && !header->page_blink) {
     /* If we saved too much free unused pages we should free this one */
     if (complete_pages[index] == MAX_COMPLETE) { page_unmap((pgulong_t*)header, heap_get_page_count(header->size)); return; }
     complete_pages[index]++;
   }
-
-  heap_insert_header(header);
+  
+  heap_insert_unused_header(header);
 }
 
 /* Resize an allocated memory block */
