@@ -1,6 +1,6 @@
 #include "interrupts.h"
 
-static InterruptDescriptor idt[IDT_SIZE];
+static interrupt_descriptor idt[IDT_SIZE];
 static idtptr idt_ptr;
 
 extern void isr0();
@@ -47,8 +47,8 @@ void setup_idt() {
 
 void init_idt() {
   
-  idt_ptr.limit = sizeof(InterruptDescriptor) * IDT_SIZE - 1;
-  memset(idt, 0, sizeof(InterruptDescriptor) * IDT_SIZE);
+  idt_ptr.limit = sizeof(interrupt_descriptor) * IDT_SIZE - 1;
+  memset(idt, 0, sizeof(interrupt_descriptor) * IDT_SIZE);
   idt_ptr.offset = (uint32_t)&idt;
 }
 

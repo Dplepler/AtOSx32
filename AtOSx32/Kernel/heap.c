@@ -87,6 +87,7 @@ heap_header* heap_melt_left(heap_header* header) {
 }
 
 
+/* Absorb all the unused headers on the same page and to the right of the given header */
 void heap_eat_right(heap_header* header) {
 
   if (header->used) { return; }
@@ -197,3 +198,4 @@ void* calloc(size_t n, size_t size) {
 
   return ptr;
 }
+

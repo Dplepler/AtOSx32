@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "hal.h"
 #include "vmm.h"
+#include "tss.h"
 
 #define GDT_SIZE 6
 

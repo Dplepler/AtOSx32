@@ -29,7 +29,7 @@ typedef struct _INTERRUPT_DESCRIPTOR_STRUCT {
   uint8_t attributes; // Gate type
   uint16_t offset_hh; // Higher half of interrupt address
 
-} __attribute__((packed)) InterruptDescriptor;
+} __attribute__((packed)) interrupt_descriptor;
 
 typedef struct _IDT_DESCRIPTOR_POINTER_STRUCT {
 
