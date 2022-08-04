@@ -50,6 +50,7 @@ void heap_split_header(heap_header* header) {
   
   split_header->size = split_header->req_size = header->size - header->req_size - sizeof(heap_header);
   split_header->req_size -= sizeof(heap_header);
+
   if (!split_header->size) { return; }
 
   split_header->signature = HEAP_SIGNATURE;
@@ -134,9 +135,8 @@ void* malloc(size_t size) {
   else {
                            
     header->used = true;
-    header->req_size = size;
     heap_remove_header(header);   // Remove from free headers
-  
+    while(1) {}
     if (!header->page_flink && !header->page_blink) { complete_pages[header->index]--; }
   }
  

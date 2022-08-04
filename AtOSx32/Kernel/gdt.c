@@ -19,22 +19,29 @@ void load_gdt() {
   cpu_load_gdt(&gdt_ptr);
 }
 
-void gdt_create_gate(uint32_t index, uint32_t base, uint32_t limit, uint8_t access, uint8_t granularity) {
+void gdt_create_gate(uint32_t base, uint32_t limit, uint8_t access, uint8_t granularity) {
+
+  static uint32_t index = 0;
+
   gdt[index].base_l = base & 0xFFFF;
   gdt[index].base_m = (base >> 16) & 0xFF;
   gdt[index].base_h = base >> 24;
   gdt[index].limit = limit & 0xFFFF;
   gdt[index].flags_and_limit = limit >> 16;
   gdt[index].flags_and_limit |= granularity & 0xF0;   // Only the higher half bits
-  gdt[index].access = access;
+  gdt[index++].access = access;
+
 }
 
 void gdt_install_gates() {
 
-  gdt_create_gate(0, 0, 0, 0, 0);   // First gate is ignored by the CPU
-  gdt_create_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xCF); // Code
-  gdt_create_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF); // Data
+  gdt_create_gate(0, 0, 0, 0);   // First gate is ignored by the CPU
+  gdt_create_gate(0, 0xFFFFFFFF, 0x9A, 0xCF); // Code
+  gdt_create_gate(0, 0xFFFFFFFF, 0x92, 0xCF); // Data
 
   load_gdt();
 }
 
+void gdt_install_tss(tss* task_state) {
+  gdt_create_gate(task_state, sizeof(*task_state), 0x89, 0);
+}

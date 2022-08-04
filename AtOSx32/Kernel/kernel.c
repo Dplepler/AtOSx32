@@ -35,15 +35,17 @@ int kmain(void) {
   int* hello = malloc(20);
   memset(hello, 69, 20);
 
-  PRINTNH(hello);
+  //PRINTNH(hello);
   
   int* hi = malloc(30);
-  PRINTNH(hi);
+  
+  //PRINTNH(hi);
 
   free(hi);
   free(hello);
 
-
+  int x = 10 / 0;
+  //PRINTN(x);
   /* while (true) {
     cursor_update(0, 0);
     cmos_time time = read_rtc();
