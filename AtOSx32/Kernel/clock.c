@@ -90,7 +90,7 @@ cmos_time read_rtc() {
     while (cmos_update_in_progress()) { }
     rtc2 = rtc_get_time();
 
-  } while (rtc1.minute != rtc2.minute || rtc1.hour != rtc2.hour || rtc1.day != rtc2.day || rtc1.month != rtc2.month || rtc1.year != rtc2.year);
+  } while (rtc1.seconds != rtc2.seconds || rtc1.minute != rtc2.minute || rtc1.hour != rtc2.hour || rtc1.day != rtc2.day || rtc1.month != rtc2.month || rtc1.year != rtc2.year);
   
   outportb(CMOS_REGISTER, 0xB);
   uint8_t regb = inportb(CMOS_RW);
@@ -139,7 +139,7 @@ char* dtoa(cmos_time date) {
 char* ttoa(cmos_time time) {
 
   static char timestr[9]; 
-  
+
   memset(timestr, '\0', 9);
   strcat(timestr, itoa(time.hour, 10));
   strcat(timestr, ":");

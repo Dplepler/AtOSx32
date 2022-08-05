@@ -17,7 +17,7 @@ uint8_t heap_get_index(size_t size) {
   return index - 1;
 }
 
-
+/* Insert memory block to the free blocks array */
 void heap_insert_unused_header(heap_header* header) {
 
   header->index = heap_get_index(header->size - sizeof(heap_header));   // In case index is incorrect
@@ -31,6 +31,7 @@ void heap_insert_unused_header(heap_header* header) {
   free_blocks[header->index] = header;
 }
 
+/* Remove memory block from the free blocks array */
 void heap_remove_header(heap_header* header) {
 
   if (header->flink) { header->flink->blink = header->blink; }
@@ -86,7 +87,6 @@ heap_header* heap_melt_left(heap_header* header) {
   return header;
 }
 
-
 /* Absorb all the unused headers on the same page and to the right of the given header */
 void heap_eat_right(heap_header* header) {
 
@@ -100,7 +100,6 @@ void heap_eat_right(heap_header* header) {
     header->page_flink = header->page_flink->page_flink;
   }
 }
-
 
 /* Create a new header for cases where there aren't any unused ones to use */
 heap_header* heap_allocate_header(unsigned int size) {

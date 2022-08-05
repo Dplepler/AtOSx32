@@ -43,5 +43,6 @@ void gdt_install_gates() {
 }
 
 void gdt_install_tss(tss* task_state) {
-  gdt_create_gate(task_state, sizeof(*task_state), 0x89, 0);
+  gdt_create_gate(task_state, sizeof(*task_state), 0x89, 0x40);
+  load_gdt();
 }

@@ -36,14 +36,16 @@ static inline size_t heap_get_page_count(size_t length) {
 void* malloc(size_t size);
 void* realloc(void* ptr, size_t size);
 void* calloc(size_t n, size_t size);
+
 void free(void* ptr);
-uint8_t heap_get_index(size_t size);
 void heap_insert_unused_header(heap_header* header);
 void heap_remove_header(heap_header* header);
 void heap_split_header(heap_header* header);
-heap_header* heap_melt_left(heap_header* header);
 void heap_eat_right(heap_header* header);
+
+heap_header* heap_melt_left(heap_header* header);
 heap_header* heap_allocate_header(unsigned int size);
 
+uint8_t heap_get_index(size_t size);
 
 #endif
