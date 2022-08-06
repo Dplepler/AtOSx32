@@ -147,7 +147,7 @@ void* malloc(size_t size) {
 void free(void* ptr) {
 
   if (!ptr) { return; }   // Nothing to free
-  
+    
   heap_header* header = (heap_header*)((unsigned long)ptr - sizeof(heap_header));
   if (header->signature != HEAP_SIGNATURE) { return; }        // Not an allocated memory 
    

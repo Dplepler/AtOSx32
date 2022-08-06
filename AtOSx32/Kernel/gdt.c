@@ -1,7 +1,9 @@
 #include "gdt.h"
 
-static gdtDescriptor gdt[GDT_SIZE];
+static gdt_descriptor gdt[GDT_SIZE];
 static gdtptr gdt_ptr;
+
+tss task_state;
 
 void setup_gdt() {
   init_gdt();
@@ -10,8 +12,8 @@ void setup_gdt() {
 }
 
 void init_gdt() {
-  gdt_ptr.limit = sizeof(gdtDescriptor) * GDT_SIZE - 1;
-  memset(gdt, 0, sizeof(gdtDescriptor) * GDT_SIZE);
+  gdt_ptr.limit = sizeof(gdt_descriptor) * GDT_SIZE - 1;
+  memset(gdt, 0, sizeof(gdt_descriptor) * GDT_SIZE);
   gdt_ptr.offset = (uint32_t)&gdt;
 }
 
@@ -22,7 +24,7 @@ void load_gdt() {
 void gdt_create_gate(uint32_t base, uint32_t limit, uint8_t access, uint8_t granularity) {
 
   static uint32_t index = 0;
-
+  
   gdt[index].base_l = base & 0xFFFF;
   gdt[index].base_m = (base >> 16) & 0xFF;
   gdt[index].base_h = base >> 24;
@@ -33,6 +35,7 @@ void gdt_create_gate(uint32_t base, uint32_t limit, uint8_t access, uint8_t gran
 
 }
 
+/* Install null gate as well as kernel data and code segments */
 void gdt_install_gates() {
 
   gdt_create_gate(0, 0, 0, 0);   // First gate is ignored by the CPU
@@ -42,7 +45,12 @@ void gdt_install_gates() {
   load_gdt();
 }
 
-void gdt_install_tss(tss* task_state) {
-  gdt_create_gate(task_state, sizeof(*task_state), 0x89, 0x40);
+/* Install a task state segment gate */
+void gdt_install_tss() {
+
+  task_state.ss0 = GDT_KERNEL_DS;
+  task_state.esp0 = 1024;
+  task_state.iopb = sizeof(tss);
+  gdt_create_gate((uint32_t)&task_state, sizeof(task_state), 0x89, 0x40);
   load_gdt();
 }

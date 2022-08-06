@@ -32,27 +32,17 @@ int kmain(void) {
   init_irq();
   setup_clock();
 
-  int* hello = malloc(20);
-  memset(hello, 69, 20);
-
-  //PRINTNH(hello);
   
-  int* hi = malloc(30);
-  
-  //PRINTNH(hi);
-
-  free(hi);
-  free(hello);
 
   //int x = 10 / 0;
   //PRINTN(x);
-  while (true) {
+  /* while (true) {
     terminal_draw_rec(0, 0, 9, 1, 8); 
     cursor_update(0, 0);
     cmos_time time = read_rtc();
     PRINT(ttoa(time));
     sleep(1000);
-  } 
+  } */ 
 
   return 0;
 }

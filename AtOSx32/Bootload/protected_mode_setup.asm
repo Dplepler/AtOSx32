@@ -1,4 +1,3 @@
-
 [bits 16]
 
 ; Switches from real mode to protected mode
@@ -25,11 +24,11 @@ switch_to_pm:
 [bits 32]
 
 ; These offsets must be 4k aligned
-;=======================;
-PD_OFFSET  equ 1000000h	; 	Table directory entry offset
-PT_OFFSET  equ 1001000h	;		First page table offset
-KPT_OFFSET equ 1002000h ;		Kernel page table offset
-;=======================;
+;===========================;
+PD_PHY_OFFSET  equ 1000000h ;   Directory table entry offset
+PT_PHY_OFFSET  equ 1001000h ;		First page table offset
+KPT_PHY_OFFSET equ 1002000h ;		Kernel page table offset
+;===========================;
 
 KERNEL_ENTRY_OFFSET equ 300h 	; Entry in the page directory for our higher half kernel at 0xC0000000
 
@@ -53,27 +52,27 @@ init_protected_mode:
 	; Set all directory entries to not present, with read/write access
 	; The page directory consists of 1024 entries, each 32 bit
 	mov eax, 2h	
-	mov edi, PD_OFFSET
+	mov edi, PD_PHY_OFFSET
 	mov ecx, 1024
 
 	rep stosd  			; Repeat copying EAX's value to EDI memory location ECX times
 
 	; Map the last directory entry to itself, this way virtual address 0xFFFFF000 will point to our directory table
 	mov edi, 1000FFCh
-	mov dword [edi], PD_OFFSET
+	mov dword [edi], PD_PHY_OFFSET
 	or dword [edi], 3
 
 	; To let the bootloader continue without failing, we will identity map the first 4 Megabytes (i.e first page table)
-	mov edi, PT_OFFSET		; Some page table offset
-	xor ecx, ecx					; Beginning of physical memory
-	xor edx, edx					; First directory entry
+	mov edi, PT_PHY_OFFSET		; Some page table offset
+	xor ecx, ecx					    ; Beginning of physical memory
+	xor edx, edx					    ; First directory entry
 
 	call fill_table
 
 	; Now let's map the kernel to make it a higher half kernel
-	mov edi, KPT_OFFSET  						; Page table to fill
-	mov ecx, 100h										; Physical page index where the kernel is located
-	mov edx, KERNEL_ENTRY_OFFSET  	; Kernel's page directory index (Will point to 0xC0000000)
+	mov edi, KPT_PHY_OFFSET  						; Page table to fill
+	mov ecx, 100h										    ; Physical page index where the kernel is located
+	mov edx, KERNEL_ENTRY_OFFSET  	    ; Kernel's page directory index (Will point to 0xC0000000)
 
 	call fill_table
 
@@ -81,8 +80,8 @@ init_protected_mode:
 	add edi, 0FFCh						; Add 1023 * 4 to page offset, point to last table entry
 	mov dword [edi], 0B8003h	; 0xB8000 | 3 = VGA buffer with present and write/read bits set
 
-	mov eax, PD_OFFSET 		; The address that points to the directory table, 1024 entries, 32 bits each
-	mov cr3, eax					; We put the address of our directory table in the cr3 register
+	mov eax, PD_PHY_OFFSET 		; The address that points to the directory table, 1024 entries, 32 bits each
+	mov cr3, eax					    ; We put the address of our directory table in the cr3 register
 
 	mov eax, cr0					; To enable paging we need to set the correct flags in the cr0 register
 	or 	eax, 80000000h
@@ -132,8 +131,8 @@ fill_table:
 	; Get the physical address of the page directory entry to add table to
 	; EDX = Page directory entry index
 	mov eax, 4
-	mul edx 						; Each page directory entry is 4 bytes
-	add eax, PD_OFFSET 	; Add the page directory offset
+	mul edx 				    		; Each page directory entry is 4 bytes
+	add eax, PD_PHY_OFFSET 	; Add the page directory offset
 	mov esi, eax
 
 	mov dword [esi], edi		; Put the page table into the page directory entry 

@@ -8,6 +8,15 @@
 
 #define GDT_SIZE 6
 
+enum GDT_ENTRY_TYPES {
+
+  GDT_NULL = 0x0,
+  GDT_KERNEL_CS = 0x8,
+  GDT_KERNEL_DS = 0x10,
+
+};
+
+
 typedef struct _GDT_DESCRIPTOR_STRUCT {
 
   uint16_t limit;
@@ -17,7 +26,7 @@ typedef struct _GDT_DESCRIPTOR_STRUCT {
   uint8_t flags_and_limit;
   uint8_t base_h;
 
-} __attribute__((packed)) gdtDescriptor;
+} __attribute__((packed)) gdt_descriptor;
 
 typedef struct _GDT_DESCRIPTOR_POINTER_STRUCT {
 
@@ -31,7 +40,7 @@ void init_gdt();
 void load_gdt();
 void gdt_create_gate(uint32_t base, uint32_t limit, uint8_t access, uint8_t granularity);
 void gdt_install_gates();
-void gdt_install_tss(tss* task_state);
+void gdt_install_tss();
 
 
 
