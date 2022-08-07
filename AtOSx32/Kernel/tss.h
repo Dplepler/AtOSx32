@@ -2,6 +2,7 @@
 #define TSS_H
 
 #include <stdint.h>
+#include "gdt.h"
 
 typedef struct _TASK_STATE_SEGMENT_STRUCT {
 
@@ -46,5 +47,6 @@ typedef struct _TASK_STATE_SEGMENT_STRUCT {
 
 } __attribute__((packed)) tss;
 
+void tss_install();
 
 #endif

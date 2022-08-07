@@ -1,8 +1,10 @@
 #include "process.h"
 
+aprocess* task; // Current task
+
 void init_multitasking() {
 
-  proc_control* current_proc = malloc(sizeof(proc_control));
+  aprocess* current_proc = malloc(sizeof(aprocess));
 
   asm volatile("mov %%cr3, %0" : "=r" (current_proc->address_space));
   asm volatile("mov %%esp, %0" : "=r" (current_proc->esp));
