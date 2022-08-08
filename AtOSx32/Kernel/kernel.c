@@ -14,7 +14,8 @@
 #include "irqs.h"
 #include "heap.h"
 #include "clock.h"
-
+#include "tss.h"
+#include "process.h"
 
 int kmain(void) {
   
@@ -32,7 +33,7 @@ int kmain(void) {
   init_irq();
   setup_clock();
 
-  
+  init_multitasking();
 
   //int x = 10 / 0;
   //PRINTN(x);

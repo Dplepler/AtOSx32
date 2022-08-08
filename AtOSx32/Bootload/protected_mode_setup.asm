@@ -22,6 +22,7 @@ switch_to_pm:
 	jmp CODE_SEG:init_protected_mode
 
 [bits 32]
+[global PD_PHY_OFFSET]
 
 ; These offsets must be 4k aligned
 ;===========================;

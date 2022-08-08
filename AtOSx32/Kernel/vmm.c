@@ -69,7 +69,7 @@ bool pd_remove_entry(pgulong_t* addr) {
 
   pd_flush_tlb(pd_index);
 
-  ((pgulong_t*)PD_ADDRESS)[pd_index] = 0x2;       // Mark as unused
+  ((pgulong_t*)PD_ADDRESS)[pd_index] = READ_WRITE;       // Mark as unused
 
   return true;
 }
@@ -95,7 +95,7 @@ int page_get_free_memory_index(size_t req_pd_entries, size_t req_pt_entries) {
     for (; i2 < i + req_pd_entries; i2++) {
       if (i2 > ENTRIES) { return ~0; }
       addr = (pgulong_t*)((pgulong_t*)PD_ADDRESS)[i2];
-      if (*addr & 1) { break; }                     // Bad
+      if (*addr & PRESENT) { break; }                     // Bad
       if (i2 == i + req_pd_entries - 1) { break; }  // Good
     }
 
@@ -103,9 +103,9 @@ int page_get_free_memory_index(size_t req_pd_entries, size_t req_pt_entries) {
       if (!req_pt_entries) { return (int)i; }   // We're done
       if (i2 == ENTRIES) { break; }             // Not enough space for extra page table entries
       addr = (pgulong_t*)((pgulong_t*)PD_ADDRESS)[i2 + 1];  // Next page directory
-      if (!((pgulong_t)addr & 1)) { return (int)i; }  // PD is empty, we can use it
+      if (!((pgulong_t)addr & PRESENT)) { return (int)i; }  // PD is empty, we can use it
       for (uint32_t i3 = 0; i3 < req_pt_entries; i3++) {
-        if (addr[i3] & 1) { break; }                        // Bad
+        if (addr[i3] & PRESENT) { break; }                        // Bad
         if (i3 == req_pt_entries - 1) { return (int)i; }    // Good
       }
     }
@@ -128,7 +128,7 @@ pgulong_t* page_get_free_pt_memory_index(size_t req_pt_entries, int* err) {
     if (page_is_empty(i)) { return page_make_address(i, 0); }
     for (uint16_t i2 = 0; i2 + req_pt_entries <= ENTRIES; i2++) {
       for (uint16_t i3 = i2; i3 < i2 + req_pt_entries; i3++) {
-        if (addr[i3] & 1) { i2 = i3; break; }
+        if (addr[i3] & PRESENT) { i2 = i3; break; }
         if (i3 == i2 + req_pt_entries - 1) { return page_make_address(i, i2); }
       }
     }
@@ -164,25 +164,26 @@ Length in pages, flags
 
 Output: Mapped address, NULL if failed
 */
-pgulong_t* page_map(pgulong_t* addr, size_t length, uint16_t flags) {
+pgulong_t* page_map(pgulong_t* addr, size_t pages, uint16_t flags) {
 
   int err = NO_ERROR;
 
-  if (!addr) { addr = page_get_free_addr(length, &err); }
+  if (!addr) { addr = page_get_free_addr(pages, &err); }
   if (err == NOT_ENOUGH_SPACE) { return NULL; }
 
   pgulong_t pd_index = pd_get_entry_index(addr);
   pgulong_t pt_index = page_get_entry_index(addr);
 
-  pgulong_t* pt_addr = (((pgulong_t*)PD_ADDRESS)[pd_index] & 1) ? page_get_table_address(pd_index) 
+
+  pgulong_t* pt_addr = (((pgulong_t*)PD_ADDRESS)[pd_index] & PRESENT) ? page_get_table_address(pd_index) 
     : pd_assign_table(pd_index, flags);
 
-  for (unsigned int i = 0; i < length; i++, pt_index++) {
+  for (uint32_t i = 0; i < pages; i++, pt_index++) {
     
-    if ((pgulong_t)pt_addr[pt_index] & 1) { return NULL; }   // If page table index was already mapped, fail 
+    if ((pgulong_t)pt_addr[pt_index] & PRESENT) { return NULL; }   // If page table index was already mapped, fail 
     
     pt_addr[pt_index] = (pgulong_t)palloc();
-    pt_addr[pt_index] |= (flags & 0xFFF) | 1;
+    pt_addr[pt_index] |= (flags & 0xFFF) | PRESENT;
 
     flush_tlb_single(&pt_addr[pt_index]);
   }
@@ -224,7 +225,7 @@ pgulong_t* pd_assign_table(pgulong_t pd_index, uint16_t flags) {
 
   pgulong_t* pt_phys_addr = palloc();
   
-  ((pgulong_t*)PD_ADDRESS)[pd_index] = ((pgulong_t)pt_phys_addr | (flags & 0xFFF) | 1);
+  ((pgulong_t*)PD_ADDRESS)[pd_index] = ((pgulong_t)pt_phys_addr | (flags & 0xFFF) | PRESENT);
  
   pgulong_t* pt_addr = page_get_table_address(pd_index);
   page_clean(pt_addr);
@@ -266,7 +267,7 @@ Removes a page table from the page directory
 Input: Page table's address to check, Page directory index to remove from
 */
 void pd_remove_empty_pt(pgulong_t pd_index) {
-  ((pgulong_t*)PD_ADDRESS)[pd_index] = 0x2;   // Set entry as not present
+  ((pgulong_t*)PD_ADDRESS)[pd_index] = READ_WRITE;   // Set entry as not present
 }
 
 /*
@@ -288,3 +289,4 @@ page_is_aligned checks if an address is page aligned (4k aligned)
 bool page_is_aligned(pgulong_t* addr) {
   return !((pgulong_t)addr << 20);
 }
+

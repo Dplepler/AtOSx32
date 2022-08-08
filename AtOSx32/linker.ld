@@ -31,5 +31,5 @@ SECTIONS
 		*(.bss)
 	}
 	/* Indicates the end address of the kernel. */
-	_kernel_end = .;
+	_kernel_end = .; 
 }

@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include "gdt.h"
 
+#define KERNEL_STACK_SIZE 0x1000 
+
 typedef struct _TASK_STATE_SEGMENT_STRUCT {
 
   uint16_t link;

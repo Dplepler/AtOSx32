@@ -1,5 +1,5 @@
 [extern task]   ; Current task
-[extern task_state]
+[extern task_state] ; TSS
 
 [global switch_task]
 
@@ -10,7 +10,7 @@ switch_task:
   push esi
 
   mov esi, dword [task]
-  mov dword [esi+0x4], esp  ; Set previous task's esp0
+  mov dword [esi+0x8], esp  ; Set previous task's esp
   
   mov esi, dword [esp+0x8]  ; Get new task
 
@@ -25,8 +25,9 @@ switch_task:
 
 .continue:
 
-  mov eax, dword [esi+0x4]    ; Get new task's esp0
-  ; Set the tss' es0 accordingly
+  mov dword [task], esi     ; Current task = new task
+  mov eax, dword [esi+0x4]  ; Get new task's kernel stack
+  ; Set the tss's esp0 accordingly
   lea esi, [task_state] 
   mov dword [esi+0x4], eax
 

@@ -4,7 +4,9 @@
 #include <stdint.h>
 #include "heap.h"
 
-#define INIT_VIRTUAL_ADDRESS 0x1000000
+#define INIT_KERNEL_STACK 0x90000
+#define VIRTUAL_SPACE     0x1000000
+
 
 typedef struct _PROCESS_CONTROL_BLOCK_STRUCT {
 
@@ -27,9 +29,11 @@ typedef struct _PROCESS_CONTROL_BLOCK_STRUCT {
 
 } __attribute__((packed)) aprocess, athread;
 
+
+
 void init_multitasking();
+uint32_t* relocate_stack(uint32_t* address, size_t size);
+
 uint32_t get_next_pid();
-
-
 
 #endif

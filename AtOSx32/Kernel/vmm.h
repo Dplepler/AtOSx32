@@ -8,6 +8,20 @@
 #define PD_OFFSET       0xFFC00000  // Used when calculating with different addresses to get a page table 
 
 #define ENTRIES 0x400     // Amount of table entries
+                          
+enum PAGE_FLAGS {
+
+  PRESENT         = 0b00000001,
+  READ_WRITE      = 0b00000010,
+  USER_ACCESS     = 0b00000100,
+  WRITE_THROUGH   = 0b00001000,
+  NO_CACHE        = 0b00010000,
+  ACCESSED        = 0b00100000,
+  DIRTY           = 0x01000000,
+  ATTRIBUTE_TABLE = 0b10000000,
+  GLOBAL          = 0b100000000,
+
+};
 
 void* memset(void* addr, uint8_t c, size_t n);
 void* memcpy(void* s1, const void* s2, size_t n);
