@@ -7,7 +7,7 @@
 uint8_t inportb(uint16_t port);
 void outportb(uint16_t port, uint8_t value);
 
-static inline void flush_tlb_single(unsigned long* addr) {
+static inline void flush_tlb_single(void* addr) {
   __asm__ __volatile__ ("invlpg (%0)" ::"r" (addr) : "memory");
 }
 
@@ -17,6 +17,10 @@ static inline void cpu_load_idt(void* addr) {
 
 static inline void cpu_load_gdt(void* addr) {
   __asm__ ("lgdt (%0)\n" :: "r" (addr));
+}
+
+static inline void cpu_load_tss(void* addr) {
+  __asm__ __volatile__ ("ltr %%ax"::"a"(addr));
 }
 
 /* Set interrupts */

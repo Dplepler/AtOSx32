@@ -19,7 +19,7 @@ enum PAGE_FLAGS {
   ACCESSED        = 0b00100000,
   DIRTY           = 0x01000000,
   ATTRIBUTE_TABLE = 0b10000000,
-  GLOBAL          = 0b100000000,
+  GLOBAL         = 0b100000000,
 
 };
 

@@ -10,12 +10,18 @@ void init_multitasking() {
   asm volatile("mov %%cr3, %0" : "=r" (current_proc->address_space));
   
   current_proc->pid = get_next_pid();
-  current_proc->esp0 = page_map(0xe0000000, 1, READ_WRITE | PRESENT);
+  current_proc->esp0 = (uint32_t*)page_map((void*)0xe0000000, 1, READ_WRITE | PRESENT);
   
   asm volatile("mov %0, %%esp" : : "r" (current_proc->esp0));
   current_proc->esp = current_proc->esp0;
     
   task = current_proc;
+
+  aprocess* np = malloc(sizeof(aprocess));
+  np->pid = get_next_pid();
+
+
+
 }
 
 uint32_t get_next_pid() {

@@ -33,7 +33,8 @@ int kmain(void) {
   init_irq();
   setup_clock();
 
-  init_multitasking();
+  tss_install();
+  //init_multitasking();
 
   //int x = 10 / 0;
   //PRINTN(x);

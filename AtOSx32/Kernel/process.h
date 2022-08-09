@@ -10,11 +10,11 @@
 
 typedef struct _PROCESS_CONTROL_BLOCK_STRUCT {
 
-  uint32_t eip;
-  uint32_t esp0;
-  uint32_t esp;
+  uint32_t* eip;
+  uint32_t* esp0;
+  uint32_t* esp;
 
-  uint32_t address_space; 
+  uint32_t* address_space; 
   
   struct _PROCESS_CONTROL_BLOCK_STRUCT* task_flink;
   
