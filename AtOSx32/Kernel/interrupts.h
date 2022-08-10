@@ -29,22 +29,24 @@ typedef struct _INTERRUPT_DESCRIPTOR_STRUCT {
   uint8_t attributes; // Gate type
   uint16_t offset_hh; // Higher half of interrupt address
 
-} __attribute__((packed)) interrupt_descriptor;
+} __attribute__((packed)) interrupt_descriptor_t;
 
 typedef struct _IDT_DESCRIPTOR_POINTER_STRUCT {
 
   uint16_t limit;
   uint32_t offset;
   
-} __attribute__((packed)) idtptr;
+} __attribute__((packed)) idtptr_t;
 
 /* The stack after an interrupt service routine was running */
 typedef struct ISR_STACK_REGS_STRUCT {
+
   unsigned int gs, fs, es, ds;                          /* pushed the segs last */
   unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax;  /* pushed by 'pusha' */
   unsigned int index, error_code;                       /*'push byte #' and ecodes do this */
   unsigned int eip, cs, eflags, useresp, ss;            /* pushed by the processor automatically */ 
-} isr_stack;
+
+} isr_stack_t;
 
 
 void setup_idt();
@@ -53,6 +55,6 @@ void load_idt();
 
 void idt_create_gate(uint8_t index, uint32_t address, uint16_t select, uint8_t attributes);
 void idt_install_gates();
-void fault_handler(isr_stack* stack);
+void fault_handler(isr_stack_t* stack);
 
 #endif

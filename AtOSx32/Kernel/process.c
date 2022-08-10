@@ -1,11 +1,11 @@
 #include "process.h"
 
-aprocess* task = NULL; // Current task
+aprocess_t* task = NULL; // Current task
 
 
 void init_multitasking() {
 
-  aprocess* current_proc = malloc(sizeof(aprocess));
+  aprocess_t* current_proc = malloc(sizeof(aprocess_t));
 
   asm volatile("mov %%cr3, %0" : "=r" (current_proc->address_space));
   
@@ -17,8 +17,9 @@ void init_multitasking() {
     
   task = current_proc;
 
-  aprocess* np = malloc(sizeof(aprocess));
+  aprocess_t* np = malloc(sizeof(aprocess_t));
   np->pid = get_next_pid();
+  np->esp0 = (uint32_t*)page_map((void*)0xe0000000, 1, READ_WRITE | PRESENT);
 
 
 

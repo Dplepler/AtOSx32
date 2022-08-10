@@ -19,7 +19,7 @@ void set_periodic_interrupt() {
 }
 
 /* Called 1024 times a second, keep track of the system's time */
-void rtc_handler(isr_stack* stack) {
+void rtc_handler(isr_stack_t* stack) {
 
   stack = stack;    // Get rid of unused variable warning
 

@@ -47,7 +47,7 @@ typedef struct _TASK_STATE_SEGMENT_STRUCT {
   uint16_t iopb;
   uint32_t ssp;
 
-} __attribute__((packed)) tss;
+} __attribute__((packed)) tss_t;
 
 
 void tss_install();

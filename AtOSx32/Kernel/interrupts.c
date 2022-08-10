@@ -1,7 +1,7 @@
 #include "interrupts.h"
 
-static interrupt_descriptor idt[IDT_SIZE];
-static idtptr idt_ptr;
+static interrupt_descriptor_t idt[IDT_SIZE];
+static idtptr_t idt_ptr;
 
 extern void isr0();
 extern void isr1();
@@ -47,8 +47,8 @@ void setup_idt() {
 
 void init_idt() {
   
-  idt_ptr.limit = sizeof(interrupt_descriptor) * IDT_SIZE - 1;
-  memset(idt, 0, sizeof(interrupt_descriptor) * IDT_SIZE);
+  idt_ptr.limit = sizeof(interrupt_descriptor_t) * IDT_SIZE - 1;
+  memset(idt, 0, sizeof(interrupt_descriptor_t) * IDT_SIZE);
   idt_ptr.offset = (uint32_t)&idt;
 }
 
@@ -103,7 +103,7 @@ void idt_install_gates() {
   load_idt();      // Reload  
 }
 
-void fault_handler(isr_stack* stack) {
+void fault_handler(isr_stack_t* stack) {
 
   if ((stack->index & 0xFF) > 31) { return; }
   if ((stack->index & 0xFF) > 18) { PANIC("Reserved"); }    // Exceptions 19-31 are reserved

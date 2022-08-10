@@ -19,8 +19,8 @@ static inline void cpu_load_gdt(void* addr) {
   __asm__ ("lgdt (%0)\n" :: "r" (addr));
 }
 
-static inline void cpu_load_tss(void* addr) {
-  __asm__ __volatile__ ("ltr %%ax"::"a"(addr));
+static inline void cpu_load_tss() {
+  __asm__ __volatile__ ("mov $0x28, %ax\nltr %ax");
 }
 
 /* Set interrupts */

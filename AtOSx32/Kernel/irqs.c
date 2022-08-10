@@ -20,7 +20,7 @@ extern void irq15();
 void* irq_routines[16] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
                           &rtc_handler, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 
-void irq_install_handler(uint8_t irq, void(*handler)(isr_stack* stack)) {
+void irq_install_handler(uint8_t irq, void(*handler)(isr_stack_t* stack)) {
   irq_routines[irq] = handler;
 }
 
@@ -70,9 +70,9 @@ void init_irq() {
 }
 
 /* Handle a default interrupt request */
-void irq_handler(isr_stack* stack) {
+void irq_handler(isr_stack_t* stack) {
   
-  void (*handler)(isr_stack* stack) = irq_routines[(stack->index & 0xFF) - 0x20]; 
+  void (*handler)(isr_stack_t* stack) = irq_routines[(stack->index & 0xFF) - 0x20]; 
   
   if (handler) { (*handler)(stack); }
 

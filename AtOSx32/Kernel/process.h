@@ -27,7 +27,7 @@ typedef struct _PROCESS_CONTROL_BLOCK_STRUCT {
   uint32_t pid;
   uint32_t curr_cpu_time;
 
-} __attribute__((packed)) aprocess, athread;
+} __attribute__((packed)) aprocess_t, athread_t;
 
 
 

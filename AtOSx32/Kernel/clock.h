@@ -39,7 +39,7 @@ enum CMOS_PORTS {
 
 void setup_clock();
 void set_periodic_interrupt();
-void rtc_handler(isr_stack* stack);
+void rtc_handler(isr_stack_t* stack);
 void sleep(unsigned long sec);
 
 cmos_time read_rtc();
