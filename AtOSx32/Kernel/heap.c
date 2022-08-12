@@ -119,7 +119,7 @@ heap_header_t* heap_allocate_header(unsigned int size) {
 }
 
 /* Allocate dynamic memory */
-void* malloc(size_t size) {
+void* kmalloc(size_t size) {
 
   uint8_t index = heap_get_index(size);
   heap_header_t* header = free_blocks[index];
@@ -168,17 +168,17 @@ void free(void* ptr) {
 }
 
 /* Resize an allocated memory block */
-void* realloc(void* ptr, size_t size) {
+void* krealloc(void* ptr, size_t size) {
 
   /* For special cases */
-  if (!ptr) { return malloc(size); }
+  if (!ptr) { return kmalloc(size); }
   if (!size) { free(ptr); return NULL; }
 
   heap_header_t* header = (heap_header_t*)((unsigned long)ptr - sizeof(heap_header_t));
   if (header->req_size == size) { return ptr; }
 
   /* Normal reallocation */
-  void* np = malloc(size);
+  void* np = kmalloc(size);
   
   memcpy(np, ptr, (header->req_size > size ? size : header->req_size));
 
@@ -187,9 +187,9 @@ void* realloc(void* ptr, size_t size) {
 }
 
 /* Allocate and reset dynamic memory */
-void* calloc(size_t n, size_t size) {
+void* kcalloc(size_t n, size_t size) {
 
-  void* ptr = malloc(n * size);
+  void* ptr = kmalloc(n * size);
   memset(ptr, 0, n * size);
 
   return ptr;

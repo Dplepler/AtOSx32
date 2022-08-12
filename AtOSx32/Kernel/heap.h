@@ -33,9 +33,9 @@ static inline size_t heap_get_page_count(size_t length) {
   return (length / PAGE_SIZE) + ((length % PAGE_SIZE) ? 1 : 0);
 } 
 
-void* malloc(size_t size);
-void* realloc(void* ptr, size_t size);
-void* calloc(size_t n, size_t size);
+void* kmalloc(size_t size);
+void* krealloc(void* ptr, size_t size);
+void* kcalloc(size_t n, size_t size);
 
 void free(void* ptr);
 void heap_insert_unused_header(heap_header_t* header);

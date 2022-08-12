@@ -19,6 +19,14 @@ static inline void cpu_load_gdt(void* addr) {
   __asm__ ("lgdt (%0)\n" :: "r" (addr));
 }
 
+static inline uint32_t* cpu_get_address_space() {
+
+  uint32_t* cr3;
+  __asm__ __volatile__ ("mov %%cr3, %0" : "=r" (cr3));
+
+  return cr3;
+}
+
 static inline void cpu_load_tss() {
   __asm__ __volatile__ ("mov $0x28, %ax\nltr %ax");
 }

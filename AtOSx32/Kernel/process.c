@@ -5,23 +5,27 @@ aprocess_t* task = NULL; // Current task
 
 void init_multitasking() {
 
-  aprocess_t* current_proc = malloc(sizeof(aprocess_t));
+  aprocess_t* current_proc = kmalloc(sizeof(aprocess_t));
 
-  asm volatile("mov %%cr3, %0" : "=r" (current_proc->address_space));
-  
+  current_proc->state = TASK_ACTIVE;
+
+  current_proc->address_space = cpu_get_address_space(); 
   current_proc->pid = get_next_pid();
-  current_proc->esp0 = (uint32_t*)page_map((void*)0xe0000000, 1, READ_WRITE | PRESENT);
+  current_proc->esp0 = (uint32_t*)page_map((void*)KERNEL_STACK, 1, READ_WRITE | PRESENT);   // Actually create a stack
   
-  asm volatile("mov %0, %%esp" : : "r" (current_proc->esp0));
   current_proc->esp = current_proc->esp0;
-    
+
+  for (unsigned int i = 0; i < 100; i++) { asm volatile ("push $0x69"); }
+  //asm volatile("mov %0, %%esp" : : "r" (current_proc->esp0));
+  while(1) {}  
   task = current_proc;
 
-  aprocess_t* np = malloc(sizeof(aprocess_t));
+  while(1) {}
+
+  /*aprocess_t* np = kmalloc(sizeof(aprocess_t));
   np->pid = get_next_pid();
-  np->esp0 = (uint32_t*)page_map((void*)0xe0000000, 1, READ_WRITE | PRESENT);
-
-
+  np->esp0 = kmalloc(0x1000);*/
+  
 
 }
 
@@ -30,3 +34,10 @@ uint32_t get_next_pid() {
   return next_pid++;
 }
 
+void relocate_kernel(uint32_t* new_addr, uint32_t* old_addr, size_t n) {
+
+  
+
+
+
+}
