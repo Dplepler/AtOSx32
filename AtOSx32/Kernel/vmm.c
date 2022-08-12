@@ -56,19 +56,15 @@ pgulong_t* page_physical_address(pgulong_t* addr) {
   return (pgulong_t*)((pt_addr[pt_index] & ~0xFFF) + ((pgulong_t)addr & 0xFFF));   
 }
 
-/*
-pd_remove_entry removes a page table from the page directory
-Input: Page entry's virtual address, note that an offset to the page table can be given and will be ignored'
-Output: True if succeeded, otherwise false
-*/
+/* pd_remove_entry removes a page table from the page directory
+Output: True if succeeded, otherwise false */
 bool pd_remove_entry(pgulong_t* addr) {
 
   if (!page_is_aligned(addr)) { return false; }   // Address should always be page aligned
 
   pgulong_t pd_index = pd_get_entry_index(addr);  // Page directory index
 
-  pd_flush_tlb(pd_index);
-
+  //pd_flush_tlb(pd_index);
   ((pgulong_t*)PD_ADDRESS)[pd_index] = READ_WRITE;       // Mark as unused
 
   return true;
@@ -82,50 +78,66 @@ pgulong_t* page_make_address(pgulong_t pd_index, pgulong_t pt_index) {
   return (pgulong_t*)addr;
 }
 
-int page_get_free_memory_index(size_t req_pd_entries, size_t req_pt_entries) {
+/* Gets offset to possible contigious unused data in the given length, used when length > 4mb */
+pgulong_t* page_memory_above4mb(size_t length, int* err) {
 
-  req_pt_entries -= (0x400 * req_pd_entries);
+  size_t req_pt_entries = length / 0x1000;
+  if (length % 0x1000) { req_pt_entries++; }
+
+  size_t req_pd_entries = length / 0x400000;
+  req_pt_entries -= (ENTRIES * req_pd_entries);
 
   pgulong_t* addr = NULL;
 
   for (uint16_t i = 1; i < ENTRIES; i++) {
+
     if (ENTRIES - i < (int)req_pd_entries) { break; }
 
     uint32_t i2 = i;
     for (; i2 < i + req_pd_entries; i2++) {
-      if (i2 > ENTRIES) { return ~0; }
+
+      if (i2 > ENTRIES) { *err = NOT_ENOUGH_SPACE; return NULL; }
+
       addr = (pgulong_t*)((pgulong_t*)PD_ADDRESS)[i2];
+
       if (*addr & PRESENT) { break; }                     // Bad
-      if (i2 == i + req_pd_entries - 1) { break; }  // Good
+      if (i2 == i + req_pd_entries - 1) { break; }        // Good
     }
 
     if (i2 == i + req_pd_entries - 1) {
-      if (!req_pt_entries) { return (int)i; }   // We're done
-      if (i2 == ENTRIES) { break; }             // Not enough space for extra page table entries
-      addr = (pgulong_t*)((pgulong_t*)PD_ADDRESS)[i2 + 1];  // Next page directory
-      if (!((pgulong_t)addr & PRESENT)) { return (int)i; }  // PD is empty, we can use it
+
+      if (!req_pt_entries) { return page_make_address(i, 0); }   // We're done
+                                                                 
+      if (i2 == ENTRIES) { break; }  // Not enough space for extra page table entries
+                                     
+      addr = (pgulong_t*)((pgulong_t*)PD_ADDRESS)[i2 + 1];  // Next page directory                                                           
+      if (!((pgulong_t)addr & PRESENT)) { return page_make_address(i, 0); }  // PD is empty, we can use it
+                                                                             
       for (uint32_t i3 = 0; i3 < req_pt_entries; i3++) {
-        if (addr[i3] & PRESENT) { break; }                        // Bad
-        if (i3 == req_pt_entries - 1) { return (int)i; }    // Good
+        if (addr[i3] & PRESENT) { break; }                                    // Bad
+        if (i3 == req_pt_entries - 1) { return page_make_address(i, 0); }     // Good
       }
     }
   }
 
-  return ~0;
+  *err = NOT_ENOUGH_SPACE;
+  return NULL;  // Unsuccesful
 }
 
-/*
-page_get_free_pt_memory_index returns an address that contains req_pt_entries * 4kb of free contigious memory
-Input: Required amount of page table entries (n bytes * 4kb of wanted memory)
-Output: Virtual address containing the offset of the free memory, err will contain the error if there is one
-*/
-pgulong_t* page_get_free_pt_memory_index(size_t req_pt_entries, int* err) {
+/* Gets offset to possible contigious unused data in the given length, used when length <= 4mb */
+pgulong_t* page_memory_under4mb(size_t length, int* err) {
+
+  pgulong_t req_pt_entries = length / 0x1000;
+  if (length % 0x1000) { req_pt_entries++; }
 
   pgulong_t* addr = NULL;
 
   for (uint16_t i = 1; i < ENTRIES; i++) {
+
     addr = page_get_table_address(i);
+
     if (page_is_empty(i)) { return page_make_address(i, 0); }
+
     for (uint16_t i2 = 0; i2 + req_pt_entries <= ENTRIES; i2++) {
       for (uint16_t i3 = i2; i3 < i2 + req_pt_entries; i3++) {
         if (addr[i3] & PRESENT) { i2 = i3; break; }
@@ -139,22 +151,7 @@ pgulong_t* page_get_free_pt_memory_index(size_t req_pt_entries, int* err) {
 }
 
 pgulong_t* page_get_free_addr(size_t length, int* err) {
-
-  int index = 0;
-
-  size_t req_pd_entries = length / 0x400000;
-
-  size_t req_pt_entries = length / 0x1000;
-  if (length % 0x1000) { req_pt_entries++; }
-
-  if (req_pd_entries) {
-    index = page_get_free_memory_index(req_pd_entries, req_pt_entries);
-    if (index == ~0) { *err = NOT_ENOUGH_SPACE; return NULL; }
-    return page_make_address(index, 0);
-  }
-  else {
-    return page_get_free_pt_memory_index(req_pt_entries, err);
-  }
+  return length > 0x400000 ? page_memory_above4mb(length, err) : page_memory_under4mb(length, err);
 }
 
 /*
