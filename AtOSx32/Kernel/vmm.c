@@ -33,19 +33,17 @@ pgulong_t pd_get_entry_index(pgulong_t* addr) {
   return (pgulong_t)addr >> 22;
 }
 
-/*
-page_get_entry index returns a page table index from a given virtual address
-*/
+/* Gets a page table index from a given virtual address */
 pgulong_t page_get_entry_index(pgulong_t* addr) {
   return (pgulong_t)addr >> 12 & 0x3FF;
 }
 
-/* page_get_table_address returns the address of a page table from a given page directory index */
+/* Gets the address of a page table from a given page directory index */
 pgulong_t* page_get_table_address(uint16_t pd_index) {
   return (pgulong_t*)(PD_OFFSET + (pd_index << 12));
 }
 
-/* page_physical_address converts a virtual address to a physical one */
+/* Converts a virtual address to a physical one */
 pgulong_t* page_physical_address(pgulong_t* addr) {
 
   pgulong_t pd_index = pd_get_entry_index(addr);
@@ -129,13 +127,13 @@ pgulong_t* page_memory_under4mb(size_t length, int* err) {
 
   pgulong_t req_pt_entries = length / 0x1000;
   if (length % 0x1000) { req_pt_entries++; }
-
+  
   pgulong_t* addr = NULL;
 
   for (uint16_t i = 1; i < ENTRIES; i++) {
 
     addr = page_get_table_address(i);
-
+    
     if (page_is_empty(i)) { return page_make_address(i, 0); }
 
     for (uint16_t i2 = 0; i2 + req_pt_entries <= ENTRIES; i2++) {
@@ -165,12 +163,11 @@ pgulong_t* page_map(pgulong_t* addr, size_t pages, uint16_t flags) {
 
   int err = NO_ERROR;
 
-  if (!addr) { addr = page_get_free_addr(pages, &err); }
+  if (!addr) { addr = page_get_free_addr(pages * 0x1000, &err); }
   if (err == NOT_ENOUGH_SPACE) { return NULL; }
-
+  
   pgulong_t pd_index = pd_get_entry_index(addr);
   pgulong_t pt_index = page_get_entry_index(addr);
-
 
   pgulong_t* pt_addr = (((pgulong_t*)PD_ADDRESS)[pd_index] & PRESENT) ? page_get_table_address(pd_index) 
     : pd_assign_table(pd_index, flags);
@@ -221,12 +218,13 @@ Output: Address of new page table
 pgulong_t* pd_assign_table(pgulong_t pd_index, uint16_t flags) {
 
   pgulong_t* pt_phys_addr = palloc();
-  
+   
   ((pgulong_t*)PD_ADDRESS)[pd_index] = ((pgulong_t)pt_phys_addr | (flags & 0xFFF) | PRESENT);
  
   pgulong_t* pt_addr = page_get_table_address(pd_index);
+  
   page_clean(pt_addr);
-
+ 
   return pt_addr;
 }
 
@@ -241,9 +239,7 @@ bool page_is_empty(pgulong_t pd_index) {
 
   pgulong_t* addr = page_get_table_address(pd_index);
 
-  for (uint16_t i = 0; i < ENTRIES; i++) {
-    if (addr[i] & 1) { return false; }
-  }
+  for (uint16_t i = 0; i < ENTRIES; i++) { if (addr[i] & 1) { return false; } }
 
   return true;
 }
@@ -251,26 +247,19 @@ bool page_is_empty(pgulong_t pd_index) {
 void page_clean(pgulong_t* addr) {
 
   if (!page_is_aligned(addr)) { return; }
-  
-  for (uint16_t i = 0; i < ENTRIES; i++) {
-    addr[i] = 0x0;
-  }
 
+  for (uint16_t i = 0; i < ENTRIES; i++) { addr[i] = 0x0; }
   flush_tlb_single(addr);
 }
 
-/*
-Removes a page table from the page directory
-Input: Page table's address to check, Page directory index to remove from
-*/
+/* Removes a page table from the page directory
+Input: Page table's address to check, Page directory index to remove from */
 void pd_remove_empty_pt(pgulong_t pd_index) {
   ((pgulong_t*)PD_ADDRESS)[pd_index] = READ_WRITE;   // Set entry as not present
 }
 
-/*
-pd_flush_tlb flushes all page directory entries
-Input: Page directory entry index
-*/
+/* Flushes all page directory entries
+Input: Page directory entry index */
 void pd_flush_tlb(pgulong_t pd_index) {
 
   pgulong_t* pt_addr = page_get_table_address(pd_index);
@@ -280,9 +269,7 @@ void pd_flush_tlb(pgulong_t pd_index) {
   }
 }
 
-/*
-page_is_aligned checks if an address is page aligned (4k aligned)
-*/
+/* Checks if an address is page aligned (4k aligned) */
 bool page_is_aligned(pgulong_t* addr) {
   return !((pgulong_t)addr << 20);
 }

@@ -15,12 +15,10 @@ void init_multitasking() {
   
   current_proc->esp = current_proc->esp0;
 
-  for (unsigned int i = 0; i < 100; i++) { asm volatile ("push $0x69"); }
+
   //asm volatile("mov %0, %%esp" : : "r" (current_proc->esp0));
   while(1) {}  
   task = current_proc;
-
-  while(1) {}
 
   /*aprocess_t* np = kmalloc(sizeof(aprocess_t));
   np->pid = get_next_pid();
@@ -34,10 +32,4 @@ uint32_t get_next_pid() {
   return next_pid++;
 }
 
-void relocate_kernel(uint32_t* new_addr, uint32_t* old_addr, size_t n) {
 
-  
-
-
-
-}

@@ -20,21 +20,25 @@
 int kmain(void) {
   
   pd_remove_entry(0); 	// Remove identity mapping
-
+  
   /* Initialize terminal interface */
   terminal_initialize();
 
   bitmap_mark_kernel();
-
+  
   perry(25, 5);
 
   setup_gdt();
   setup_idt();
   init_irq();
   setup_clock();
-
+  
   tss_install();
-  init_multitasking();
+
+  int* x = kmalloc(10);
+  PRINT("HI");
+  //init_multitasking();
+  
 
   //int x = 10 / 0;
   //PRINTN(x);

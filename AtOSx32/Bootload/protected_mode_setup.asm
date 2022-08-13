@@ -63,17 +63,17 @@ init_protected_mode:
 	mov dword [edi], PD_PHY_OFFSET
 	or dword [edi], 3
 
-	; To let the bootloader continue without failing, we will identity map the first 4 Megabytes (i.e first page table)
+	; To let the bootloader continue without failing, we will identity map the first 4 megabytes (i.e first page table)
 	mov edi, PT_PHY_OFFSET		; Some page table offset
 	xor ecx, ecx					    ; Beginning of physical memory
 	xor edx, edx					    ; First directory entry
 
 	call fill_table
 
-	; Now let's map the kernel to make it a higher half kernel
-	mov edi, KPT_PHY_OFFSET  						; Page table to fill
-	mov ecx, 100h										    ; Physical page index where the kernel is located
-	mov edx, KERNEL_ENTRY_OFFSET  	    ; Kernel's page directory index (Will point to 0xC0000000)
+	; Map the kernel to make it a higher half kernel
+	mov edi, KPT_PHY_OFFSET  					; Page table to fill
+	mov ecx, 100h										  ; Physical page index where the kernel is located
+	mov edx, KERNEL_ENTRY_OFFSET  	  ; Kernel's page directory index (will point to 0xC0000000)
 
 	call fill_table
 
@@ -81,10 +81,13 @@ init_protected_mode:
 	add edi, 0FFCh						; Add 1023 * 4 to page offset, point to last table entry
 	mov dword [edi], 0B8003h	; 0xB8000 | 3 = VGA buffer with present and write/read bits set
 
+ ; sub edi, 4                ; Go back to the second last entry
+ ; mov dword [edi], 90003h   ; 0x90000 | 3 = Kernel stack with presenet and write/read bits set
+
 	mov eax, PD_PHY_OFFSET 		; The address that points to the directory table, 1024 entries, 32 bits each
 	mov cr3, eax					    ; We put the address of our directory table in the cr3 register
 
-	mov eax, cr0					; To enable paging we need to set the correct flags in the cr0 register
+	mov eax, cr0					    ; To enable paging we need to set the correct flags in the cr0 register
 	or 	eax, 80000000h
 	mov cr0, eax
 

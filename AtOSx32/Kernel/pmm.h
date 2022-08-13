@@ -31,9 +31,11 @@ extern uint32_t _kernel_start;
 extern uint32_t _kernel_end;
 
 void bitmap_mark_kernel();
+void pallocn(pgulong_t** frames, size_t size);
+
 pgulong_t* palloc();
 pgulong_t* palloc_single();
-void pallocn(pgulong_t** frames, size_t size);
+
 
 
 

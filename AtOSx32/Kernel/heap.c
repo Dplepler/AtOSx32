@@ -104,9 +104,9 @@ void heap_eat_right(heap_header_t* header) {
 /* Create a new header for cases where there aren't any unused ones to use */
 heap_header_t* heap_allocate_header(unsigned int size) {
   
-  size_t page_amount = heap_get_page_count(size); 
+  size_t page_amount = heap_get_page_count(size);  
   heap_header_t* header = (heap_header_t*)page_map(NULL, page_amount, 0);
-
+  
   header->signature = HEAP_SIGNATURE;
   header->size = page_amount * PAGE_SIZE;
   header->req_size = size;
@@ -123,15 +123,15 @@ void* kmalloc(size_t size) {
 
   uint8_t index = heap_get_index(size);
   heap_header_t* header = free_blocks[index];
-  
+ 
   while (header) {
     if (header->size - sizeof(heap_header_t) >= size) { break; }
     header = header->flink;
   }
-
+  
   if (!header) { header = heap_allocate_header(size); header->used = true; }   // Get a new header
   else {
-                           
+
     header->used = true;
     header->req_size = size;
     heap_remove_header(header);   // Remove from free headers
