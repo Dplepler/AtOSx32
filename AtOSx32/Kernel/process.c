@@ -15,10 +15,15 @@ void init_multitasking() {
   
   current_proc->esp = current_proc->esp0;
 
+  for (int i = 0; i < 100; i++) { asm("push $0x69"); }
 
+  memcpy(current_proc->esp0, (uint8_t*)INIT_KERNEL_STACK, 0x1000);   // Relocate kernel stack
+  
   //asm volatile("mov %0, %%esp" : : "r" (current_proc->esp0));
-  while(1) {}  
+
   task = current_proc;
+
+  
 
   /*aprocess_t* np = kmalloc(sizeof(aprocess_t));
   np->pid = get_next_pid();

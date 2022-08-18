@@ -35,9 +35,8 @@ int kmain(void) {
   
   tss_install();
 
-  int* x = kmalloc(10);
-  PRINT("HI");
-  //init_multitasking();
+  
+  init_multitasking();
   
 
   //int x = 10 / 0;

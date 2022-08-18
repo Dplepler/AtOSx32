@@ -4,10 +4,9 @@
 #include <stdint.h>
 #include "heap.h"
 
-#define INIT_KERNEL_STACK 0x90000
-#define KERNEL_STACK      0xe0000000
+#define INIT_KERNEL_STACK 0xC03FE000
+#define KERNEL_STACK      0xE0000000
 #define VIRTUAL_SPACE     0x1000000
-
 
 typedef struct _PROCESS_CONTROL_BLOCK_STRUCT {
 

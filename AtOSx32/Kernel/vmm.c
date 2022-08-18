@@ -9,26 +9,11 @@ void* memset(void* addr, uint8_t c, size_t n) {
   return addr;
 }
 
-void* memcpy(void* s1, const void* s2, size_t n) {
-
-  for (; n >= sizeof(unsigned long); n -= sizeof(unsigned long)) {
-    *(unsigned long*)s1++ = *(unsigned long*)s2++;
-  }
-
-  uint8_t* cdst = (uint8_t*)s1;
-  uint8_t* csrc = (uint8_t*)s2;
-
-  while (n > 0) {
-    *cdst++ = *csrc++;
-    n--;
-  }
-
-  return s1;
+void memcpy(void* s1, const void* s2, size_t n) {
+  for (; n > 0; n--) { *(uint8_t*)s1++ = *(uint8_t*)s2++; }
 }
 
-/*
-pd_get_entry_index returns a page directory index from a given virtual address
-*/
+/* Returns a page directory index from a given virtual address */
 pgulong_t pd_get_entry_index(pgulong_t* addr) {
   return (pgulong_t)addr >> 22;
 }
