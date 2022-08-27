@@ -1,8 +1,8 @@
 #ifndef VMM_H
 #define VMM_H
 
-#include "pmm.h"
-#include "errors.h"
+#include "Memory/pmm.h"
+#include "System/errors.h"
 
 #define PD_ADDRESS      0xFFFFF000  
 #define PD_OFFSET       0xFFC00000  // Used when calculating with different addresses to get a page table 

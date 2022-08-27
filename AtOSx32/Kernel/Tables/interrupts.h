@@ -1,8 +1,8 @@
 #ifndef INTERRUPTS_H
 #define INTERRUPTS_H
 
-#include "vmm.h"
-#include "kernel_screen.h"
+#include "Memory/vmm.h"
+#include "Drivers/kernel_screen.h"
 
 #define IDT_SIZE 256
 

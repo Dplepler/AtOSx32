@@ -2,9 +2,9 @@
 #define GDT_H
 
 #include <stdint.h>
-#include "hal.h"
-#include "vmm.h"
-#include "tss.h"
+#include "Memory/vmm.h"
+#include "System/hal.h"
+#include "Tables/tss.h"
 
 #define GDT_SIZE 6
 

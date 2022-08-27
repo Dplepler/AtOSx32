@@ -2,27 +2,21 @@
 #define KERNEL_KEYBOARD_H
 
 #include <stdbool.h>
-#include "hal.h"
+#include "../System/hal.h"
 
-/*
-Keyboard encoder is accessible through port 0x60
-*/
+/* Keyboard encoder is accessible through port 0x60 */
 enum KEYBOARD_ENCODER_IO {
   KEYBOARD_ENC_INPUT_BUF	=	0x60,
   KEYBOARD_ENC_CMD_REG	=	0x60
 };
  
-/*
-Keyboard controller is accessible through port 0x64
-*/
+/* Keyboard controller is accessible through port 0x64 */
 enum KEYBOARD_CTRL_IO {
   KEYBOARD_CTRL_STATS_REG =	0x64,
   KEYBOARD_CTRL_CMD_REG   =	0x64
 };
 
-/*
-Status register flag locations
-*/
+/* Status register flag locations */
 enum KEYBOARD_CTRL_STATS_MASK {
 
   KEYBOARD_CTRL_STATS_MASK_OUT_BUF	=	1,		//00000001

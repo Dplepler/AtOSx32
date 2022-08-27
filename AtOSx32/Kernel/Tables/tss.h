@@ -2,7 +2,7 @@
 #define TSS_H
 
 #include <stdint.h>
-#include "gdt.h"
+#include "Tables/gdt.h"
 
 #define KERNEL_STACK_SIZE 0x1000 
 

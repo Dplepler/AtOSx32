@@ -1,7 +1,7 @@
 #ifndef HEAP_H
 #define HEAP_H
 
-#include "vmm.h"
+#include "Memory/vmm.h"
 
 #define HEAP_SIGNATURE 0xB00B5555
 

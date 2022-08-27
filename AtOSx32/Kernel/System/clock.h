@@ -1,8 +1,8 @@
 #ifndef CLOCK_H
 #define CLOCK_H
 
-#include "hal.h"
-#include "interrupts.h"
+#include "System/hal.h"
+#include "Tables/interrupts.h"
 #include "utils.h"
 
 #define HERTZ(ms) (1024 * (ms / 1000.0))

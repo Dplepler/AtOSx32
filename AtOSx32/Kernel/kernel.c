@@ -8,14 +8,14 @@
 #error "You need an ix86-elf compiler to build AtOS"
 #endif
 
-#include "kernel_keyboard.h"
-#include "gdt.h"
-#include "interrupts.h"
-#include "irqs.h"
-#include "heap.h"
-#include "clock.h"
-#include "tss.h"
-#include "process.h"
+#include "Drivers/kernel_keyboard.h"
+#include "Tables/gdt.h"
+#include "Tables/interrupts.h"
+#include "Tables/irqs.h"
+#include "Memory/heap.h"
+#include "System/clock.h"
+#include "Tables/tss.h"
+#include "Process/process.h"
 
 int kmain(void) {
   

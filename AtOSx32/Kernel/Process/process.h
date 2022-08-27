@@ -2,11 +2,13 @@
 #define PROCESS_H
 
 #include <stdint.h>
-#include "heap.h"
+#include "Memory/heap.h"
 
 #define INIT_KERNEL_STACK 0xC03FE000
 #define KERNEL_STACK      0xE0000000
 #define VIRTUAL_SPACE     0x1000000
+#define STACK_SIZE        0x1000
+
 
 typedef struct _PROCESS_CONTROL_BLOCK_STRUCT {
 

@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include "hal.h"
+#include "System/hal.h"
 #include "utils.h"
 
 #define VGA_BUFFER_ADDR 0xC03FF000

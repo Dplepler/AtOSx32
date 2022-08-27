@@ -1,5 +1,4 @@
 #include "clock.h"
-#include "kernel_screen.h"
 
 static unsigned long counter = 0;
 

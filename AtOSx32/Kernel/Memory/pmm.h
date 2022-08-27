@@ -3,8 +3,8 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "hal.h"
-#include "kernel_screen.h"
+#include "System/hal.h"
+#include "Drivers/kernel_screen.h"
 
 #define KERNEL_PHYSICAL 0x100000
 
