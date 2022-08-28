@@ -34,8 +34,7 @@ int kmain(void) {
   setup_clock();
   
   tss_install();
-
-  
+ 
   init_multitasking();
   
 
