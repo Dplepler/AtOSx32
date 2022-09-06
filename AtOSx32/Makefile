@@ -30,10 +30,10 @@ OBJC = $(C_SOURCES:.c=.o)
 OBJS = $(S_SOURCES:.asm=.o)
 
 Kernel/kernel.bin : Kernel/kernel_start.o ${OBJS} ${OBJC}
-	i686-elf-gcc -T linker.ld -o $@ -ffreestanding -nostdlib Kernel/kernel_start.o $^ -lgcc
+	gcc -T linker.ld -o $@ -ffreestanding -nostdlib Kernel/kernel_start.o $^ -lgcc
 
 %.o : %.c
-	i686-elf-gcc -c $< -o $@ -I./Kernel -std=gnu99 -ffreestanding -Wall -Wextra
+	gcc -c $< -o $@ -I./Kernel -std=gnu99 -ffreestanding -Wall -Wextra
 
 %.o : %.asm
 	nasm $< -f elf32 -o $@

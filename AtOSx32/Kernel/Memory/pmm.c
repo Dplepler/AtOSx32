@@ -14,10 +14,8 @@ void bitmap_mark_kernel() {
   for (uint32_t i = 0; i <= kernel_pages; i++) { MARK_USED(frame_bitmap, (kernel_first_index + i)); }
 }
 
-/*
-palloc_single allocates a single free page and marks it as used
-Output: Previously unused page frame's physical address
-*/
+/* Allocates a single free page and marks it as used
+Output: Previously unused page frame's physical address */
 pgulong_t* palloc_single() {
 
   uint32_t i = 0x100; 

@@ -50,7 +50,7 @@ bool cmos_update_in_progress();
 char* dtoa(cmos_time date);
 char* ttoa(cmos_time time);
 
-  unsigned long clock_time();
+unsigned long clock_time();
 
 #endif
 

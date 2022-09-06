@@ -6,6 +6,7 @@ aprocess_t* task = NULL; // Current task
 void init_multitasking() {
 
   cli();
+
   aprocess_t* current_proc = kmalloc(sizeof(aprocess_t));
 
   current_proc->state = TASK_ACTIVE;
