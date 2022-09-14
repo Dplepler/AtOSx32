@@ -29,10 +29,12 @@ void create_task(uint8_t state, uint32_t* address_space) {
   current_proc->state = state;
   current_proc->address_space = address_space;
   current_proc->pid = get_next_pid();
-  current_proc->esp0 = kmalloc(STACK_SIZE) + KERNEL_STACK - 0x4;   // Create new stack
-
-  current_proc->esp = current_proc->esp0 - 0x4;
+  current_proc->esp0 = ((uint32_t)kmalloc(STACK_SIZE)) + KERNEL_STACK - 0x4;   // Create new stack
   
+  
+  
+  *((uint32_t*)task->esp) = current_proc;
+  task->esp -= 0x4;
 
   sti();
 }

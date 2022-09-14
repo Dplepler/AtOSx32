@@ -4,8 +4,9 @@ debug: clean DiskImages/AtOSDebug.img
 gdb: 	 clean DiskImages/AtOSGDB.img
 
 clean:
-	rm -rf Kernel/*.bin Kernel/*.o
-	rm -rf Bootload/*.bin
+	rm -rf  $(shell find Kernel/ -type f -name '*.o')
+	rm -rf  $(shell find Kernel/ -type f -name '*.bin')
+	rm -rf  $(shell find Bootload/ -type f -name '*.bin')
 
 DiskImages/AtOS.img: makeImg
 	qemu-system-x86_64 DiskImages/AtOS.img
@@ -30,10 +31,10 @@ OBJC = $(C_SOURCES:.c=.o)
 OBJS = $(S_SOURCES:.asm=.o)
 
 Kernel/kernel.bin : Kernel/kernel_start.o ${OBJS} ${OBJC}
-	gcc -T linker.ld -o $@ -ffreestanding -nostdlib Kernel/kernel_start.o $^ -lgcc
+	i686-elf-gcc -T linker.ld -o $@ -ffreestanding -nostdlib Kernel/kernel_start.o $^ -lgcc
 
 %.o : %.c
-	gcc -c $< -o $@ -I./Kernel -std=gnu99 -ffreestanding -Wall -Wextra
+	i686-elf-gcc -c $< -o $@ -I./Kernel -std=gnu99 -ffreestanding -Wall -Wextra
 
 %.o : %.asm
 	nasm $< -f elf32 -o $@
