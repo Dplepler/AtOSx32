@@ -47,9 +47,12 @@ void heap_remove_header(heap_header_t* header) {
    so we split it to a new header */
 void heap_split_header(heap_header_t* header) {
 
+  if (header->size == header->req_size) { return; }
+
   heap_header_t* split_header = (heap_header_t*)((unsigned long)header + sizeof(heap_header_t) + header->req_size);
-  
+
   split_header->size = split_header->req_size = header->size - header->req_size - sizeof(heap_header_t);
+
   split_header->req_size -= sizeof(heap_header_t);
   if (!split_header->size) { return; }
 
@@ -122,6 +125,7 @@ heap_header_t* heap_allocate_header(unsigned int size) {
 void* kmalloc(size_t size) {
 
   uint8_t index = heap_get_index(size);
+
   heap_header_t* header = free_blocks[index];
  
   while (header) {
