@@ -37,8 +37,10 @@ typedef struct _PROCESS_CONTROL_BLOCK_STRUCT {
 
 
 void init_multitasking();
+
 uint32_t* relocate_stack(uint32_t* address, size_t size);
 
 uint32_t get_next_pid();
 
+aprocess_t* create_task(uint8_t state, uint32_t* address_space);
 #endif

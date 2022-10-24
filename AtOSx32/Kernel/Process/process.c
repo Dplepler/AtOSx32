@@ -20,23 +20,21 @@ void init_multitasking() {
   sti();
 }
 
-void create_task(uint8_t state, uint32_t* address_space) { 
+aprocess_t* create_task(uint8_t state, uint32_t* address_space) { 
 
   cli();
   
-  aprocess_t* current_proc = kmalloc(sizeof(aprocess_t));
+  aprocess_t* task = kmalloc(sizeof(aprocess_t));
   
-  current_proc->state = state;
-  current_proc->address_space = address_space;
-  current_proc->pid = get_next_pid();
-  current_proc->esp0 = ((uint32_t)kmalloc(STACK_SIZE)) + KERNEL_STACK - 0x4;   // Create new stack
+  task->state = state;
+  task->address_space = address_space;
+  task->pid = get_next_pid();
+  task->esp0 = ((uint32_t)kmalloc(STACK_SIZE)) + KERNEL_STACK - 0x4;   // Create new stack
   
-  
-  
-  *((uint32_t*)task->esp) = current_proc;
-  task->esp -= 0x4;
 
   sti();
+
+  return task;
 }
 
 
