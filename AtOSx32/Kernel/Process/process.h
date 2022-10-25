@@ -10,6 +10,7 @@
 #define STACK_SIZE        0x1000
 
 
+
 typedef struct _PROCESS_CONTROL_BLOCK_STRUCT {
 
   uint32_t eip;
@@ -19,7 +20,7 @@ typedef struct _PROCESS_CONTROL_BLOCK_STRUCT {
 
   uint32_t* address_space; 
   
-  struct _PROCESS_CONTROL_BLOCK_STRUCT* task_flink;
+  struct _PROCESS_CONTROL_BLOCK_STRUCT* flink;
   
   enum {
 
@@ -34,7 +35,7 @@ typedef struct _PROCESS_CONTROL_BLOCK_STRUCT {
 
 } __attribute__((packed)) aprocess_t, athread_t;
 
-
+extern void switch_task(struct _PROCESS_CONTROL_BLOCK_STRUCT* new_task);
 
 void init_multitasking();
 
@@ -42,5 +43,10 @@ uint32_t* relocate_stack(uint32_t* address, size_t size);
 
 uint32_t get_next_pid();
 
+
+
 aprocess_t* create_task(uint8_t state, uint32_t* address_space);
+aprocess_t* run_task(uint32_t pid);
+aprocess_t* find_task(uint32_t pid);
+
 #endif

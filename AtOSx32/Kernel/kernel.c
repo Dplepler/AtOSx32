@@ -27,7 +27,9 @@ int kmain(void) {
  
   init_multitasking();
 
-  aprocess_t* task = create_task(TASK_ACTIVE, kmalloc(0x1000));
+  aprocess_t* taskk = create_task(TASK_ACTIVE, kmalloc(0x1000));
+    
+    
 
   /* while (true) {
     terminal_draw_rec(0, 0, 9, 1, 8); 
