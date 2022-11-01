@@ -1,4 +1,4 @@
-[extern task]   ; Current task
+[extern task]       ; Current task
 [extern task_state] ; TSS
 
 [global switch_task]
@@ -14,7 +14,10 @@ switch_task:
   
   mov esi, dword [esp+0x8]  ; Get new task
 
+  jmp $
   mov esp, dword [esi+0x8]  ; Set esp
+
+  jmp $
   mov eax, dword [esi+0xC]  ; CR3 (Address space)
   mov edx, cr3
 

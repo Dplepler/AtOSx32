@@ -26,9 +26,8 @@ int kmain(void) {
   tss_install();
  
   init_multitasking();
-
-  aprocess_t* taskk = create_task(TASK_ACTIVE, kmalloc(0x1000));
-    
+  
+  run_task(create_task(TASK_ACTIVE, kmalloc(0x1000)));
     
 
   /* while (true) {

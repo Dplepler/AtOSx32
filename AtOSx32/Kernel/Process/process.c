@@ -26,12 +26,18 @@ aprocess_t* create_task(uint8_t state, uint32_t* address_space) {
   cli();
   
   aprocess_t* new_task = kmalloc(sizeof(aprocess_t));
+
+  PRINTNH(new_task);
+  NL;
   
   new_task->state = state;
   new_task->address_space = address_space;
   new_task->pid = get_next_pid();
-  new_task->esp0 = ((uint32_t)kmalloc(STACK_SIZE)) + KERNEL_STACK - 0x4;   // Create new stack
+  new_task->esp0 = ((uint32_t)kmalloc(STACK_SIZE)) + STACK_SIZE - 0x4;   // Create new stack
   
+  new_task->esp = new_task->esp0 - 0x4;
+
+  PRINTNH(new_task->esp);
   task->flink = new_task; 
 
   sti();
@@ -39,11 +45,13 @@ aprocess_t* create_task(uint8_t state, uint32_t* address_space) {
   return new_task;
 }
 
-aprocess_t* run_task(uint32_t pid) {
+void run_task(aprocess_t* new_task) {
 
-  switch_task(find_task(pid));
-
-
+  while(1) {}
+  PRINTNH(new_task->esp);
+  NL;
+  PRINTNH(new_task);
+  switch_task(new_task); 
 }
 
 aprocess_t* find_task(uint32_t pid) {

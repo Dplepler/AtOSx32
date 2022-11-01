@@ -1,4 +1,4 @@
-; This file includes the Disk address packet, we will use this to write the kernel into memory
+; This file includes the Disk Address Packet, we will use this to write the kernel into memory
 
 DAP_START:
 
