@@ -27,7 +27,7 @@ int kmain(void) {
  
   init_multitasking();
   
-  run_task(create_task(TASK_ACTIVE, kmalloc(0x1000)));
+  run_task(create_task(TASK_ACTIVE, create_address_space()));
     
 
   /* while (true) {

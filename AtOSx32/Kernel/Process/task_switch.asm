@@ -8,16 +8,12 @@
 switch_task:
   
   push esi
-
+  
   mov esi, dword [task]
   mov dword [esi+0x8], esp  ; Set previous task's esp
   
   mov esi, dword [esp+0x8]  ; Get new task
 
-  jmp $
-  mov esp, dword [esi+0x8]  ; Set esp
-
-  jmp $
   mov eax, dword [esi+0xC]  ; CR3 (Address space)
   mov edx, cr3
 
@@ -28,6 +24,9 @@ switch_task:
 
 .continue:
 
+jmp $
+  mov esp, dword [esi+0x8]  ; Set esp
+  
   mov dword [task], esi     ; Current task = new task
   mov eax, dword [esi+0x4]  ; Get new task's kernel stack
   ; Set the tss's esp0 accordingly

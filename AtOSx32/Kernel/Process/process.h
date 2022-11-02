@@ -6,9 +6,7 @@
 
 #define INIT_KERNEL_STACK 0xC03FE000
 #define KERNEL_STACK      0xE0000000
-#define VIRTUAL_SPACE     0x1000000
 #define STACK_SIZE        0x1000
-
 
 
 typedef struct _PROCESS_CONTROL_BLOCK_STRUCT {
@@ -40,6 +38,7 @@ extern void switch_task(struct _PROCESS_CONTROL_BLOCK_STRUCT* new_task);
 void init_multitasking();
 void run_task(aprocess_t* new_task);
 
+uint32_t* create_address_space();
 uint32_t* relocate_stack(uint32_t* address, size_t size);
 uint32_t get_next_pid();
 

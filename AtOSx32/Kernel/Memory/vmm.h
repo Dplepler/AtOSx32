@@ -7,7 +7,9 @@
 #define PD_ADDRESS      0xFFFFF000  
 #define PD_OFFSET       0xFFC00000  // Used when calculating with different addresses to get a page table 
 
-#define ENTRIES 0x400     // Amount of table entries
+#define PD_SIZE         0x1000
+#define PD_ENTRIES      0x400       // Amount of table entries
+
                           
 enum PAGE_FLAGS {
 

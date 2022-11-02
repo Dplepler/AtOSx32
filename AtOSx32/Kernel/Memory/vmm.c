@@ -39,7 +39,8 @@ pgulong_t* page_physical_address(pgulong_t* addr) {
   return (pgulong_t*)((pt_addr[pt_index] & ~0xFFF) + ((pgulong_t)addr & 0xFFF));   
 }
 
-/* pd_remove_entry removes a page table from the page directory
+
+/* Removes a page table from the page directory
 Output: True if succeeded, otherwise false */
 bool pd_remove_entry(pgulong_t* addr) {
 
@@ -64,22 +65,22 @@ pgulong_t* page_make_address(pgulong_t pd_index, pgulong_t pt_index) {
 /* Gets offset to possible contigious unused data in the given length, used when length > 4mb */
 pgulong_t* page_memory_above4mb(size_t length, int* err) {
 
-  size_t req_pt_entries = length / 0x1000;
-  if (length % 0x1000) { req_pt_entries++; }
+  size_t req_pt_entries = length / PAGE_SIZE;
+  if (length % PAGE_SIZE) { req_pt_entries++; }
 
   size_t req_pd_entries = length / 0x400000;
-  req_pt_entries -= (ENTRIES * req_pd_entries);
+  req_pt_entries -= (PD_ENTRIES * req_pd_entries);
 
   pgulong_t* addr = NULL;
 
-  for (uint16_t i = 1; i < ENTRIES; i++) {
+  for (uint16_t i = 1; i < PD_ENTRIES; i++) {
 
-    if (ENTRIES - i < (int)req_pd_entries) { break; }
+    if (PD_ENTRIES - i < (int)req_pd_entries) { break; }
 
     uint32_t i2 = i;
     for (; i2 < i + req_pd_entries; i2++) {
 
-      if (i2 > ENTRIES) { *err = NOT_ENOUGH_SPACE; return NULL; }
+      if (i2 > PD_ENTRIES) { *err = NOT_ENOUGH_SPACE; return NULL; }
 
       addr = (pgulong_t*)((pgulong_t*)PD_ADDRESS)[i2];
 
@@ -91,7 +92,7 @@ pgulong_t* page_memory_above4mb(size_t length, int* err) {
 
       if (!req_pt_entries) { return page_make_address(i, 0); }   // We're done
                                                                  
-      if (i2 == ENTRIES) { break; }  // Not enough space for extra page table entries
+      if (i2 == PD_ENTRIES) { break; }  // Not enough space for extra page table entries
                                      
       addr = (pgulong_t*)((pgulong_t*)PD_ADDRESS)[i2 + 1];  // Next page directory                                                           
       if (!((pgulong_t)addr & PRESENT)) { return page_make_address(i, 0); }  // PD is empty, we can use it
@@ -110,18 +111,18 @@ pgulong_t* page_memory_above4mb(size_t length, int* err) {
 /* Gets offset to possible contigious unused data in the given length, used when length <= 4mb */
 pgulong_t* page_memory_under4mb(size_t length, int* err) {
 
-  pgulong_t req_pt_entries = length / 0x1000;
-  if (length % 0x1000) { req_pt_entries++; }
+  pgulong_t req_pt_entries = length / PAGE_SIZE;
+  if (length % PAGE_SIZE) { req_pt_entries++; }
   
   pgulong_t* addr = NULL;
 
-  for (uint16_t i = 1; i < ENTRIES; i++) {
+  for (uint16_t i = 1; i < PD_ENTRIES; i++) {
 
     addr = page_get_table_address(i);
     
     if (page_is_empty(i)) { return page_make_address(i, 0); }
 
-    for (uint16_t i2 = 0; i2 + req_pt_entries <= ENTRIES; i2++) {
+    for (uint16_t i2 = 0; i2 + req_pt_entries <= PD_ENTRIES; i2++) {
       for (uint16_t i3 = i2; i3 < i2 + req_pt_entries; i3++) {
         if (addr[i3] & PRESENT) { i2 = i3; break; }
         if (i3 == i2 + req_pt_entries - 1) { return page_make_address(i, i2); }
@@ -148,7 +149,7 @@ pgulong_t* page_map(pgulong_t* addr, size_t pages, uint16_t flags) {
 
   int err = NO_ERROR;
 
-  if (!addr) { addr = page_get_free_addr(pages * 0x1000, &err); }
+  if (!addr) { addr = page_get_free_addr(pages * PAGE_SIZE, &err); }
   if (err == NOT_ENOUGH_SPACE) { return NULL; }
   
   pgulong_t pd_index = pd_get_entry_index(addr);
@@ -224,7 +225,7 @@ bool page_is_empty(pgulong_t pd_index) {
 
   pgulong_t* addr = page_get_table_address(pd_index);
 
-  for (uint16_t i = 0; i < ENTRIES; i++) { if (addr[i] & 1) { return false; } }
+  for (uint16_t i = 0; i < PD_ENTRIES; i++) { if (addr[i] & 1) { return false; } }
 
   return true;
 }
@@ -233,7 +234,7 @@ void page_clean(pgulong_t* addr) {
 
   if (!page_is_aligned(addr)) { return; }
 
-  for (uint16_t i = 0; i < ENTRIES; i++) { addr[i] = 0x0; }
+  for (uint16_t i = 0; i < PD_ENTRIES; i++) { addr[i] = 0x0; }
   flush_tlb_single(addr);
 }
 
@@ -249,7 +250,7 @@ void pd_flush_tlb(pgulong_t pd_index) {
 
   pgulong_t* pt_addr = page_get_table_address(pd_index);
   
-  for (uint16_t i = 0; i < ENTRIES; i++) {
+  for (uint16_t i = 0; i < PD_ENTRIES; i++) {
     flush_tlb_single((pgulong_t*)pt_addr[i]);
   }
 }

@@ -107,7 +107,7 @@ void heap_eat_right(heap_header_t* header) {
 /* Create a new header for cases where there aren't any unused ones to use */
 heap_header_t* heap_allocate_header(unsigned int size) {
   
-  size_t page_amount = heap_get_page_count(size);  
+  size_t page_amount = heap_get_page_count(size + sizeof(heap_header_t));  
   heap_header_t* header = (heap_header_t*)page_map(NULL, page_amount, 0);
   
   header->signature = HEAP_SIGNATURE;
