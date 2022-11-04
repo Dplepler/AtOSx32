@@ -21,6 +21,15 @@ void init_multitasking() {
   sti();
 }
 
+aprocess_t* create_process(uint8_t state, uint32_t* address_space) {
+
+  aprocess_t* process = create_task(state, address_space);
+
+  process->address_space;
+
+}
+
+
 aprocess_t* create_task(uint8_t state, uint32_t* address_space) { 
 
   cli();
@@ -40,7 +49,14 @@ aprocess_t* create_task(uint8_t state, uint32_t* address_space) {
 }
 
 void run_task(aprocess_t* new_task) {
+  
+  map_higher_half(new_task->address_space);
+
+  PRINTNH(new_task->address_space);
+  while(1) {}
   switch_task(new_task);
+
+
 }
 
 aprocess_t* find_task(uint32_t pid) {
@@ -57,16 +73,7 @@ uint32_t get_next_pid() {
   return next_pid++;
 }
 
-uint32_t* create_address_space() {
-  
-  uint32_t* address_space = kmalloc(PD_SIZE);
 
-  for (uint32_t i = 0; i < PD_ENTRIES; i++) {
-    address_space[i] = READ_WRITE;
-  }
 
-  while(1) {}
-  return address_space;
-}
 
 

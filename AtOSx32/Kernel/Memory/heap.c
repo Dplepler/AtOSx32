@@ -199,3 +199,30 @@ void* kcalloc(size_t n, size_t size) {
   return ptr;
 }
 
+/* Allocate aligned size, alignment type must be a power of 2 
+Must use free_aligned in order to free the memory */
+void* kmalloc_aligned(size_t size, uint32_t alignment) {
+
+  
+  /* 
+  The way this works is we first allocate a size that would certainly fit,
+  so we allocate our size + our alignment (starting the count from 0), 
+  then, to make the pointer actually aligned, we first add our 
+  alignment and then remove all the bits that exist after our alignment bit
+  (because we only accept alignments that are a power of 2, we know how to remove 
+  the right bits, that is the bits lower than the alignment bit), so we basically just
+  floor the pointer to the closest aligned address
+  */
+
+  void* ptr = kmalloc(size + (alignment - 1));
+
+  return (void*)(((uint32_t)ptr + (alignment - 1)) & ~(alignment - 1));
+}
+
+void free_aligned(void* ptr) {
+
+
+
+
+}
+

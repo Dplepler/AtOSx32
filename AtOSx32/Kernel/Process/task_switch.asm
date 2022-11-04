@@ -8,7 +8,7 @@
 switch_task:
   
   push esi
-  
+ 
   mov esi, dword [task]
   mov dword [esi+0x8], esp  ; Set previous task's esp
   
@@ -19,12 +19,11 @@ switch_task:
 
   cmp eax, edx
   je .continue
-  
+ 
   mov cr3, eax  ; Change address space accordingly
-
+  
 .continue:
 
-jmp $
   mov esp, dword [esi+0x8]  ; Set esp
   
   mov dword [task], esi     ; Current task = new task

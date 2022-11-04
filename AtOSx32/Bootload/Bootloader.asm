@@ -103,7 +103,7 @@ check_a20:
 ; Switch to unreal mode so we can load a big big kernel
 unreal_mode:    
 
-	cli 		; Clear interrupts
+	cli 		  ; Clear interrupts
 	push ds		; Save segment
 
 	lgdt [GDT_DESCRIPTOR]	; Load Global Descriptor Table
@@ -117,7 +117,7 @@ unreal_mode:
 
 .continue:
 
-	mov  bx, 0x08        ; Select descriptor 1
+	mov  bx, 0x8         ; Select descriptor 1
 	mov  ds, bx          ; 8h = 1000b
 
 	; Back to real mode
@@ -163,7 +163,7 @@ load_kernel:
 	jmp $
 
 	
-; load DH sectors to ES:BX from drive DL
+; load from disk using a disk address packet 
 load_disk:
 
 	mov ah, 42h	 		; BIOS read sector extended function  

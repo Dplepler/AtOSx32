@@ -8,7 +8,6 @@
 #define KERNEL_STACK      0xE0000000
 #define STACK_SIZE        0x1000
 
-
 typedef struct _PROCESS_CONTROL_BLOCK_STRUCT {
 
   uint32_t eip;

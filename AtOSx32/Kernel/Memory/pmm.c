@@ -7,7 +7,7 @@ void bitmap_mark_kernel() {
 
   size_t kernel_pages = (pgulong_t)(((uint32_t)&_kernel_end) - ((uint32_t)&_kernel_start)) / 0x1000;
 
-  if ((((uint32_t)&_kernel_end) - ((uint32_t)&_kernel_start)) % 0x1000) { kernel_pages++; }      
+  if ((((uint32_t)&_kernel_end) - ((uint32_t)&_kernel_start)) % PAGE_SIZE) { kernel_pages++; }      
   const uint32_t kernel_first_index = KERNEL_PHYSICAL / 0x1000;  
 
   /* Mark all kernel's page frames as used in the bitmap */
@@ -30,7 +30,7 @@ pgulong_t* palloc_single() {
 
   MARK_USED(frame_bitmap, i);
 
-  return (pgulong_t*)(i * 0x1000);     // Return free page frame
+  return (pgulong_t*)(i * FREE_PAGES_OFFSET);     // Return free page frame
 }
 
 /* 

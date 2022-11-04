@@ -138,14 +138,29 @@ pgulong_t* page_get_free_addr(size_t length, int* err) {
   return length > 0x400000 ? page_memory_above4mb(length, err) : page_memory_under4mb(length, err);
 }
 
-/*
+
+/* Map the system's kernel to 3gb in memory */
+void map_higher_half(pgulong_t* address_space) {
+
+  pgulong_t* page_table = page_map(NULL, 1, 0);
+  
+  for (uint32_t i = 0; i < PD_ENTRIES; i++) {
+    page_table[i] = ((0x100 + i) * 0x1000);
+  }
+  
+  address_space[KERNEL_ENTRY_OFFSET] = page_table;
+}
+
+
+  /*
 Maps a physical address to a desired virtual address
-Input: Desired virtual address and entry flags, if no specific address is desired, parameter can be NULL
+Input: Desired virtual address, if no specific address is desired parameter can be NULL
 Length in pages, flags
 
 Output: Mapped address, NULL if failed
 */
 pgulong_t* page_map(pgulong_t* addr, size_t pages, uint16_t flags) {
+
 
   int err = NO_ERROR;
 

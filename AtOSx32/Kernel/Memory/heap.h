@@ -36,8 +36,10 @@ static inline size_t heap_get_page_count(size_t length) {
 void* kmalloc(size_t size);
 void* krealloc(void* ptr, size_t size);
 void* kcalloc(size_t n, size_t size);
+void* kmalloc_aligned(size_t size, uint32_t alignment);
 
 void free(void* ptr);
+void free_aligned(void* ptr);
 void heap_insert_unused_header(heap_header_t* header);
 void heap_remove_header(heap_header_t* header);
 void heap_split_header(heap_header_t* header);
