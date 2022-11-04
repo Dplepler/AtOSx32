@@ -203,6 +203,7 @@ void* kcalloc(size_t n, size_t size) {
 Must use free_aligned in order to free the memory */
 void* kmalloc_aligned(size_t size, uint32_t alignment) {
 
+  if (!alignment || (alignment & (alignment - 1))) { return NULL; }  // Leave if alignment is not a power of 2
   
   /* 
   The way this works is we first allocate a size that would certainly fit,
@@ -221,8 +222,9 @@ void* kmalloc_aligned(size_t size, uint32_t alignment) {
 
 void free_aligned(void* ptr) {
 
-
-
-
+  ptr = (uint8_t)ptr - (sizeof(heap_header_t) + 0x4);
+  while (((heap_header_t*)ptr)->signature != HEAP_SIGNATURE) { ptr = (uint8_t)ptr - 1; }
+  
+  free((void*)((unsigned long)ptr + sizeof(heap_header_t)));
 }
 
