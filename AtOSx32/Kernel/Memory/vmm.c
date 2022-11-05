@@ -144,15 +144,17 @@ void map_higher_half(pgulong_t* address_space) {
 
   pgulong_t* page_table = page_map(NULL, 1, 0);
   
-  for (uint32_t i = 0; i < PD_ENTRIES; i++) {
-    page_table[i] = ((0x100 + i) * 0x1000);
+  for (uint32_t i = 0; i < PT_ENTRIES; i++) {
+    page_table[i] = ((0x100 + i) * 0x1000) | READ_WRITE;
   }
   
-  address_space[KERNEL_ENTRY_OFFSET] = page_table;
+  address_space[KERNEL_ENTRY_OFFSET] = page_physical_address(page_table);
+
+  for (uint32_t i = 0; i < PD_ENTRIES; i++) { address_space[i] |= READ_WRITE; }
 }
 
 
-  /*
+/*
 Maps a physical address to a desired virtual address
 Input: Desired virtual address, if no specific address is desired parameter can be NULL
 Length in pages, flags

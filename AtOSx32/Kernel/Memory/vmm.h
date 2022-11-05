@@ -11,9 +11,11 @@
 #define PD_SIZE         0x1000
 #define PT_SIZE         0x1000
 #define PD_ENTRIES      0x400       // Amount of table entries
+#define PT_ENTRIES      0x400
 
 #define KERNEL_ENTRY_OFFSET       0x300     // Offset to higher half kernel in the pd
 #define KERNEL_PAGE_TABLE_OFFSET  0x1002000  
+
 enum PAGE_FLAGS {
 
   PRESENT         =  0b00000001,

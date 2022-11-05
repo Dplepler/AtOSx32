@@ -23,10 +23,10 @@ void init_multitasking() {
 
 aprocess_t* create_process(uint8_t state, uint32_t* address_space) {
 
+  map_higher_half(address_space);
   aprocess_t* process = create_task(state, address_space);
 
-  process->address_space;
-
+  return process;
 }
 
 
@@ -48,12 +48,10 @@ aprocess_t* create_task(uint8_t state, uint32_t* address_space) {
   return new_task;
 }
 
-void run_task(aprocess_t* new_task) {
-  
-  map_higher_half(new_task->address_space);
 
-  PRINTNH(new_task->address_space);
-  while(1) {}
+void run_task(aprocess_t* new_task) {
+
+  
   switch_task(new_task);
 
 
