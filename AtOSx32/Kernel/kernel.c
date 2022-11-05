@@ -26,7 +26,13 @@ int kmain(void) {
   tss_install();
  
   init_multitasking();
-  
+ 
+  void* ptr = kmalloc_aligned(30, 0x1000);
+
+  free_aligned(ptr);
+
+  PRINT("HELLO");
+
   //run_task(create_task(TASK_ACTIVE, kmalloc()));
     
 

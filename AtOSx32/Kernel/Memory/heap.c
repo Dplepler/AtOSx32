@@ -222,8 +222,9 @@ void* kmalloc_aligned(size_t size, uint32_t alignment) {
 
 void free_aligned(void* ptr) {
 
-  ptr = (uint8_t)ptr - (sizeof(heap_header_t) + 0x4);
-  while (((heap_header_t*)ptr)->signature != HEAP_SIGNATURE) { ptr = (uint8_t)ptr - 1; }
+  ptr = (uint32_t)ptr - sizeof(heap_header_t) + 0x4;
+  
+  while (((heap_header_t*)ptr)->signature != HEAP_SIGNATURE) { ptr = (uint32_t)ptr - 1; }
   
   free((void*)((unsigned long)ptr + sizeof(heap_header_t)));
 }
