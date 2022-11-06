@@ -28,8 +28,9 @@ int kmain(void) {
   init_multitasking();
 
 
-  run_task(create_process(TASK_ACTIVE, kmalloc_aligned(0x1000, 0x1000)));
+  run_task(create_process(TASK_ACTIVE, create_address_space()));
   
+  PRINT("Hello");
   /* while (true) {
     terminal_draw_rec(0, 0, 9, 1, 8); 
     cursor_update(0, 0);

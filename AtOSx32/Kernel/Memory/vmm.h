@@ -14,7 +14,7 @@
 #define PT_ENTRIES      0x400
 
 #define KERNEL_ENTRY_OFFSET       0x300     // Offset to higher half kernel in the pd
-#define KERNEL_PAGE_TABLE_OFFSET  0x1002000  
+#define KERNEL_INIT_PHY_INDEX     0x100  
 
 enum PAGE_FLAGS {
 

@@ -145,10 +145,12 @@ void map_higher_half(pgulong_t* address_space) {
   pgulong_t* page_table = page_map(NULL, 1, 0);
   
   for (uint32_t i = 0; i < PT_ENTRIES; i++) {
-    page_table[i] = ((0x100 + i) * 0x1000) | READ_WRITE;
+    page_table[i] = ((KERNEL_INIT_PHY_INDEX + i) * 0x1000) | READ_WRITE | PRESENT;
   }
+
+  page_table[PT_ENTRIES-1] = VGA_BUFFER_PHY_ADDR | READ_WRITE  | PRESENT; 
   
-  address_space[KERNEL_ENTRY_OFFSET] = page_physical_address(page_table);
+  address_space[KERNEL_ENTRY_OFFSET] |= (uint32_t)page_physical_address(page_table);
 }
 
 

@@ -8,6 +8,7 @@
 #include "utils.h"
 
 #define VGA_BUFFER_ADDR 0xC03FF000
+#define VGA_BUFFER_PHY_ADDR 0xB8000
 
 #define NL terminal_write_string("\n\r")
 
