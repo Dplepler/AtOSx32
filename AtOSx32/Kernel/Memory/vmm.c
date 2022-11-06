@@ -31,7 +31,7 @@ pgulong_t* page_get_table_address(uint16_t pd_index) {
 /* Converts a virtual address to a physical one */
 pgulong_t* page_physical_address(pgulong_t* addr) {
 
-  pgulong_t pd_index = pd_get_entry_index(addr);
+  pgulong_t pd_index = pd_get_entry_index(addr);  
   pgulong_t pt_index = page_get_entry_index(addr);
 
   pgulong_t* pt_addr = page_get_table_address(pd_index);
@@ -149,8 +149,6 @@ void map_higher_half(pgulong_t* address_space) {
   }
   
   address_space[KERNEL_ENTRY_OFFSET] = page_physical_address(page_table);
-
-  for (uint32_t i = 0; i < PD_ENTRIES; i++) { address_space[i] |= READ_WRITE; }
 }
 
 

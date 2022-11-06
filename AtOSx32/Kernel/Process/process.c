@@ -21,6 +21,20 @@ void init_multitasking() {
   sti();
 }
 
+uint32_t* create_address_space() {
+
+  uint32_t* address_space = kmalloc(PD_SIZE);
+  
+  /* Reset all entries */
+  for (uint32_t i = 0; i < PD_ENTRIES; i++) { address_space[i] |= READ_WRITE; }
+
+  /* Map page directory to itself */
+  address_space[PD_SIZE-1] = (uint32_t)page_physical_address(address_space) | READ_WRITE;
+
+  return address_space;
+}
+
+
 aprocess_t* create_process(uint8_t state, uint32_t* address_space) {
 
   map_higher_half(address_space);
@@ -30,6 +44,12 @@ aprocess_t* create_process(uint8_t state, uint32_t* address_space) {
 }
 
 
+/*
+ * TODO: Change address space to physical address but 
+ * first link it to itself recursivley
+ *
+ *
+ * */
 aprocess_t* create_task(uint8_t state, uint32_t* address_space) { 
 
   cli();
@@ -39,8 +59,9 @@ aprocess_t* create_task(uint8_t state, uint32_t* address_space) {
   new_task->state = state;
   new_task->address_space = address_space;
   new_task->pid = get_next_pid();
-  new_task->esp0 = ((uint32_t)kmalloc(STACK_SIZE)) + KERNEL_STACK - 0x4;   // Create new stack
-  
+  new_task->esp0 = (uint32_t)kmalloc_aligned(STACK_SIZE, 0x1000) + STACK_SIZE - 0x4;   // Create new stack
+  new_task->esp = new_task->esp0 - 0x4;
+
   task->flink = new_task; 
 
   sti();
@@ -51,7 +72,7 @@ aprocess_t* create_task(uint8_t state, uint32_t* address_space) {
 
 void run_task(aprocess_t* new_task) {
 
-  
+    
   switch_task(new_task);
 
 
