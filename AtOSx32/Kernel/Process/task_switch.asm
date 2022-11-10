@@ -30,7 +30,7 @@ switch_task:
 
   cmp eax, edx
   je .continue
-
+  
   mov cr3, eax  ; Change address space accordingly
     
 .continue:
@@ -40,5 +40,6 @@ switch_task:
   pop esi
   pop ebx
 
+  ;jmp $
   ret
 

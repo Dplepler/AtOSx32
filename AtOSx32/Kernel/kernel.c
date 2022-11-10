@@ -7,6 +7,12 @@
 #include "Tables/tss.h"
 #include "Process/process.h"
 
+static void test() {
+
+  PRINT("TEST SUCCESS!");
+
+}
+
 int kmain(void) {
   
   pd_remove_entry(0); 	// Remove identity mapping
@@ -27,8 +33,7 @@ int kmain(void) {
  
   init_multitasking();
 
-
-  run_task(create_process(TASK_ACTIVE, create_address_space()));
+  run_task(create_process(TASK_ACTIVE, create_address_space(), (uint32_t)test));
   
   PRINT("Hello");
   /* while (true) {

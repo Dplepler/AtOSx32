@@ -5,7 +5,6 @@
 #include "Memory/heap.h"
 
 #define INIT_KERNEL_STACK 0xC03FE000
-#define KERNEL_STACK      0xE0000000
 #define STACK_SIZE        0x1000
 
 typedef struct _PROCESS_CONTROL_BLOCK_STRUCT {
@@ -41,7 +40,8 @@ uint32_t* create_address_space();
 uint32_t* relocate_stack(uint32_t* address, size_t size);
 uint32_t get_next_pid();
 
-aprocess_t* create_task(uint8_t state, uint32_t* address_space);
+aprocess_t* create_task(uint8_t state, uint32_t* address_space, uint32_t eip);
+aprocess_t* create_process(uint8_t state, uint32_t* address_space, uint32_t eip);
 aprocess_t* find_task(uint32_t pid);
 
 #endif

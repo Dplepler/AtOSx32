@@ -35,16 +35,16 @@ uint32_t* create_address_space() {
 }
 
 
-aprocess_t* create_process(uint8_t state, uint32_t* address_space) {
+aprocess_t* create_process(uint8_t state, uint32_t* address_space, uint32_t eip) {
 
   map_higher_half(address_space);
-  aprocess_t* process = create_task(state, address_space);
+  aprocess_t* process = create_task(state, address_space, eip);
 
   return process;
 }
 
 
-aprocess_t* create_task(uint8_t state, uint32_t* address_space) { 
+aprocess_t* create_task(uint8_t state, uint32_t* address_space, uint32_t eip) { 
 
   cli();
   
@@ -54,9 +54,13 @@ aprocess_t* create_task(uint8_t state, uint32_t* address_space) {
   new_task->address_space = page_physical_address(address_space);
   new_task->pid = get_next_pid();
   new_task->esp0 = (uint32_t)kmalloc_aligned(STACK_SIZE, 0x1000) + STACK_SIZE - 0x4;   // Create new stack
-  new_task->esp = new_task->esp0 - 0x4;
 
   task->flink = new_task; 
+
+  /* Set up initial stack layout to be popped in the task switch routinue */
+  new_task->esp = new_task->esp0; 
+  *(uint32_t*)new_task->esp = eip;     // EIP
+  new_task->esp -= 0x10;               // Other registers
 
   sti();
 
@@ -66,10 +70,7 @@ aprocess_t* create_task(uint8_t state, uint32_t* address_space) {
 
 void run_task(aprocess_t* new_task) {
 
-  
-  PRINTNH(new_task->address_space);
   switch_task(new_task);
-  
 
 }
 
