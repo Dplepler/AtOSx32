@@ -26,7 +26,9 @@ uint32_t* create_address_space() {
   uint32_t* address_space = kmalloc_aligned(PD_SIZE, 0x1000);
    
   /* Reset all entries */
-  for (uint32_t i = 0; i < PD_ENTRIES; i++) { address_space[i] |= READ_WRITE | PRESENT; }
+  for (uint32_t i = 0; i < PD_ENTRIES; i++) { address_space[i] |= READ_WRITE; }
+  
+
 
   /* Map page directory to itself */
   address_space[PD_ENTRIES-1] = (uint32_t)page_physical_address(address_space) | READ_WRITE | PRESENT;
