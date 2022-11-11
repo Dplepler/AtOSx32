@@ -13,6 +13,7 @@
 #define PD_ENTRIES      0x400       // Amount of table entries
 #define PT_ENTRIES      0x400
 
+#define KERNEL_PAGE_TABLE         0x1002000 // Phyiscal address of the kernel's first page table
 #define KERNEL_ENTRY_OFFSET       0x300     // Offset to higher half kernel in the pd
 #define KERNEL_INIT_PHY_INDEX     0x100  
 
@@ -29,6 +30,8 @@ enum PAGE_FLAGS {
   GLOBAL          = 0b100000000,
 
 };
+
+void hello();
 
 void* memset(void* addr, uint8_t c, size_t n);
 void  memcpy(void* s1, const void* s2, size_t n);

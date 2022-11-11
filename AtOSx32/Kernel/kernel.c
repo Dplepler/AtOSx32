@@ -7,7 +7,7 @@
 #include "Tables/tss.h"
 #include "Process/process.h"
 
-static void test() {
+void test() {
 
   PRINT("TEST SUCCESS!");
 
@@ -21,7 +21,7 @@ int kmain(void) {
   terminal_initialize();
 
   bitmap_mark_kernel();
-  
+
   perry(25, 5);
 
   setup_gdt();
@@ -30,11 +30,13 @@ int kmain(void) {
   setup_clock();
   
   tss_install();
- 
-  init_multitasking();
 
-  run_task(create_process(TASK_ACTIVE, create_address_space(), (uint32_t)test));
+  init_multitasking();
   
+  PRINTNH(hello);
+  run_task(create_process(TASK_ACTIVE, create_address_space(), (uint32_t)hello));
+
+    
   PRINT("Hello");
   /* while (true) {
     terminal_draw_rec(0, 0, 9, 1, 8); 

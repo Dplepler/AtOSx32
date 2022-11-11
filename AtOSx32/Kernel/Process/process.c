@@ -29,7 +29,6 @@ uint32_t* create_address_space() {
   for (uint32_t i = 0; i < PD_ENTRIES; i++) { address_space[i] |= READ_WRITE; }
   
 
-
   /* Map page directory to itself */
   address_space[PD_ENTRIES-1] = (uint32_t)page_physical_address(address_space) | READ_WRITE | PRESENT;
 
@@ -54,15 +53,14 @@ aprocess_t* create_task(uint8_t state, uint32_t* address_space, uint32_t eip) {
   
   new_task->state = state;
   new_task->address_space = page_physical_address(address_space);
-  new_task->pid = get_next_pid();
-  new_task->esp0 = (uint32_t)kmalloc_aligned(STACK_SIZE, 0x1000) + STACK_SIZE - 0x4;   // Create new stack
-
+  new_task->pid   = get_next_pid();
+  new_task->esp0  = (uint32_t)kmalloc_aligned(STACK_SIZE, 0x1000) + STACK_SIZE - 0x4;   // Create new stack
+  new_task->eip   = eip;
+  
   task->flink = new_task; 
 
   /* Set up initial stack layout to be popped in the task switch routinue */
   new_task->esp = new_task->esp0; 
-  *(uint32_t*)new_task->esp = eip;     // EIP
-  new_task->esp -= 0x10;               // Other registers
 
   sti();
 
@@ -72,8 +70,27 @@ aprocess_t* create_task(uint8_t state, uint32_t* address_space, uint32_t eip) {
 
 void run_task(aprocess_t* new_task) {
 
-  switch_task(new_task);
+  if (!new_task->curr_cpu_time) {
 
+    cdecl_regs registers;
+
+    uint32_t* stack = (uint32_t*)new_task->esp;
+
+    __asm__ __volatile__ ("mov %%ebx, %0" : "=r" (registers.ebx));  
+    __asm__ __volatile__ ("mov %%esi, %0" : "=r" (registers.esi));
+    __asm__ __volatile__ ("mov %%edi, %0" : "=r" (registers.edi));
+    __asm__ __volatile__ ("mov %%ebp, %0" : "=r" (registers.ebp));
+
+    *--stack = new_task->eip;
+    *--stack = registers.ebx;
+    *--stack = registers.esi;
+    *--stack = registers.edi;
+    *--stack = registers.ebp;
+    
+    new_task->esp = (uint32_t)stack;
+  }
+
+  switch_task(new_task);
 }
 
 aprocess_t* find_task(uint32_t pid) {

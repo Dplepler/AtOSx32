@@ -82,6 +82,8 @@ init_protected_mode:
 
   sub edi, 4                ; Go back to the second last entry
   mov dword [edi], 8F003h   ; 0x8E000 | 3 = Kernel stack with presenet and write/read bits set
+  mov esp, 0xC03FE000
+  
 
 	mov eax, PD_PHY_OFFSET 		; The address that points to the directory table, 1024 entries, 32 bits each
 	mov cr3, eax					    ; We put the address of our directory table in the cr3 register

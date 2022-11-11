@@ -31,13 +31,9 @@ switch_task:
   cmp eax, edx
   je .continue
  
-  mov cr3, eax  ; Change address space accordingly
+  ;mov cr3, eax  ; Change address space accordingly
     
 .continue:
-
-  mov eax, 0x6969
-  jmp $
-
 
   pop ebp
   pop edi

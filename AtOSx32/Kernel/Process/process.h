@@ -31,6 +31,16 @@ typedef struct _PROCESS_CONTROL_BLOCK_STRUCT {
 
 } __attribute__((packed)) aprocess_t, athread_t;
 
+typedef struct _CDECL_REGISTERS_STRUCT {
+
+  uint32_t ebp;
+  uint32_t edi;
+  uint32_t esi;
+  uint32_t ebx;
+
+} cdecl_regs;
+
+
 extern void switch_task(struct _PROCESS_CONTROL_BLOCK_STRUCT* new_task);
 
 void init_multitasking();
