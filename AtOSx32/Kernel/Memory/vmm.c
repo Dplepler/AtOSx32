@@ -110,7 +110,7 @@ pgulong_t* page_memory_above4mb(size_t length, int* err) {
 
 /* Gets offset to possible contigious unused data in the given length, used when length <= 4mb */
 pgulong_t* page_memory_under4mb(size_t length, int* err) {
-
+ 
   pgulong_t req_pt_entries = length / PAGE_SIZE;
   if (length % PAGE_SIZE) { req_pt_entries++; }
   
@@ -148,15 +148,17 @@ void map_higher_half(pgulong_t* address_space) {
     page_table[i] = ((KERNEL_INIT_PHY_INDEX + i) * 0x1000) | READ_WRITE | PRESENT;
   }
 
-  page_table[PT_ENTRIES-1] = VGA_BUFFER_PHY_ADDR | READ_WRITE  | PRESENT; 
+  page_table[PT_ENTRIES-1] = VGA_BUFFER_PHY_ADDR | READ_WRITE | PRESENT; 
   
   address_space[KERNEL_ENTRY_OFFSET] |= (uint32_t)page_physical_address(page_table) | PRESENT;
 }
 
-void hello() {
-  
-  PRINT("HII");
 
+void hello() {
+ 
+  while(1) {}
+  PRINT("WORKED!");
+  
 }
 
 /*

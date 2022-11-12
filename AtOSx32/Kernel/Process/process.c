@@ -6,8 +6,6 @@ aprocess_t* root_task = NULL;
 
 void init_multitasking() {
 
-  cli();
-
   aprocess_t* current_proc = kmalloc(sizeof(aprocess_t));
 
   current_proc->state = TASK_ACTIVE;
@@ -16,9 +14,7 @@ void init_multitasking() {
   current_proc->pid = get_next_pid();
   current_proc->esp0 = INIT_KERNEL_STACK;
 
-  root_task = task = current_proc;
-   
-  sti();
+  root_task = task = current_proc;   
 }
 
 uint32_t* create_address_space() {
@@ -46,23 +42,19 @@ aprocess_t* create_process(uint8_t state, uint32_t* address_space, uint32_t eip)
 
 
 aprocess_t* create_task(uint8_t state, uint32_t* address_space, uint32_t eip) { 
-
-  cli();
   
   aprocess_t* new_task = kmalloc(sizeof(aprocess_t));
   
   new_task->state = state;
   new_task->address_space = page_physical_address(address_space);
-  new_task->pid   = get_next_pid();
-  new_task->esp0  = (uint32_t)kmalloc_aligned(STACK_SIZE, 0x1000) + STACK_SIZE - 0x4;   // Create new stack
-  new_task->eip   = eip;
+  new_task->pid = get_next_pid();
+  new_task->esp0 = (uint32_t)kmalloc_aligned(STACK_SIZE, 0x1000) + STACK_SIZE - 0x4;   // Create new stack
+  new_task->eip = eip;
   
   task->flink = new_task; 
 
   /* Set up initial stack layout to be popped in the task switch routinue */
   new_task->esp = new_task->esp0; 
-
-  sti();
 
   return new_task;
 }
@@ -86,13 +78,13 @@ void run_task(aprocess_t* new_task) {
     *--stack = registers.esi;
     *--stack = registers.edi;
     *--stack = registers.ebp;
-
-    
-    
+ 
     new_task->esp = (uint32_t)stack;
   }
 
+  cli();
   switch_task(new_task);
+  sti();
 }
 
 aprocess_t* find_task(uint32_t pid) {

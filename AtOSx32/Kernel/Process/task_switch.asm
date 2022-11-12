@@ -5,7 +5,7 @@
 
 
 ; void switch_task(struct _PROCESS_CONTROL_BLOCK_STRUCT* new_task)
-switch_task:
+switch_task: 
 
   push ebx
   push esi
@@ -16,8 +16,7 @@ switch_task:
   mov dword [esi+0x8], esp  ; Set previous task's esp
   
   mov esi, dword [esp+0x14]  ; Get new task
-  mov edi, dword [esi+0x8]   ; Set esp
-  mov ecx, dword [edi+12]
+  mov esp, dword [esi+0x8]   ; Set esp
 
   mov dword [task], esi     ; Current task = new task
   mov eax, dword [esi+0x4]  ; Get new task's kernel stack
@@ -40,7 +39,6 @@ switch_task:
   pop edi
   pop esi
   pop ebx
-  push ecx
-  jmp $
+
   ret
 
