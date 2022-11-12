@@ -86,6 +86,8 @@ void run_task(aprocess_t* new_task) {
     *--stack = registers.esi;
     *--stack = registers.edi;
     *--stack = registers.ebp;
+
+    
     
     new_task->esp = (uint32_t)stack;
   }
