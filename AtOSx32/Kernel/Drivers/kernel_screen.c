@@ -178,7 +178,7 @@ void terminal_write(const char* data, size_t amount) {
 terminal_write_string prints a character array to the screen
 Input: Character array to print
 */
-void terminal_write_string(const char* data) {
+void __attribute__((stdcall)) terminal_write_string(const char* data) {
   terminal_write(data, strl(data));
 }
 

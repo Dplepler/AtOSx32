@@ -153,12 +153,10 @@ void map_higher_half(pgulong_t* address_space) {
   address_space[KERNEL_ENTRY_OFFSET] |= (uint32_t)page_physical_address(page_table) | PRESENT;
 }
 
-
-void hello() {
- 
-  while(1) {}
-  PRINT("WORKED!");
+void hello(int x) {
   
+  
+  while(1) { }
 }
 
 /*

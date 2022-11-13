@@ -1,12 +1,12 @@
 #include "process.h"
 
-aprocess_t* task = NULL;  // Current task
-aprocess_t* root_task = NULL;
+tcb_t* running_task = NULL;  // Current task
+tcb_t* root_task = NULL;
 
 
 void init_multitasking() {
 
-  aprocess_t* current_proc = kmalloc(sizeof(aprocess_t));
+  tcb_t* current_proc = kmalloc(sizeof(tcb_t));
 
   current_proc->state = TASK_ACTIVE;
     
@@ -14,7 +14,7 @@ void init_multitasking() {
   current_proc->pid = get_next_pid();
   current_proc->esp0 = INIT_KERNEL_STACK;
 
-  root_task = task = current_proc;   
+  root_task = running_task = current_proc;   
 }
 
 uint32_t* create_address_space() {
@@ -32,18 +32,18 @@ uint32_t* create_address_space() {
 }
 
 
-aprocess_t* create_process(uint8_t state, uint32_t* address_space, uint32_t eip) {
+process_t* create_process(uint8_t state, uint32_t* address_space, uint32_t eip) {
 
   map_higher_half(address_space);
-  aprocess_t* process = create_task(state, address_space, eip);
+  process_t* process = create_task(state, address_space, eip);
 
   return process;
 }
 
 
-aprocess_t* create_task(uint8_t state, uint32_t* address_space, uint32_t eip) { 
+tcb_t* create_task(uint8_t state, uint32_t* address_space, uint32_t eip) { 
   
-  aprocess_t* new_task = kmalloc(sizeof(aprocess_t));
+  tcb_t* new_task = kmalloc(sizeof(tcb_t));
   
   new_task->state = state;
   new_task->address_space = page_physical_address(address_space);
@@ -51,7 +51,7 @@ aprocess_t* create_task(uint8_t state, uint32_t* address_space, uint32_t eip) {
   new_task->esp0 = (uint32_t)kmalloc_aligned(STACK_SIZE, 0x1000) + STACK_SIZE - 0x4;   // Create new stack
   new_task->eip = eip;
   
-  task->flink = new_task; 
+  running_task->flink = new_task; 
 
   /* Set up initial stack layout to be popped in the task switch routinue */
   new_task->esp = new_task->esp0; 
@@ -59,26 +59,36 @@ aprocess_t* create_task(uint8_t state, uint32_t* address_space, uint32_t eip) {
   return new_task;
 }
 
+void terminate_process(tcb_t* task) {
 
-void run_task(aprocess_t* new_task) {
+  PRINT("Task: ");
+  PRINTN(task->pid);
+  PRINT("Terminated\n");
+  while(1) {}
+}
+
+void run_task(tcb_t* new_task) {
+
+  uint32_t* stack = (uint32_t*)new_task->esp;
+  
+  *--stack = new_task;
+  *--stack = terminate_process;
 
   if (!new_task->curr_cpu_time) {
 
     cdecl_regs registers;
 
-    uint32_t* stack = (uint32_t*)new_task->esp;
-
     __asm__ __volatile__ ("mov %%ebx, %0" : "=r" (registers.ebx));  
     __asm__ __volatile__ ("mov %%esi, %0" : "=r" (registers.esi));
     __asm__ __volatile__ ("mov %%edi, %0" : "=r" (registers.edi));
     __asm__ __volatile__ ("mov %%ebp, %0" : "=r" (registers.ebp));
-
+    
     *--stack = new_task->eip;
     *--stack = registers.ebx;
     *--stack = registers.esi;
     *--stack = registers.edi;
     *--stack = registers.ebp;
- 
+     
     new_task->esp = (uint32_t)stack;
   }
 
@@ -87,9 +97,9 @@ void run_task(aprocess_t* new_task) {
   sti();
 }
 
-aprocess_t* find_task(uint32_t pid) {
+tcb_t* find_task(uint32_t pid) {
 
-  aprocess_t* curr = root_task;
+  tcb_t* curr = root_task;
 
   while (curr && curr->pid != pid) { curr = curr->flink; }
 

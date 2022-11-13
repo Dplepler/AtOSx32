@@ -31,7 +31,7 @@ enum PAGE_FLAGS {
 
 };
 
-void hello();
+void hello(int x);
 
 void* memset(void* addr, uint8_t c, size_t n);
 void  memcpy(void* s1, const void* s2, size_t n);

@@ -1,4 +1,4 @@
-[extern task]       ; Current task
+[extern running_task]       ; Current task
 [extern task_state] ; TSS
 
 [global switch_task]
@@ -11,14 +11,14 @@ switch_task:
   push esi
   push edi
   push ebp
-  
-  mov esi, dword [task]
-  mov dword [esi+0x8], esp  ; Set previous task's esp
+ 
+  mov esi, dword [running_task]
+  mov dword [esi+0x8], esp    ; Set previous task's esp
   
   mov esi, dword [esp+0x14]  ; Get new task
   mov esp, dword [esi+0x8]   ; Set esp
 
-  mov dword [task], esi     ; Current task = new task
+  mov dword [running_task], esi     ; Current task = new task
   mov eax, dword [esi+0x4]  ; Get new task's kernel stack
 
   ; Set the tss's esp0 accordingly
@@ -39,6 +39,6 @@ switch_task:
   pop edi
   pop esi
   pop ebx
-
+  
   ret
 

@@ -12,7 +12,7 @@ void outportb(uint16_t port, uint8_t value) {
   __asm__ __volatile__ ("outb %%al, %%dx": :"d" (port), "a" (value));
 }
 
-/*
+
 void push32(uint32_t value) {
   __asm__ __volatile__ ("push %%eax": :"a" (value));
 }
@@ -23,4 +23,4 @@ uint32_t pop32() {
   __asm__ __volatile__ ("pop %%eax" : "=r" (ret));
 
   return ret;
-} */ 
+}
