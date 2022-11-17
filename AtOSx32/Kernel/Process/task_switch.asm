@@ -1,5 +1,5 @@
 [extern running_task]       ; Current task
-[extern task_state] ; TSS
+[extern task_state]         ; TSS
 
 [global switch_task]
 

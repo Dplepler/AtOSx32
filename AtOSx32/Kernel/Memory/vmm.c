@@ -153,12 +153,6 @@ void map_higher_half(pgulong_t* address_space) {
   address_space[KERNEL_ENTRY_OFFSET] |= (uint32_t)page_physical_address(page_table) | PRESENT;
 }
 
-void hello(int x) {
-  
-  
-  while(1) { }
-}
-
 /*
 Maps a physical address to a desired virtual address
 Input: Desired virtual address, if no specific address is desired parameter can be NULL

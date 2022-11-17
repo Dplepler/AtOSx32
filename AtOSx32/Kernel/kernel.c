@@ -10,7 +10,7 @@
 void test(int x) {
 
   PRINT("TEST SUCCESS!");
-  PRINTNH(x); 
+  while(1) {} 
 }
 
 int kmain(void) {
@@ -35,8 +35,12 @@ int kmain(void) {
 
   //PRINTNH(terminate_process); 
   
-  run_task(create_process(TASK_ACTIVE, create_address_space(), (uint32_t)hello));
-  
+  run_task(create_process(TASK_ACTIVE, create_address_space(), (uint32_t)test));
+ 
+      
+
+
+
   //test(10);
   while(1) {}
   
