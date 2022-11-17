@@ -20,7 +20,7 @@ void init_multitasking() {
 uint32_t* create_address_space() {
 
   uint32_t* address_space = kmalloc_aligned(PD_SIZE, 0x1000);
-   
+  
   /* Reset all entries */
   for (uint32_t i = 0; i < PD_ENTRIES; i++) { address_space[i] |= READ_WRITE; }
   
@@ -32,16 +32,16 @@ uint32_t* create_address_space() {
 }
 
 
-process_t* create_process(uint8_t state, uint32_t* address_space, uint32_t eip) {
+process_t* create_process_handler(uint8_t state, uint32_t* address_space, uint32_t eip) {
 
   map_higher_half(address_space);
-  process_t* process = create_task(state, address_space, eip);
+  process_t* process = create_task_handler(state, address_space, eip);
 
   return process;
 }
 
 
-tcb_t* create_task(uint8_t state, uint32_t* address_space, uint32_t eip) { 
+tcb_t* create_task_handler(uint8_t state, uint32_t* address_space, uint32_t eip) { 
   
   tcb_t* new_task = kmalloc(sizeof(tcb_t));
   
@@ -66,13 +66,17 @@ void terminate_process(tcb_t* task) {
   PRINT("Terminated\n");
   while(1) {}
 }
+  
+void make_thread(tcb_t* task, void* params) {
 
-void run_task(tcb_t* new_task) {
+  void* (*entry)(void*) = (void*)task->eip;
+  (*entry)(params);
+  terminate_process(task);
+}
+
+void run_task(tcb_t* new_task, void* params) {
 
   uint32_t* stack = (uint32_t*)new_task->esp;
-  
-  *--stack = new_task;
-  *--stack = terminate_process;
 
   if (!new_task->curr_cpu_time) {
 
@@ -83,7 +87,10 @@ void run_task(tcb_t* new_task) {
     __asm__ __volatile__ ("mov %%edi, %0" : "=r" (registers.edi));
     __asm__ __volatile__ ("mov %%ebp, %0" : "=r" (registers.ebp));
     
-    *--stack = new_task->eip;
+    *--stack = (uint32_t)new_task;
+    *--stack = (uint32_t)params;
+    *--stack = (uint32_t)make_thread;
+
     *--stack = registers.ebx;
     *--stack = registers.esi;
     *--stack = registers.edi;

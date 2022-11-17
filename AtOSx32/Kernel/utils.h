@@ -9,4 +9,5 @@ char* strcat(char* dest, const char* src);
 size_t strl(const char* str);
 size_t intl(int n);
 
+
 #endif

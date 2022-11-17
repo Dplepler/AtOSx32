@@ -7,10 +7,8 @@
 #include "Tables/tss.h"
 #include "Process/process.h"
 
-void test(int x) {
-
-  PRINT("TEST SUCCESS!");
-  while(1) {} 
+void test(void* hello) {
+  PRINT("TEST SUCCESS!"); 
 }
 
 int kmain(void) {
@@ -35,8 +33,8 @@ int kmain(void) {
 
   //PRINTNH(terminate_process); 
   
-  run_task(create_process(TASK_ACTIVE, create_address_space(), (uint32_t)test));
- 
+  run_task(create_process_handler(TASK_ACTIVE, create_address_space(), (uint32_t)test), NULL);
+   
       
 
 
