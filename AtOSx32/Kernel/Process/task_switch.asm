@@ -16,41 +16,47 @@ switch_task:
   mov dword [esi+0x8], esp    ; Set previous task's esp
   
   mov esi, dword [esp+0x14]  ; Get new task
-  mov esp, dword [esi+0x8]   ; Set esp
- 
+  mov ecx, dword [esi+0x8]   ; ESP
+  mov eax, dword [esi+0x4]   ; ESP0
+
+  mov edx, eax
+  sub edx, ecx    ; Variables in stack (times 4)
+  
+  sub eax, 0x1000    ; Literal start of stack
+  call calc_phys      
+
+  or eax, 3                 ; Read+Write and present flags set
+  mov edi, 0xFFF00000       ; Write to kernel
+  mov dword [edi+0x3FE*0x4], eax  ; ESP0
+
+  mov esp, 0xC03FE000
+  add esp, 0x1000
+  sub esp, edx
+
   mov dword [running_task], esi   ; Current task = new task
   mov eax, dword [esi+0x4]        ; Get new task's kernel stack
   
   ; Set the tss's esp0 accordingly
   lea edi, [task_state]
   mov dword [edi+0x4], eax
-
  
-  mov eax, esp
-  
-  call calc_phys
-  jmp $
-
-  mov esi, 0xFFF00000
-  mov dword [esi+0x3FE*0x4], eax
-
-  jmp $
-
   mov eax, dword [esi+0x10]  ; CR3 (Address space)
   mov edx, cr3
-
+  
   cmp eax, edx
   je .continue
-  
-  mov cr3, eax  ; Change address space accordingly
-   
-.continue:
 
+  mov cr3, eax  ; Change address space accordingly
+  
+
+.continue:
+  
   pop ebp
   pop edi
   pop esi
   pop ebx
- 
+  
+  
   ret
 
 
@@ -83,7 +89,7 @@ calc_phys:
   and edx, 0xFFF                 ; In-page offset
 
   add eax, edx
-  
+
   pop edi
   pop esi
   pop edx

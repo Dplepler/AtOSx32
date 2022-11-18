@@ -48,7 +48,7 @@ tcb_t* create_task_handler(uint8_t state, uint32_t* address_space, uint32_t eip)
   new_task->state = state;
   new_task->address_space = page_physical_address(address_space);
   new_task->pid = get_next_pid();
-  new_task->esp0 = (uint32_t)kmalloc_aligned(STACK_SIZE, 0x1000) + STACK_SIZE - 0x4;   // Create new kernel stack
+  new_task->esp0 = (uint32_t)kmalloc_aligned(STACK_SIZE, 0x1000) + STACK_SIZE;   // Create new kernel stack
   new_task->eip = eip;
   
   running_task->flink = new_task; 
@@ -68,8 +68,9 @@ void terminate_process(tcb_t* task) {
 }
   
 void make_thread(tcb_t* task, void* params) {
+ 
 
-  void* (*entry)(void*) = (void*)task->eip;
+  void* (*entry)(void*) = (void*)task->eip;  
   (*entry)(params);
   terminate_process(task);
 }
@@ -99,10 +100,8 @@ void run_task(tcb_t* new_task, void* params) {
     new_task->esp = (uint32_t)stack;
   }
 
-  PRINTNH(page_physical_address(new_task->esp));
   cli();
   switch_task(new_task);
-  sti();
 }
 
 tcb_t* find_task(uint32_t pid) {

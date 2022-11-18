@@ -72,7 +72,7 @@ pgulong_t* page_memory_above4mb(size_t length, int* err) {
 
   pgulong_t* addr = NULL;
 
-  for (uint16_t i = 1; i < PD_ENTRIES; i++) {
+  for (uint16_t i = 0x300; i < PD_ENTRIES; i++) {
 
     if (PD_ENTRIES - i < (int)req_pd_entries) { break; }
 
@@ -115,7 +115,7 @@ pgulong_t* page_memory_under4mb(size_t length, int* err) {
   
   pgulong_t* addr = NULL;
 
-  for (uint16_t i = 1; i < PD_ENTRIES; i++) {
+  for (uint16_t i = 0x300; i < PD_ENTRIES; i++) {
 
     addr = page_get_table_address(i);
     
@@ -141,8 +141,11 @@ pgulong_t* page_get_free_addr(size_t length, int* err) {
 /* Map the system's kernel to 3gb in memory */
 void map_higher_half(pgulong_t* address_space) {
   
-  for (uint16_t i = 0; i < PD_ENTRIES; i++) { address_space[i] = READ_WRITE; }
-  address_space[KERNEL_ENTRY_INDEX] |= KERNEL_PAGE_TABLE_PHYSICAL | PRESENT;
+  for (uint16_t i = 0; i < KERNEL_ENTRY_INDEX; i++) { address_space[i] = READ_WRITE; }
+  
+  for (uint16_t i = KERNEL_ENTRY_INDEX; i < PD_ENTRIES - 1; i++) { 
+    address_space[i] = ((pgulong_t*)PD_ADDRESS)[i]; 
+  }
 }
 
 /*

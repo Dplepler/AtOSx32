@@ -30,6 +30,7 @@ int kmain(void) {
   tss_install();
 
   init_multitasking();
+  PRINTNH(make_thread);
   
   run_task(create_process_handler(TASK_ACTIVE, create_address_space(), (uint32_t)test), NULL);
    
