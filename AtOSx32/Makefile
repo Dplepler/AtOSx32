@@ -1,7 +1,7 @@
-all:	 clean DiskImages/AtOS.img
+all:	 DiskImages/AtOS.img clean
 
-debug: clean DiskImages/AtOSDebug.img
-gdb: 	 clean DiskImages/AtOSGDB.img
+debug: DiskImages/AtOSDebug.img clean
+gdb: 	 DiskImages/AtOSGDB.img clean
 
 clean:
 	rm -rf  $(shell find Kernel/ -type f -name '*.o')

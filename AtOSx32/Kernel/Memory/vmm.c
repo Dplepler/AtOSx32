@@ -48,7 +48,6 @@ bool pd_remove_entry(pgulong_t* addr) {
 
   pgulong_t pd_index = pd_get_entry_index(addr);  // Page directory index
 
-  //pd_flush_tlb(pd_index);
   ((pgulong_t*)PD_ADDRESS)[pd_index] = READ_WRITE;       // Mark as unused
 
   return true;
@@ -141,16 +140,9 @@ pgulong_t* page_get_free_addr(size_t length, int* err) {
 
 /* Map the system's kernel to 3gb in memory */
 void map_higher_half(pgulong_t* address_space) {
-
-  pgulong_t* page_table = page_map(NULL, 1, 0);
   
-  for (uint32_t i = 0; i < PT_ENTRIES; i++) {
-    page_table[i] = ((KERNEL_INIT_PHY_INDEX + i) * 0x1000) | READ_WRITE | PRESENT;
-  }
-
-  page_table[PT_ENTRIES-1] = VGA_BUFFER_PHY_ADDR | READ_WRITE | PRESENT; 
-  
-  address_space[KERNEL_ENTRY_OFFSET] |= (uint32_t)page_physical_address(page_table) | PRESENT;
+  for (uint16_t i = 0; i < PD_ENTRIES; i++) { address_space[i] = READ_WRITE; }
+  address_space[KERNEL_ENTRY_INDEX] |= KERNEL_PAGE_TABLE_PHYSICAL | PRESENT;
 }
 
 /*
