@@ -1,5 +1,4 @@
 [extern running_task]       ; Current task
-[extern task_state]         ; TSS
 [extern make_thread]
 
 [global switch_task]
@@ -12,7 +11,7 @@ switch_task:
   push esi
   push edi
   push ebp
- 
+  
   mov esi, dword [running_task]
   mov dword [esi+0x8], esp    ; Set previous task's esp
   
@@ -23,15 +22,10 @@ switch_task:
   sub edx, ecx    ; Variables in stack (times 4)
 
   mov dword [running_task], esi   ; Current task = new task
-  mov eax, dword [esi+0x4]        ; Get new task's kernel stack
-  
-  ; Set the tss's esp0 accordingly
-  lea edi, [task_state]
-  mov dword [edi+0x4], eax
  
-  mov eax, dword [esi+0x10]  ; CR3 (Address space)
+  mov eax, dword [esi+0x10]  ; CR3 (Physical address space)
   mov edx, cr3
-  
+
   cmp eax, edx
   je .continue
 
@@ -43,10 +37,9 @@ switch_task:
   pop edi
   pop esi
   pop ebx
- 
+
   call make_thread
   jmp $
-
 
 ;calc_phys:
   

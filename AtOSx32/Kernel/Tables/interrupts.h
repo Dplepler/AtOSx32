@@ -49,12 +49,10 @@ typedef struct ISR_STACK_REGS_STRUCT {
 } isr_stack_t;
 
 
-void setup_idt();
-void init_idt();
-void load_idt();
-
-void idt_create_gate(uint8_t index, uint32_t address, uint16_t select, uint8_t attributes);
-void idt_install_gates();
+void setup_idt(idtptr_t* idt_ptr, interrupt_descriptor_t** idt);
+void init_idt(idtptr_t* idt_ptr, interrupt_descriptor_t** idt);
+void idt_create_gate(interrupt_descriptor_t** idt, uint8_t index, uint32_t address, uint16_t select, uint8_t attributes);
+void idt_install_gates(interrupt_descriptor_t** idt);
 void fault_handler(isr_stack_t* stack);
 
 #endif

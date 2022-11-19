@@ -7,11 +7,39 @@
 #include "Tables/tss.h"
 #include "Process/process.h"
 
-void test(int* args) {
+extern tcb_t* running_task;
 
+void thread1(void* args);
+void thread2(void* args);
+void process(void* args);
+
+void process(void* args) {
+
+  thread_t* child1 = create_thread_handler(TASK_ACTIVE, (uint32_t)thread1);
+  thread_t* child2 = create_thread_handler(TASK_ACTIVE, (uint32_t)thread2);
   
-  for (uint8_t i = 0; i < 4; i++) { NL; PRINTN(args[i]); }
-  NL;
+  run_task(child1, child2);
+
+  while(1) {}
+}
+
+
+void thread1(void* args) {
+
+  PRINT("HELEGFRMHG");
+  while(1) {}
+  PRINT("HI from thread1\n\r");
+  run_task(args, running_task);
+  while(1) {}
+
+}
+
+void thread2(void* args) {
+
+  PRINT("HI from thread2\n\r");
+  while(1) {}
+  run_task(args, running_task);
+  while(1) {}
 }
 
 int kmain(void) {
@@ -25,22 +53,28 @@ int kmain(void) {
 
   perry(25, 5);
 
-  setup_gdt();
-  setup_idt();
-  init_irq();
+  idtptr_t* idt_ptr = kmalloc(sizeof(idtptr_t));
+  interrupt_descriptor_t** idt = kmalloc(IDT_SIZE * sizeof(interrupt_descriptor_t*));
+  
+  gdtptr* gdt_ptr = kmalloc(sizeof(gdtptr));
+  gdt_descriptor** gdt = kmalloc(GDT_SIZE * sizeof(gdt_descriptor*));
+
+  tss_t* tss = kmalloc(sizeof(tss_t));
+
+  setup_gdt(gdt_ptr, gdt);
+  setup_idt(idt_ptr, idt);
+  init_irq(idt);
   setup_clock();
   
-  tss_install();
+  tss_install(tss, gdt_ptr, gdt);
 
   init_multitasking();
   
-  int* args = kmalloc(4 * sizeof(int));
-  for (uint8_t i = 0; i < 4; i++) { args[i] = i; }
-  
-  run_task(create_process_handler(TASK_ACTIVE, create_address_space(), (uint32_t)test), args);
+
+  process_t* root = create_process_handler(TASK_ACTIVE, cpu_get_address_space(), (uint32_t)process);
+  run_task(root, NULL);
 
 
-  //test(10);
   while(1) {}
   
   /* while (true) {

@@ -1,6 +1,7 @@
 #include "clock.h"
 
-static unsigned long counter = 0;
+unsigned long proc_time_counter = 0;
+unsigned long time_counter = 0;
 
 void setup_clock() {
   set_periodic_interrupt();
@@ -22,17 +23,19 @@ void rtc_handler(isr_stack_t* stack) {
 
   stack = stack;    // Get rid of unused variable warning
 
-  counter++; 
+  proc_time_counter++;
+  time_counter++; 
 
   /* To make sure a next IRQ8 will happen, read from the 0xC register */
   outportb(CMOS_REGISTER, 0xC);  
   inportb(CMOS_RW);
 }
 
+
 /* Delay the systems by the given miliseconds */
 void sleep(unsigned long milisec) {
-  unsigned long prev = counter;
-  while (counter != prev + HERTZ(milisec)) { }
+  unsigned long prev = time_counter;
+  while (time_counter != prev + HERTZ(milisec)) { }
 }
 
 /* The system's timer. First time it's called it will initialize the timer and the 
@@ -42,8 +45,8 @@ unsigned long clock_time() {
   static unsigned long count = 0;
   static unsigned long activated = false;
 
-  if (!activated) { count = counter; }
-  else { activated = false; return counter - count;  }
+  if (!activated) { count = time_counter; }
+  else { activated = false; return time_counter - count;  }
 
   activated = true;
   return ~0;

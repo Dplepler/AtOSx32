@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include "Memory/vmm.h"
 #include "System/hal.h"
-#include "Tables/tss.h"
 
 #define GDT_SIZE 6
 
@@ -35,12 +34,10 @@ typedef struct _GDT_DESCRIPTOR_POINTER_STRUCT {
 
 } __attribute__((packed)) gdtptr;
 
-void setup_gdt();
-void init_gdt();
-void load_gdt();
-void gdt_create_gate(uint32_t index, uint32_t base, uint32_t limit, uint8_t access, uint8_t granularity);
-void gdt_install_gates();
-
+void setup_gdt(gdtptr* gdt_ptr, gdt_descriptor** gdt);
+void init_gdt(gdtptr* gdt_ptr, gdt_descriptor** gdt);
+void gdt_create_gate(gdt_descriptor** gdt, uint32_t index, uint32_t base, uint32_t limit, uint8_t access, uint8_t granularity);
+void gdt_install_gates(gdt_descriptor** gdt);
 
 
 

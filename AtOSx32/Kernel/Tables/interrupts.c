@@ -1,8 +1,5 @@
 #include "interrupts.h"
 
-static interrupt_descriptor_t idt[IDT_SIZE];
-static idtptr_t idt_ptr;
-
 extern void isr0();
 extern void isr1();
 extern void isr2();
@@ -38,69 +35,65 @@ extern void isr31();
 
 extern void idt_flush();
 
-void setup_idt() {
+void setup_idt(idtptr_t* idt_ptr, interrupt_descriptor_t** idt) {
   
-  init_idt();
-  load_idt();
-  idt_install_gates();
+  init_idt(idt_ptr, idt);
+  idt_install_gates(idt);
+  cpu_load_idt(idt_ptr);     // Reload  
 }
-
-void init_idt() {
   
-  idt_ptr.limit = sizeof(interrupt_descriptor_t) * IDT_SIZE - 1;
-  memset(idt, 0, sizeof(interrupt_descriptor_t) * IDT_SIZE);
-  idt_ptr.offset = (uint32_t)&idt;
+void init_idt(idtptr_t* idt_ptr, interrupt_descriptor_t** idt) {
+
+  idt_ptr->limit = sizeof(interrupt_descriptor_t) * IDT_SIZE - 1;
+  idt_ptr->offset = (uint32_t)idt;
 }
 
-void load_idt() {
-  cpu_load_idt(&idt_ptr);
+
+void idt_create_gate(interrupt_descriptor_t** idt, uint8_t index, uint32_t address, uint16_t select, uint8_t attributes) {
+
+  idt[index] = kcalloc(sizeof(interrupt_descriptor_t));
+
+  idt[index]->attributes = attributes;
+  idt[index]->offset_lh  = (uint16_t)(address & 0xFFFF);   // Address' high bits
+  idt[index]->offset_hh  = (uint16_t)(address >> 16);      // Address' low bits
+  idt[index]->selector   = select;
+  idt[index]->unused     = 0;
 }
 
-void idt_create_gate(uint8_t index, uint32_t address, uint16_t select, uint8_t attributes) {
-
-  idt[index].attributes = attributes;
-  idt[index].offset_lh  = (uint16_t)(address & 0xFFFF);   // Address' high bits
-  idt[index].offset_hh  = (uint16_t)(address >> 16);      // Address' low bits
-  idt[index].selector   = select;
-  idt[index].unused     = 0;
-}
-
-void idt_install_gates() {
+void idt_install_gates(interrupt_descriptor_t** idt) {
   
-  idt_create_gate(0,  (uint32_t)isr0,  0x8, IDT_GATE);
-  idt_create_gate(1,  (uint32_t)isr1,  0x8, IDT_GATE);
-  idt_create_gate(2,  (uint32_t)isr2,  0x8, IDT_GATE);
-  idt_create_gate(3,  (uint32_t)isr3,  0x8, IDT_GATE);
-  idt_create_gate(4,  (uint32_t)isr4,  0x8, IDT_GATE);
-  idt_create_gate(5,  (uint32_t)isr5,  0x8, IDT_GATE);
-  idt_create_gate(6,  (uint32_t)isr6,  0x8, IDT_GATE);
-  idt_create_gate(7,  (uint32_t)isr7,  0x8, IDT_GATE);
-  idt_create_gate(8,  (uint32_t)isr8,  0x8, IDT_GATE);
-  idt_create_gate(9,  (uint32_t)isr9,  0x8, IDT_GATE);
-  idt_create_gate(10, (uint32_t)isr10, 0x8, IDT_GATE);
-  idt_create_gate(11, (uint32_t)isr11, 0x8, IDT_GATE);
-  idt_create_gate(12, (uint32_t)isr12, 0x8, IDT_GATE);
-  idt_create_gate(13, (uint32_t)isr13, 0x8, IDT_GATE);
-  idt_create_gate(14, (uint32_t)isr14, 0x8, IDT_GATE);
-  idt_create_gate(15, (uint32_t)isr15, 0x8, IDT_GATE);
-  idt_create_gate(16, (uint32_t)isr16, 0x8, IDT_GATE);
-  idt_create_gate(17, (uint32_t)isr17, 0x8, IDT_GATE);
-  idt_create_gate(18, (uint32_t)isr18, 0x8, IDT_GATE);
-  idt_create_gate(19, (uint32_t)isr19, 0x8, IDT_GATE);
-  idt_create_gate(20, (uint32_t)isr20, 0x8, IDT_GATE);
-  idt_create_gate(21, (uint32_t)isr21, 0x8, IDT_GATE);
-  idt_create_gate(22, (uint32_t)isr22, 0x8, IDT_GATE);
-  idt_create_gate(23, (uint32_t)isr23, 0x8, IDT_GATE);
-  idt_create_gate(24, (uint32_t)isr24, 0x8, IDT_GATE);
-  idt_create_gate(25, (uint32_t)isr25, 0x8, IDT_GATE);
-  idt_create_gate(26, (uint32_t)isr26, 0x8, IDT_GATE);
-  idt_create_gate(27, (uint32_t)isr27, 0x8, IDT_GATE);
-  idt_create_gate(28, (uint32_t)isr28, 0x8, IDT_GATE);
-  idt_create_gate(29, (uint32_t)isr29, 0x8, IDT_GATE);
-  idt_create_gate(30, (uint32_t)isr30, 0x8, IDT_GATE);
-  idt_create_gate(31, (uint32_t)isr31, 0x8, IDT_GATE);
-
-  load_idt();      // Reload  
+  idt_create_gate(idt, 0,  (uint32_t)isr0,  0x8, IDT_GATE);
+  idt_create_gate(idt, 1,  (uint32_t)isr1,  0x8, IDT_GATE);
+  idt_create_gate(idt, 2,  (uint32_t)isr2,  0x8, IDT_GATE);
+  idt_create_gate(idt, 3,  (uint32_t)isr3,  0x8, IDT_GATE);
+  idt_create_gate(idt, 4,  (uint32_t)isr4,  0x8, IDT_GATE);
+  idt_create_gate(idt, 5,  (uint32_t)isr5,  0x8, IDT_GATE);
+  idt_create_gate(idt, 6,  (uint32_t)isr6,  0x8, IDT_GATE);
+  idt_create_gate(idt, 7,  (uint32_t)isr7,  0x8, IDT_GATE);
+  idt_create_gate(idt, 8,  (uint32_t)isr8,  0x8, IDT_GATE);
+  idt_create_gate(idt, 9,  (uint32_t)isr9,  0x8, IDT_GATE);
+  idt_create_gate(idt, 10, (uint32_t)isr10, 0x8, IDT_GATE);
+  idt_create_gate(idt, 11, (uint32_t)isr11, 0x8, IDT_GATE);
+  idt_create_gate(idt, 12, (uint32_t)isr12, 0x8, IDT_GATE);
+  idt_create_gate(idt, 13, (uint32_t)isr13, 0x8, IDT_GATE);
+  idt_create_gate(idt, 14, (uint32_t)isr14, 0x8, IDT_GATE);
+  idt_create_gate(idt, 15, (uint32_t)isr15, 0x8, IDT_GATE);
+  idt_create_gate(idt, 16, (uint32_t)isr16, 0x8, IDT_GATE);
+  idt_create_gate(idt, 17, (uint32_t)isr17, 0x8, IDT_GATE);
+  idt_create_gate(idt, 18, (uint32_t)isr18, 0x8, IDT_GATE);
+  idt_create_gate(idt, 19, (uint32_t)isr19, 0x8, IDT_GATE);
+  idt_create_gate(idt, 20, (uint32_t)isr20, 0x8, IDT_GATE);
+  idt_create_gate(idt, 21, (uint32_t)isr21, 0x8, IDT_GATE);
+  idt_create_gate(idt, 22, (uint32_t)isr22, 0x8, IDT_GATE);
+  idt_create_gate(idt, 23, (uint32_t)isr23, 0x8, IDT_GATE);
+  idt_create_gate(idt, 24, (uint32_t)isr24, 0x8, IDT_GATE);
+  idt_create_gate(idt, 25, (uint32_t)isr25, 0x8, IDT_GATE);
+  idt_create_gate(idt, 26, (uint32_t)isr26, 0x8, IDT_GATE);
+  idt_create_gate(idt, 27, (uint32_t)isr27, 0x8, IDT_GATE);
+  idt_create_gate(idt, 28, (uint32_t)isr28, 0x8, IDT_GATE);
+  idt_create_gate(idt, 29, (uint32_t)isr29, 0x8, IDT_GATE);
+  idt_create_gate(idt, 30, (uint32_t)isr30, 0x8, IDT_GATE);
+  idt_create_gate(idt, 31, (uint32_t)isr31, 0x8, IDT_GATE);
 }
 
 void fault_handler(isr_stack_t* stack) {

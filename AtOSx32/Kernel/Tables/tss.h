@@ -50,6 +50,6 @@ typedef struct _TASK_STATE_SEGMENT_STRUCT {
 } __attribute__((packed)) tss_t;
 
 
-void tss_install();
+void tss_install(tss_t* task_state, gdtptr* gdtptr, gdt_descriptor** gdt);
 
 #endif
