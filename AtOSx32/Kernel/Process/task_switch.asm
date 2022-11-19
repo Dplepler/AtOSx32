@@ -1,5 +1,6 @@
 [extern running_task]       ; Current task
 [extern task_state]         ; TSS
+[extern make_thread]
 
 [global switch_task]
 
@@ -16,22 +17,10 @@ switch_task:
   mov dword [esi+0x8], esp    ; Set previous task's esp
   
   mov esi, dword [esp+0x14]  ; Get new task
-  mov ecx, dword [esi+0x8]   ; ESP
-  mov eax, dword [esi+0x4]   ; ESP0
+  mov esp, dword [esi+0x8]   ; ESP
 
   mov edx, eax
   sub edx, ecx    ; Variables in stack (times 4)
-  
-  sub eax, 0x1000    ; Literal start of stack
-  call calc_phys      
-
-  or eax, 3                 ; Read+Write and present flags set
-  mov edi, 0xFFF00000       ; Write to kernel
-  mov dword [edi+0x3FE*0x4], eax  ; ESP0
-
-  mov esp, 0xC03FE000
-  add esp, 0x1000
-  sub esp, edx
 
   mov dword [running_task], esi   ; Current task = new task
   mov eax, dword [esi+0x4]        ; Get new task's kernel stack
@@ -47,7 +36,6 @@ switch_task:
   je .continue
 
   mov cr3, eax  ; Change address space accordingly
-  
 
 .continue:
   
@@ -55,45 +43,45 @@ switch_task:
   pop edi
   pop esi
   pop ebx
-  
-  
-  ret
+ 
+  call make_thread
+  jmp $
 
 
-calc_phys:
+;calc_phys:
   
-  push ecx
-  push edx
-  push esi
-  push edi
+;  push ecx
+;  push edx
+;  push esi
+;  push edi
 
-  mov ecx, eax
-  mov edx, eax
+;  mov ecx, eax
+;  mov edx, eax
   
-  shr ecx, 22     ; PD index
-  shr edx, 12     ; PT index
-  and edx, 0x3FF
+;  shr ecx, 22     ; PD index
+;  shr edx, 12     ; PT index
+;  and edx, 0x3FF
 
-  push eax    ; Address
+;  push eax    ; Address
   
   ; Calculate page table address 
-  mov esi, 0xFFC00000 
-  shl ecx, 12
-  add esi, ecx
+;  mov esi, 0xFFC00000 
+;  shl ecx, 12
+;  add esi, ecx
   
-  mov eax, dword [esi+edx*0x4]  ; Physical address + flags
+;  mov eax, dword [esi+edx*0x4]  ; Physical address + flags
   
-  and eax, 0xFFFFF000           ; Remove flags
+;  and eax, 0xFFFFF000           ; Remove flags
 
-  pop edx
-  and edx, 0xFFF                 ; In-page offset
+; pop edx
+;  and edx, 0xFFF                 ; In-page offset
 
-  add eax, edx
+;  add eax, edx
 
-  pop edi
-  pop esi
-  pop edx
-  pop ecx
+;  pop edi
+;  pop esi
+;  pop edx
+;  pop ecx
 
-  ret
+;  ret
   

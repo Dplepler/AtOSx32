@@ -7,8 +7,11 @@
 #include "Tables/tss.h"
 #include "Process/process.h"
 
-void test(void* hello) {
-  PRINT("TEST SUCCESS!"); 
+void test(int* args) {
+
+  
+  for (uint8_t i = 0; i < 4; i++) { NL; PRINTN(args[i]); }
+  NL;
 }
 
 int kmain(void) {
@@ -30,10 +33,11 @@ int kmain(void) {
   tss_install();
 
   init_multitasking();
-  PRINTNH(make_thread);
   
-  run_task(create_process_handler(TASK_ACTIVE, create_address_space(), (uint32_t)test), NULL);
-   
+  int* args = kmalloc(4 * sizeof(int));
+  for (uint8_t i = 0; i < 4; i++) { args[i] = i; }
+  
+  run_task(create_process_handler(TASK_ACTIVE, create_address_space(), (uint32_t)test), args);
 
 
   //test(10);

@@ -63,12 +63,11 @@ void terminate_process(tcb_t* task) {
 
   PRINT("Task: ");
   PRINTN(task->pid);
-  PRINT("Terminated\n");
+  PRINT(" Terminated\n");
   while(1) {}
 }
   
 void make_thread(tcb_t* task, void* params) {
- 
 
   void* (*entry)(void*) = (void*)task->eip;  
   (*entry)(params);
@@ -87,16 +86,18 @@ void run_task(tcb_t* new_task, void* params) {
     __asm__ __volatile__ ("mov %%esi, %0" : "=r" (registers.esi));
     __asm__ __volatile__ ("mov %%edi, %0" : "=r" (registers.edi));
     __asm__ __volatile__ ("mov %%ebp, %0" : "=r" (registers.ebp));
-    
-    *--stack = (uint32_t)new_task;
-    *--stack = (uint32_t)params;
-    *--stack = (uint32_t)make_thread;
 
+    /* Push parameters for make_thread function */
+    *--stack = (uint32_t)params;
+    *--stack = (uint32_t)new_task;
+
+    /* Push cdecl registers */
     *--stack = registers.ebx;
     *--stack = registers.esi;
     *--stack = registers.edi;
     *--stack = registers.ebp;
      
+    /* Update stack */
     new_task->esp = (uint32_t)stack;
   }
 
