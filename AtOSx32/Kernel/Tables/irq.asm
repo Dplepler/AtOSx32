@@ -32,7 +32,7 @@ IRQ 15, 47
 [extern irq_handler]
 
 irq_common_handler:
-
+  
   pusha
   push ds
   push es

@@ -11,7 +11,7 @@ void setup_clock() {
 void set_periodic_interrupt() {
 
   cli();
-  outportb(CMOS_REGISTER, 0x8B);      // Select register 0xB and disable NMI e
+  outportb(CMOS_REGISTER, 0x8B);      // Select register 0xB and disable NMI
   uint8_t old_data = inportb(CMOS_RW);
   outportb(CMOS_REGISTER, 0x8B);      // For some reason reading from this port resets the CMOS register to 0xD
   outportb(CMOS_RW, old_data | 0x40);
@@ -22,7 +22,7 @@ void set_periodic_interrupt() {
 void rtc_handler(isr_stack_t* stack) {
 
   stack = stack;    // Get rid of unused variable warning
-
+  
   proc_time_counter++;
   time_counter++; 
 

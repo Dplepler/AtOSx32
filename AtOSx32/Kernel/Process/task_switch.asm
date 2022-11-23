@@ -13,15 +13,16 @@ switch_task:
   push ebp
   
   mov esi, dword [running_task]
+
+  cmp dword [esi+0x18], 8008
+  je .foo
+
   mov dword [esi+0x8], esp    ; Set previous task's esp
   
   mov esi, dword [esp+0x14]  ; Get new task
   mov esp, dword [esi+0x8]   ; ESP
 
-  mov edx, eax
-  sub edx, ecx    ; Variables in stack (times 4)
-
-  mov dword [running_task], esi   ; Current task = new task
+  mov dword [running_task], esi   ; running_task = new task
  
   mov eax, dword [esi+0x10]  ; CR3 (Physical address space)
   mov edx, cr3
@@ -38,7 +39,20 @@ switch_task:
   pop esi
   pop ebx
 
+  mov esi, dword [running_task]
+
+  cmp dword [esi+0x1C], 0       ; CPU time
+  je .wrapper
+
+  ret
+
+.wrapper:
+
   call make_thread
+  jmp $
+
+.foo:
+  mov eax, 0x1234
   jmp $
 
 ;calc_phys:

@@ -19,7 +19,10 @@ typedef struct _TASK_CONTROL_BLOCK_STRUCT {
   uint32_t cr3;
   
   struct _TASK_CONTROL_BLOCK_STRUCT* flink;
-  
+
+  uint32_t pid;
+  uint32_t cpu_time;
+
   enum {
 
     TASK_ACTIVE,
@@ -28,8 +31,6 @@ typedef struct _TASK_CONTROL_BLOCK_STRUCT {
 
   } state;
  
-  uint32_t pid;
-  uint32_t cpu_time;
 
 } __attribute__((packed)) tcb_t, process_t, thread_t;
 

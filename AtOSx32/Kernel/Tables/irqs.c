@@ -47,31 +47,31 @@ void irq_remap() {
   outportb(SLAVE_DATA,        0);
 }
 
-void init_irq(interrupt_descriptor_t** idt) {
+void init_irq() {
   
   irq_remap();
 
-  idt_create_gate(idt, 32, (uint32_t)irq0, 0x8, IDT_GATE);
-  idt_create_gate(idt, 33, (uint32_t)irq1, 0x8, IDT_GATE);
-  idt_create_gate(idt, 34, (uint32_t)irq2, 0x8, IDT_GATE);
-  idt_create_gate(idt, 35, (uint32_t)irq3, 0x8, IDT_GATE);
-  idt_create_gate(idt, 36, (uint32_t)irq4, 0x8, IDT_GATE);
-  idt_create_gate(idt, 37, (uint32_t)irq5, 0x8, IDT_GATE);
-  idt_create_gate(idt, 38, (uint32_t)irq6, 0x8, IDT_GATE);
-  idt_create_gate(idt, 39, (uint32_t)irq7, 0x8, IDT_GATE);
-  idt_create_gate(idt, 40, (uint32_t)irq8, 0x8, IDT_GATE);
-  idt_create_gate(idt, 41, (uint32_t)irq9, 0x8, IDT_GATE);
-  idt_create_gate(idt, 42, (uint32_t)irq10, 0x8, IDT_GATE);
-  idt_create_gate(idt, 43, (uint32_t)irq11, 0x8, IDT_GATE);
-  idt_create_gate(idt, 44, (uint32_t)irq12, 0x8, IDT_GATE);
-  idt_create_gate(idt, 45, (uint32_t)irq13, 0x8, IDT_GATE);
-  idt_create_gate(idt, 46, (uint32_t)irq14, 0x8, IDT_GATE);
-  idt_create_gate(idt, 47, (uint32_t)irq15, 0x8, IDT_GATE);
+  idt_create_gate(32, (uint32_t)irq0, 0x8, IDT_GATE);
+  idt_create_gate(33, (uint32_t)irq1, 0x8, IDT_GATE);
+  idt_create_gate(34, (uint32_t)irq2, 0x8, IDT_GATE);
+  idt_create_gate(35, (uint32_t)irq3, 0x8, IDT_GATE);
+  idt_create_gate(36, (uint32_t)irq4, 0x8, IDT_GATE);
+  idt_create_gate(37, (uint32_t)irq5, 0x8, IDT_GATE);
+  idt_create_gate(38, (uint32_t)irq6, 0x8, IDT_GATE);
+  idt_create_gate(39, (uint32_t)irq7, 0x8, IDT_GATE);
+  idt_create_gate(40, (uint32_t)irq8, 0x8, IDT_GATE);
+  idt_create_gate(41, (uint32_t)irq9, 0x8, IDT_GATE);
+  idt_create_gate(42, (uint32_t)irq10, 0x8, IDT_GATE);
+  idt_create_gate(43, (uint32_t)irq11, 0x8, IDT_GATE);
+  idt_create_gate(44, (uint32_t)irq12, 0x8, IDT_GATE);
+  idt_create_gate(45, (uint32_t)irq13, 0x8, IDT_GATE);
+  idt_create_gate(46, (uint32_t)irq14, 0x8, IDT_GATE);
+  idt_create_gate(47, (uint32_t)irq15, 0x8, IDT_GATE);
 }
 
 /* Handle a default interrupt request */
 void irq_handler(isr_stack_t* stack) {
-  
+
   void (*handler)(isr_stack_t* stack) = irq_routines[(stack->index & 0xFF) - 0x20]; 
   
   if (handler) { (*handler)(stack); }
@@ -84,4 +84,3 @@ void irq_handler(isr_stack_t* stack) {
 
   sti(); 
 }
-

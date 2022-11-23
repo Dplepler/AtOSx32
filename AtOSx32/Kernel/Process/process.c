@@ -38,7 +38,7 @@ process_t* create_process_handler(uint8_t state, uint32_t* address_space, uint32
   return (process_t*)create_task_handler(state, address_space, eip);  
 }
 
-thread_t* create_thread_handler(uint8_t state, uint32_t eip) {
+thread_t* create_thread_handler(uint8_t state, uint32_t eip){
   return (thread_t*)create_task_handler(state, running_task->cr3, eip);
 }
 
@@ -62,6 +62,15 @@ tcb_t* create_task_handler(uint8_t state, uint32_t cr3, uint32_t eip) {
   return new_task;
 }
 
+ 
+void make_thread(tcb_t* task, void* params) {
+ 
+  void* (*entry)(void*) = (void*)task->eip;  
+  (*entry)(params);
+  terminate_process(task);
+}
+
+
 void terminate_process(tcb_t* task) {
 
   PRINT("Task: ");
@@ -70,20 +79,14 @@ void terminate_process(tcb_t* task) {
 
   while(1) {}
 }
-  
-void make_thread(tcb_t* task, void* params) {
 
-  void* (*entry)(void*) = (void*)task->eip;  
-  (*entry)(params);
-  terminate_process(task);
-}
 
 void run_task(tcb_t* new_task, void* params) {
 
   uint32_t* stack = (uint32_t*)new_task->esp;
 
   if (!new_task->cpu_time) {
-
+    
     cdecl_regs registers;
 
     __asm__ __volatile__ ("mov %%ebx, %0" : "=r" (registers.ebx));  
@@ -92,8 +95,10 @@ void run_task(tcb_t* new_task, void* params) {
     __asm__ __volatile__ ("mov %%ebp, %0" : "=r" (registers.ebp));
     
     /* Push parameters for make_thread function */ 
-    *--stack = (uint32_t)params;
+
     *--stack = (uint32_t)new_task;
+    *--stack = (uint32_t)params;
+    *--stack = (uint32_t)make_thread;
 
     /* Push cdecl registers */
     *--stack = registers.ebx;
@@ -105,13 +110,10 @@ void run_task(tcb_t* new_task, void* params) {
     new_task->esp = (uint32_t)stack;
   }
 
-  cli();
-
   update_proc_time();
   proc_time_counter = 0;
-  PRINT("TIME: ");
-  PRINTNH(running_task->cpu_time);
-  NL;
+  
+  cli();
   switch_task(new_task);
 }
 
@@ -119,7 +121,8 @@ void update_proc_time() {
 
   if (!running_task) { return; }
   
-  running_task->cpu_time = proc_time_counter;
+  /* Prevent a hack that will initialize a process twice if it ran for less than a milisecond */
+  running_task->cpu_time += proc_time_counter ? proc_time_counter : 1;
 }
 
 tcb_t* find_task(uint32_t pid) {

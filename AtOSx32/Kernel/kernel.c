@@ -17,7 +17,7 @@ void process(void* args) {
 
   thread_t* child1 = create_thread_handler(TASK_ACTIVE, (uint32_t)thread1);
   thread_t* child2 = create_thread_handler(TASK_ACTIVE, (uint32_t)thread2);
-  
+ 
   run_task(child1, child2);
 
   while(1) {}
@@ -25,20 +25,27 @@ void process(void* args) {
 
 
 void thread1(void* args) {
-
-  PRINT("HELEGFRMHG");
+ 
+  PRINTNH(args);
+  for (;;) {
+    PRINT("HI from thread1\n\r");
+    while(1) {}
+    run_task(args, running_task);
+  }
+ 
   while(1) {}
-  PRINT("HI from thread1\n\r");
-  run_task(args, running_task);
-  while(1) {}
-
 }
 
 void thread2(void* args) {
 
-  PRINT("HI from thread2\n\r");
-  while(1) {}
-  run_task(args, running_task);
+  for (;;) {
+    while(1) {}
+    PRINT("HI from thread2\n\r");
+    while(1) {}
+    run_task(args, running_task);
+    
+    while(1) {}
+  }
   while(1) {}
 }
 
@@ -53,28 +60,24 @@ int kmain(void) {
 
   perry(25, 5);
 
-  idtptr_t* idt_ptr = kmalloc(sizeof(idtptr_t));
-  interrupt_descriptor_t** idt = kmalloc(IDT_SIZE * sizeof(interrupt_descriptor_t*));
+  setup_gdt();
+  setup_idt();
   
-  gdtptr* gdt_ptr = kmalloc(sizeof(gdtptr));
-  gdt_descriptor** gdt = kmalloc(GDT_SIZE * sizeof(gdt_descriptor*));
+  init_irq();
 
-  tss_t* tss = kmalloc(sizeof(tss_t));
-
-  setup_gdt(gdt_ptr, gdt);
-  setup_idt(idt_ptr, idt);
-  init_irq(idt);
   setup_clock();
   
-  tss_install(tss, gdt_ptr, gdt);
+  tss_install();
 
   init_multitasking();
   
-
-  process_t* root = create_process_handler(TASK_ACTIVE, cpu_get_address_space(), (uint32_t)process);
+  NL;
+  PRINT("THREAD 2: "); PRINTNH(thread2);
+  NL;
+  process_t* root = create_thread_handler(TASK_ACTIVE, (uint32_t)process);
   run_task(root, NULL);
 
-
+  
   while(1) {}
   
   /* while (true) {
