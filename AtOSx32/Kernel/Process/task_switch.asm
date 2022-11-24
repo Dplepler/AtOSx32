@@ -7,6 +7,7 @@
 ; void switch_task(struct _PROCESS_CONTROL_BLOCK_STRUCT* new_task)
 switch_task:
 
+  ; Cdecl registers
   push ebx
   push esi
   push edi
@@ -31,6 +32,7 @@ switch_task:
 
 .continue:
   
+  ; Cdecl registers
   pop ebp
   pop edi
   pop esi
@@ -38,13 +40,15 @@ switch_task:
    
   mov esi, dword [running_task]
 
-  or dword [esi+0x1C], 0    ; CPU time
+  sti
+
+  or dword [esi+0x1C], 0    ; CPU time, if 0 we initialize the task
   jz .wrapper
 
-  ret
+  ret     ; Normal task switching, popping off the last EIP
 
 .wrapper:
-
+  
   call make_thread
   jmp $
 

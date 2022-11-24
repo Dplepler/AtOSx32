@@ -26,7 +26,6 @@ void process(void* args) {
 
 void thread1(void* args) {
  
-  PRINTNH(args);
   for (;;) {
     PRINT("HI from thread1\n\r");
     run_task(args, running_task);
@@ -37,9 +36,13 @@ void thread1(void* args) {
 
 void thread2(void* args) {
 
+  int counter = 0;
   for (;;) {
+    sleep(1000);
+    //if (counter == 50) { while(1) {} }
     PRINT("HI from thread2\n\r");
     run_task(args, running_task);
+    counter++;
     
   }
   while(1) {}
@@ -66,10 +69,11 @@ int kmain(void) {
   tss_install();
 
   init_multitasking();
-
+  
   process_t* root = create_thread_handler(TASK_ACTIVE, (uint32_t)process);
   run_task(root, NULL);
 
+  
   
   while(1) {}
   

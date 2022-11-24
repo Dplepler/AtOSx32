@@ -58,7 +58,8 @@ uint32_t* relocate_stack(uint32_t* address, size_t size);
 uint32_t get_next_pid();
 
 tcb_t* create_task_handler(uint8_t state, uint32_t cr3, uint32_t eip);
-tcb_t* create_process_handler(uint8_t state, uint32_t* address_space, uint32_t eip);
+process_t* create_process_handler(uint8_t state, uint32_t* address_space, uint32_t eip);
+thread_t* create_thread_handler(uint8_t state, uint32_t eip);
 tcb_t* find_task(uint32_t pid);
 
 #endif
