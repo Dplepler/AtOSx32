@@ -64,7 +64,7 @@ tcb_t* create_task_handler(uint8_t state, uint32_t cr3, uint32_t eip) {
 
  
 void make_thread(tcb_t* task, void* params) {
- 
+  
   void* (*entry)(void*) = (void*)task->eip;  
   (*entry)(params);
   terminate_process(task);
@@ -95,10 +95,8 @@ void run_task(tcb_t* new_task, void* params) {
     __asm__ __volatile__ ("mov %%ebp, %0" : "=r" (registers.ebp));
     
     /* Push parameters for make_thread function */ 
-
-    *--stack = (uint32_t)new_task;
     *--stack = (uint32_t)params;
-    *--stack = (uint32_t)make_thread;
+    *--stack = (uint32_t)new_task;
 
     /* Push cdecl registers */
     *--stack = registers.ebx;
@@ -108,6 +106,7 @@ void run_task(tcb_t* new_task, void* params) {
      
     /* Update stack */
     new_task->esp = (uint32_t)stack;
+
   }
 
   update_proc_time();

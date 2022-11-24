@@ -5,17 +5,14 @@
 
 
 ; void switch_task(struct _PROCESS_CONTROL_BLOCK_STRUCT* new_task)
-switch_task: 
+switch_task:
 
   push ebx
   push esi
   push edi
-  push ebp
-  
-  mov esi, dword [running_task]
+  push ebp 
 
-  cmp dword [esi+0x18], 8008
-  je .foo
+  mov esi, dword [running_task]
 
   mov dword [esi+0x8], esp    ; Set previous task's esp
   
@@ -23,7 +20,7 @@ switch_task:
   mov esp, dword [esi+0x8]   ; ESP
 
   mov dword [running_task], esi   ; running_task = new task
- 
+  
   mov eax, dword [esi+0x10]  ; CR3 (Physical address space)
   mov edx, cr3
 
@@ -38,11 +35,11 @@ switch_task:
   pop edi
   pop esi
   pop ebx
-
+   
   mov esi, dword [running_task]
 
-  cmp dword [esi+0x1C], 0       ; CPU time
-  je .wrapper
+  or dword [esi+0x1C], 0    ; CPU time
+  jz .wrapper
 
   ret
 
@@ -51,9 +48,6 @@ switch_task:
   call make_thread
   jmp $
 
-.foo:
-  mov eax, 0x1234
-  jmp $
 
 ;calc_phys:
   
