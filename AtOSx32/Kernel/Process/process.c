@@ -80,13 +80,12 @@ void terminate_process(tcb_t* task) {
   while(1) {}
 }
 
-
 void run_task(tcb_t* new_task, void* params) {
 
   uint32_t* stack = (uint32_t*)new_task->esp;
 
   if (!new_task->cpu_time) {
-    
+
     cdecl_regs registers;
 
     __asm__ __volatile__ ("mov %%ebx, %0" : "=r" (registers.ebx));  

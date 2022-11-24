@@ -17,7 +17,7 @@ void process(void* args) {
   
   thread_t* child1 = create_thread_handler(TASK_ACTIVE, (uint32_t)thread1);
   thread_t* child2 = create_thread_handler(TASK_ACTIVE, (uint32_t)thread2);
- 
+  
   run_task(child1, child2);
 
   while(1) {}
@@ -27,7 +27,7 @@ void process(void* args) {
 void thread1(void* args) {
  
   for (;;) {
-    PRINT("HI from thread1\n\r");
+
     run_task(args, running_task);
   }
  
@@ -38,11 +38,9 @@ void thread2(void* args) {
 
   int counter = 0;
   for (;;) {
-    sleep(1000);
-    //if (counter == 50) { while(1) {} }
-    PRINT("HI from thread2\n\r");
-    run_task(args, running_task);
     counter++;
+    PRINTNH(counter);
+    run_task(args, running_task);
     
   }
   while(1) {}
