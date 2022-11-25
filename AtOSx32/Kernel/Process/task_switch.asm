@@ -1,5 +1,5 @@
 [extern running_task]       ; Current task
-[extern make_thread]
+[extern init_task]
 
 [global switch_task]
 
@@ -49,6 +49,6 @@ switch_task:
 
 .wrapper:
   
-  call make_thread
+  call init_task
   jmp $
 

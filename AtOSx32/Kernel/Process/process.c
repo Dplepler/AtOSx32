@@ -63,15 +63,15 @@ tcb_t* create_task_handler(uint8_t state, uint32_t cr3, uint32_t eip) {
 }
 
  
-void make_thread(tcb_t* task, void* params) {
+void init_task(tcb_t* task, void* params) {
   
   void* (*entry)(void*) = (void*)task->eip;  
   (*entry)(params);
-  terminate_process(task);
+  terminate_task(task);
 }
 
 
-void terminate_process(tcb_t* task) {
+void terminate_task(tcb_t* task) {
 
   PRINT("Task: ");
   PRINTN(task->pid);
@@ -114,6 +114,18 @@ void run_task(tcb_t* new_task, void* params) {
   cli();
   switch_task(new_task);
 }
+
+void task_change_state(tcb_t* task, uint16_t state) {
+
+  task->state = state;
+}
+
+void task_block(uint32_t new_state) {
+  
+  task_change_state(running_task, new_state);
+}
+
+
 
 void update_proc_time() {
 

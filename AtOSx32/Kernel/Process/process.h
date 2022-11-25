@@ -23,13 +23,14 @@ typedef struct _TASK_CONTROL_BLOCK_STRUCT {
   uint32_t pid;
   uint32_t cpu_time;
 
+
   enum {
 
     TASK_ACTIVE,
     TASK_AVAILABLE,
+    TASK_BLOCKED,
     TASK_SLEEPING,
-    TASK_WAITING,
-    TASK_BLOCKED
+    TASK_WAITING
 
   } state;
  
@@ -50,12 +51,13 @@ extern void switch_task(struct _TASK_CONTROL_BLOCK_STRUCT* new_task);
 
 void init_multitasking();
 void run_task(tcb_t* new_task, void* params);
-void terminate_process(tcb_t* task);
-void make_thread(tcb_t* task, void* params);
+void terminate_task(tcb_t* task);
+void init_task(tcb_t* task, void* params);
 void update_proc_time();
+void task_change_state(tcb_t* task, uint16_t state);
+void task_block(uint32_t new_state);
 
-
-uint32_t* create_address_space();
+  uint32_t* create_address_space();
 uint32_t* relocate_stack(uint32_t* address, size_t size);
 uint32_t get_next_pid();
 
