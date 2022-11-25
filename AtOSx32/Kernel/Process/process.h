@@ -27,6 +27,8 @@ typedef struct _TASK_CONTROL_BLOCK_STRUCT {
 
     TASK_ACTIVE,
     TASK_AVAILABLE,
+    TASK_SLEEPING,
+    TASK_WAITING,
     TASK_BLOCKED
 
   } state;

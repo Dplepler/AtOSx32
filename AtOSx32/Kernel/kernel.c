@@ -27,7 +27,7 @@ void process(void* args) {
 void thread1(void* args) {
  
   for (;;) {
-
+    PRINT("BYEBYE");
     run_task(args, running_task);
   }
  
@@ -35,14 +35,13 @@ void thread1(void* args) {
 }
 
 void thread2(void* args) {
-
-  int counter = 0;
+  
   for (;;) {
-    counter++;
-    PRINTNH(counter);
+    PRINT("HELLO");
     run_task(args, running_task);
     
   }
+  
   while(1) {}
 }
 
@@ -68,7 +67,7 @@ int kmain(void) {
 
   init_multitasking();
   
-  process_t* root = create_thread_handler(TASK_ACTIVE, (uint32_t)process);
+  process_t* root = create_process_handler(TASK_ACTIVE, create_address_space(), (uint32_t)process);
   run_task(root, NULL);
 
   
