@@ -8,6 +8,9 @@ tcb_t* running_task = NULL;  // Current task
 task_list_t available_tasks[] = { { NULL, NULL }, { NULL, NULL }, { NULL, NULL }, { NULL, NULL } };
 task_list_t waiting_tasks[]   = { { NULL, NULL }, { NULL, NULL }, { NULL, NULL }, { NULL, NULL } };
 
+tcb_t* sleeping_tasks_head = NULL;
+tcb_t* terminated_tasks_head = NULL;
+
 void init_multitasking() {
 
   tcb_t* current_proc = kmalloc(sizeof(tcb_t));
@@ -105,21 +108,25 @@ void init_task(tcb_t* task, void* params) {
 
 void terminate_task(tcb_t* task) {
 
-  PRINT("Task: ");
-  PRINTN(task->pid);
-  PRINT(" Terminated\n\r");
+  /* We can't cleanup the task's stack just yet, we're still in it, so signal to the next task to do so */
+  task_change_state(task, TASK_TERMINATED);
+  task->flink = terminated_tasks_head;
+  terminated_tasks_head = task;
 
+  // TODO: Cleaner task should be unblocked here to signal that there is a task that needs to be cleared
   while(1) {}
+
 }
 
 void run_task(tcb_t* new_task) {
   
   if (!allow_ts) { return; }  // Don't task switch if we are not allowed
-
+                              
   update_proc_time();
   proc_time_counter = 0;
   
   cli();
+  new_task->state = TASK_ACTIVE;
   switch_task(new_task);
 }
 
@@ -131,15 +138,44 @@ void task_change_state(tcb_t* task, uint16_t state) {
 void task_block(uint32_t new_state) {
   
   task_change_state(running_task, new_state);
+  schedule();
 }
 
 
 void task_unblock(tcb_t* task) {
 
-  task_change_state(task, TASK_AVAILABLE);
-  if (!waiting_tasks[task->policy].head) { run_task(task); }     // If no task is available we can switch to this one
+  task_change_state(task, TASK_AVAILABLE); 
+
+  task->flink = NULL;
+  
+  /* If there are no available tasks we can switch to this one */
+  if (!available_tasks[task->policy].head) { run_task(task); } 
+  else {
+    /* Insert task to the waitlist */
+    available_tasks[task->policy].tail->flink = task;
+    available_tasks[task->policy].tail = task;
+  }
 }
 
+/* Go over all sleeping tasks and reduce their nap time */
+void manage_sleeping_tasks() {
+
+  tcb_t* task = sleeping_tasks_head;
+
+  while (task) {
+    if (!--task->naptime) { task_unblock(task); }   // Naptime over, task is ready to run
+    task = task->flink;
+  }
+}
+
+void insert_sleeping_list(unsigned long hertz) {
+
+  /* Add running task to sleeping task list */
+  if (!sleeping_tasks_head) { sleeping_tasks_head = running_task; running_task->flink = NULL; }
+  else { running_task->flink = sleeping_tasks_head; sleeping_tasks_head = running_task; }
+
+  running_task->naptime = hertz; 
+}
 
 void update_proc_time() {
 
@@ -172,3 +208,24 @@ void unlock_ts() {
 
   if (!--irq_disable_counter) { sti(); allow_ts = true; }
 }
+
+
+void schedule() {
+  
+
+
+
+}
+
+void schedule_high_priority() {
+
+
+}
+
+void schedule_low_priority() {
+
+
+}
+
+
+

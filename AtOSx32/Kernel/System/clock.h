@@ -3,6 +3,7 @@
 
 #include "System/hal.h"
 #include "Tables/interrupts.h"
+#include "Process/process.h"
 #include "utils.h"
 
 #define HERTZ(ms) (1024 * (ms / 1000.0))

@@ -7,7 +7,7 @@
 #define INIT_KERNEL_STACK 0xC03FE000
 #define STACK_SIZE        0x1000
 
-#define DEFAULT_TIME_SLICE 100
+#define DEFAULT_TIME_SLICE 50
 #define DEFAULT_PRIORITY   128
 
 
@@ -51,6 +51,9 @@ typedef struct _TASK_CONTROL_BLOCK_STRUCT {
 
   uint32_t time_slice;   // Only for policies 2 & 3
   uint8_t priority;      // Only for policies 0 & 1
+  
+  uint32_t naptime;      // Duration of sleep
+
                     
 
 } __attribute__((packed)) tcb_t, process_t, thread_t;
@@ -86,6 +89,13 @@ void task_block(uint32_t new_state);
 void lock_irq();
 void unlock_irq();
 void task_unblock(tcb_t* task);
+void manage_sleeping_tasks();
+void insert_sleeping_list(unsigned long hertz);
+
+/* Scheduler */
+void schedule();
+void schedule_high_priority();
+void schedule_low_priority();
 
 uint32_t* create_address_space();
 uint32_t* relocate_stack(uint32_t* address, size_t size);
