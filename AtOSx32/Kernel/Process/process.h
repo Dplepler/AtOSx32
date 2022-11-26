@@ -7,6 +7,10 @@
 #define INIT_KERNEL_STACK 0xC03FE000
 #define STACK_SIZE        0x1000
 
+#define DEFAULT_TIME_SLICE 100
+#define DEFAULT_PRIORITY   128
+
+
 extern unsigned long proc_time_counter; 
 
 typedef struct _TASK_CONTROL_BLOCK_STRUCT {
@@ -34,9 +38,31 @@ typedef struct _TASK_CONTROL_BLOCK_STRUCT {
     TASK_WAITING
 
   } state;
- 
+
+  /* Priority of process */
+  enum {
+
+    POLICY_0,
+    POLICY_1,
+    POLICY_2,
+    POLICY_3
+
+  } policy;
+
+  uint32_t time_slice;   // Only for policies 2 & 3
+  uint8_t priority;      // Only for policies 0 & 1
+                    
 
 } __attribute__((packed)) tcb_t, process_t, thread_t;
+
+typedef struct _WAITING_LIST_STRUCT {
+
+  tcb_t* tail;
+  tcb_t* head;
+
+} task_list_t;
+
+
 
 typedef struct _CDECL_REGISTERS_STRUCT {
 
@@ -65,9 +91,9 @@ uint32_t* create_address_space();
 uint32_t* relocate_stack(uint32_t* address, size_t size);
 uint32_t get_next_pid();
 
-tcb_t* create_task_handler(uint8_t state, uint32_t cr3, uint32_t eip, void* params);
-process_t* create_process_handler(uint8_t state, uint32_t* address_space, uint32_t eip, void* params);
-thread_t* create_thread_handler(uint8_t state, uint32_t eip, void* params);
+tcb_t* create_task_handler(uint8_t state, uint32_t cr3, uint32_t eip, void* params, uint8_t policy);
+process_t* create_process_handler(uint8_t state, uint32_t* address_space, uint32_t eip, void* params, uint8_t policy);
+thread_t* create_thread_handler(uint8_t state, uint32_t eip, void* params, uint8_t policy);
 //tcb_t* find_task(uint32_t pid);
 
 #endif

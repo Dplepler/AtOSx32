@@ -5,11 +5,8 @@
 
 typedef struct _MUTEX_LOCK_STRUCT {
 
-  tcb_t* waiting_list_head;
-  tcb_t* waiting_list_tail;
-  
+  wait_list_t wait_list; 
   bool aquired;
-
 
 } mutex_t;
 

@@ -3,7 +3,7 @@
 
 #include "process.h"
 
-
+void schedule();
 
 
 #endif

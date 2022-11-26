@@ -4,9 +4,9 @@ uint32_t irq_disable_counter = 0;
 bool     allow_ts = true;
 
 tcb_t* running_task = NULL;  // Current task
-tcb_t* waiting_list_head = NULL;
-tcb_t* waiting_list_tail = NULL;
 
+task_list_t available_tasks[] = { { NULL, NULL }, { NULL, NULL }, { NULL, NULL }, { NULL, NULL } };
+task_list_t waiting_tasks[]   = { { NULL, NULL }, { NULL, NULL }, { NULL, NULL }, { NULL, NULL } };
 
 void init_multitasking() {
 
@@ -19,7 +19,7 @@ void init_multitasking() {
   current_proc->esp0 = INIT_KERNEL_STACK;
   current_proc->cpu_time = 0;
 
-  running_task = current_proc;   
+  running_task = current_proc; 
 }
 
 /* Creates a virtual address space, note that only this function can modify the address space from within the caller's virtual address space */
@@ -38,30 +38,34 @@ uint32_t* create_address_space() {
 }
 
 
-process_t* create_process_handler(uint8_t state, uint32_t* address_space, uint32_t eip, void* params) {
-  return (process_t*)create_task_handler(state, (uint32_t)address_space, eip, params);  
+process_t* create_process_handler(uint8_t state, uint32_t* address_space, uint32_t eip, void* params, uint8_t policy) {
+  return (process_t*)create_task_handler(state, (uint32_t)address_space, eip, params, policy);  
 }
 
-thread_t* create_thread_handler(uint8_t state, uint32_t eip, void* params){
-  return (thread_t*)create_task_handler(state, running_task->cr3, eip, params);
+thread_t* create_thread_handler(uint8_t state, uint32_t eip, void* params, uint8_t policy){
+  return (thread_t*)create_task_handler(state, running_task->cr3, eip, params, policy);
 }
 
 
-tcb_t* create_task_handler(uint8_t state, uint32_t cr3, uint32_t eip, void* params) { 
+tcb_t* create_task_handler(uint8_t state, uint32_t cr3, uint32_t eip, void* params, uint8_t policy) { 
   
   tcb_t* new_task = kmalloc(sizeof(tcb_t));
   
   new_task->state = state;
-  new_task->cr3   = cr3;
-  new_task->pid   = get_next_pid();
-  new_task->esp0  = (uint32_t)kmalloc_aligned(STACK_SIZE, 0x1000) + STACK_SIZE;   // Create new kernel stack
-  new_task->eip   = eip;
+  new_task->cr3 = cr3;
+  new_task->pid = get_next_pid();
+  new_task->esp0 = (uint32_t)kmalloc_aligned(STACK_SIZE, 0x1000) + STACK_SIZE;   // Create new kernel stack
+  new_task->eip = eip;
   new_task->cpu_time = 0;
   
   running_task->flink = new_task; 
 
   new_task->esp = new_task->esp0; 
  
+  new_task->policy = policy;
+
+  new_task->time_slice = policy >= POLICY_2 ? DEFAULT_TIME_SLICE : 0;
+  new_task->priority   = policy <= POLICY_1 ? DEFAULT_PRIORITY   : 0;
 
   /* Set up initial stack layout to be popped in the task switch routine */
   uint32_t* stack = (uint32_t*)new_task->esp;  // Temporary stack pointer
@@ -110,8 +114,7 @@ void terminate_task(tcb_t* task) {
 
 void run_task(tcb_t* new_task) {
   
-
-
+  if (!allow_ts) { return; }  // Don't task switch if we are not allowed
 
   update_proc_time();
   proc_time_counter = 0;
@@ -134,7 +137,7 @@ void task_block(uint32_t new_state) {
 void task_unblock(tcb_t* task) {
 
   task_change_state(task, TASK_AVAILABLE);
-  if (!waiting_list_head) { run_task(task); }     // If no task is available we can switch to this one
+  if (!waiting_tasks[task->policy].head) { run_task(task); }     // If no task is available we can switch to this one
 }
 
 
