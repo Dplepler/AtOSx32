@@ -1,7 +1,11 @@
 #include "process.h"
 
+uint32_t irq_disable_counter = 0;
+bool     allow_ts = true;
+
 tcb_t* running_task = NULL;  // Current task
-tcb_t* root_task = NULL;
+tcb_t* waiting_list_head = NULL;
+tcb_t* waiting_list_tail = NULL;
 
 
 void init_multitasking() {
@@ -10,12 +14,12 @@ void init_multitasking() {
 
   current_proc->state = TASK_ACTIVE;
     
-  current_proc->cr3 = cpu_get_address_space(); 
+  current_proc->cr3 = (uint32_t)cpu_get_address_space(); 
   current_proc->pid = get_next_pid();
   current_proc->esp0 = INIT_KERNEL_STACK;
   current_proc->cpu_time = 0;
 
-  root_task = running_task = current_proc;   
+  running_task = current_proc;   
 }
 
 /* Creates a virtual address space, note that only this function can modify the address space from within the caller's virtual address space */
@@ -34,16 +38,16 @@ uint32_t* create_address_space() {
 }
 
 
-process_t* create_process_handler(uint8_t state, uint32_t* address_space, uint32_t eip) {
-  return (process_t*)create_task_handler(state, address_space, eip);  
+process_t* create_process_handler(uint8_t state, uint32_t* address_space, uint32_t eip, void* params) {
+  return (process_t*)create_task_handler(state, (uint32_t)address_space, eip, params);  
 }
 
-thread_t* create_thread_handler(uint8_t state, uint32_t eip){
-  return (thread_t*)create_task_handler(state, running_task->cr3, eip);
+thread_t* create_thread_handler(uint8_t state, uint32_t eip, void* params){
+  return (thread_t*)create_task_handler(state, running_task->cr3, eip, params);
 }
 
 
-tcb_t* create_task_handler(uint8_t state, uint32_t cr3, uint32_t eip) { 
+tcb_t* create_task_handler(uint8_t state, uint32_t cr3, uint32_t eip, void* params) { 
   
   tcb_t* new_task = kmalloc(sizeof(tcb_t));
   
@@ -56,8 +60,32 @@ tcb_t* create_task_handler(uint8_t state, uint32_t cr3, uint32_t eip) {
   
   running_task->flink = new_task; 
 
-  /* Set up initial stack layout to be popped in the task switch routinue */
   new_task->esp = new_task->esp0; 
+ 
+
+  /* Set up initial stack layout to be popped in the task switch routine */
+  uint32_t* stack = (uint32_t*)new_task->esp;  // Temporary stack pointer
+
+  cdecl_regs registers;
+
+  /* Push cdecl registers */
+  __asm__ __volatile__ ("mov %%ebx, %0" : "=r" (registers.ebx));  
+  __asm__ __volatile__ ("mov %%esi, %0" : "=r" (registers.esi));
+  __asm__ __volatile__ ("mov %%edi, %0" : "=r" (registers.edi));
+  __asm__ __volatile__ ("mov %%ebp, %0" : "=r" (registers.ebp));
+    
+  /* Push parameters for make_thread function */ 
+  *--stack = (uint32_t)params;
+  *--stack = (uint32_t)new_task;
+
+  /* Push cdecl registers */
+  *--stack = registers.ebx;
+  *--stack = registers.esi;
+  *--stack = registers.edi;
+  *--stack = registers.ebp;
+     
+  /* Update stack */
+  new_task->esp = (uint32_t)stack;
 
   return new_task;
 }
@@ -80,33 +108,10 @@ void terminate_task(tcb_t* task) {
   while(1) {}
 }
 
-void run_task(tcb_t* new_task, void* params) {
+void run_task(tcb_t* new_task) {
+  
 
-  uint32_t* stack = (uint32_t*)new_task->esp;
 
-  if (!new_task->cpu_time) {
-
-    cdecl_regs registers;
-
-    __asm__ __volatile__ ("mov %%ebx, %0" : "=r" (registers.ebx));  
-    __asm__ __volatile__ ("mov %%esi, %0" : "=r" (registers.esi));
-    __asm__ __volatile__ ("mov %%edi, %0" : "=r" (registers.edi));
-    __asm__ __volatile__ ("mov %%ebp, %0" : "=r" (registers.ebp));
-    
-    /* Push parameters for make_thread function */ 
-    *--stack = (uint32_t)params;
-    *--stack = (uint32_t)new_task;
-
-    /* Push cdecl registers */
-    *--stack = registers.ebx;
-    *--stack = registers.esi;
-    *--stack = registers.edi;
-    *--stack = registers.ebp;
-     
-    /* Update stack */
-    new_task->esp = (uint32_t)stack;
-
-  }
 
   update_proc_time();
   proc_time_counter = 0;
@@ -126,6 +131,12 @@ void task_block(uint32_t new_state) {
 }
 
 
+void task_unblock(tcb_t* task) {
+
+  task_change_state(task, TASK_AVAILABLE);
+  if (!waiting_list_head) { run_task(task); }     // If no task is available we can switch to this one
+}
+
 
 void update_proc_time() {
 
@@ -135,17 +146,26 @@ void update_proc_time() {
   running_task->cpu_time += proc_time_counter ? proc_time_counter : 1;
 }
 
-tcb_t* find_task(uint32_t pid) {
+/*tcb_t* find_task(uint32_t pid) {
 
   tcb_t* curr = root_task;
 
   while (curr && curr->pid != pid) { curr = curr->flink; }
 
   return curr;
-}
+} */
 
 uint32_t get_next_pid() {
   static uint32_t next_pid = 8008;
   return next_pid++;
 }
 
+void lock_ts() {
+
+  if (!irq_disable_counter++) { cli(); allow_ts = false; } 
+}
+
+void unlock_ts() {
+
+  if (!--irq_disable_counter) { sti(); allow_ts = true; }
+}

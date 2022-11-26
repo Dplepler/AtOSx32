@@ -1,6 +1,5 @@
 #include "mutex.h"
 
-uint32_t irq_disable_counter = 0;
 extern tcb_t* running_task;
 
 
@@ -37,8 +36,11 @@ void mutex_lock(mutex_t* mutex) {
 void mutex_unlock(mutex_t* mutex) { 
   
   if (!mutex->waiting_list_head) { mutex->aquired = false; return; }
-
-  task_change_state(mutex->waiting_list_head, TASK_AVAILABLE);
+  
+  
+  task_unblock(mutex->waiting_list_head);
   mutex->waiting_list_head = mutex->waiting_list_head->flink;
+
+  
 
 }

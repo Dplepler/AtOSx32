@@ -66,12 +66,9 @@ int kmain(void) {
   tss_install();
 
   init_multitasking();
-  
-  process_t* root = create_process_handler(TASK_ACTIVE, create_address_space(), (uint32_t)process);
-  run_task(root, NULL);
 
-  
-  
+
+   
   while(1) {}
   
   /* while (true) {

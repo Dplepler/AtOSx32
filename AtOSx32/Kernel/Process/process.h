@@ -51,20 +51,23 @@ typedef struct _CDECL_REGISTERS_STRUCT {
 extern void switch_task(struct _TASK_CONTROL_BLOCK_STRUCT* new_task);
 
 void init_multitasking();
-void run_task(tcb_t* new_task, void* params);
+void run_task(tcb_t* new_task);
 void terminate_task(tcb_t* task);
 void init_task(tcb_t* task, void* params);
 void update_proc_time();
 void task_change_state(tcb_t* task, uint16_t state);
 void task_block(uint32_t new_state);
+void lock_irq();
+void unlock_irq();
+void task_unblock(tcb_t* task);
 
-  uint32_t* create_address_space();
+uint32_t* create_address_space();
 uint32_t* relocate_stack(uint32_t* address, size_t size);
 uint32_t get_next_pid();
 
-tcb_t* create_task_handler(uint8_t state, uint32_t cr3, uint32_t eip);
-process_t* create_process_handler(uint8_t state, uint32_t* address_space, uint32_t eip);
-thread_t* create_thread_handler(uint8_t state, uint32_t eip);
-tcb_t* find_task(uint32_t pid);
+tcb_t* create_task_handler(uint8_t state, uint32_t cr3, uint32_t eip, void* params);
+process_t* create_process_handler(uint8_t state, uint32_t* address_space, uint32_t eip, void* params);
+thread_t* create_thread_handler(uint8_t state, uint32_t eip, void* params);
+//tcb_t* find_task(uint32_t pid);
 
 #endif
