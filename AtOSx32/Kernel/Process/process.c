@@ -12,8 +12,6 @@ tcb_t* sleeping_tasks_head   = NULL;
 tcb_t* terminated_tasks_head = NULL;
 tcb_t* cleaner_task          = NULL;
 
-extern unsigned long time_counter;
-extern unsigned long idle_time_counter;
 
 /* The startup task will become our initial process, but also the cleaner task */
 void init_multitasking() {
@@ -235,17 +233,39 @@ void unlock_ts() {
 
 void schedule() {
   
+  tcb_t* high_policy0_task = schedule_priority_task(available_tasks[POLICY_0].head);
+  tcb_t* high_policy1_task = schedule_priority_task(available_tasks[POLICY_1].head);
 
+  tcb_t* high_policy_task = high_policy0_task ? high_policy0_task : high_policy1_task;
+
+  if (high_policy_task) { return; }
+
+  //tcb_t* task = schedule_time_slice_task();
+
+  // Continue here
 
 
 }
 
-void schedule_higher_policies() {
+/* Schedule priority based tasks (policies 0 & 1) */
+tcb_t* schedule_priority_task(tcb_t* list) {
 
+  tcb_t* highest_priority_task = list;
 
+  /* Get the highest priority task from the list */
+  while (highest_priority_task && highest_priority_task->flink) {
+    if (highest_priority_task->flink->priority < highest_priority_task->priority) {
+      highest_priority_task = highest_priority_task->flink;
+    }
+  }
+  
+  highest_priority_task->priority--;    // Decrease it's priority so that low priority tasks will also get a chance at CPU time
+
+  return highest_priority_task;
 }
 
-void schedule_lower_policies() {
+/* Schedule time slice based tasks (policies 2 & 3) */
+tcb_t* schedule_time_slice_task(tcb_t* list) {
 
 
 }

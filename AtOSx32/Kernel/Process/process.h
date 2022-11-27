@@ -105,8 +105,8 @@ void task_cleanup(tcb_t* task);
 
 /* Scheduler */
 void schedule();
-void schedule_higher_policies();
-void schedule_lower_policies();
+tcb_t* schedule_priority_task(tcb_t* list);
+tcb_t* schedule_time_slice_task(tcb_t* list);
 
 uint32_t* create_address_space();
 uint32_t* relocate_stack(uint32_t* address, size_t size);
