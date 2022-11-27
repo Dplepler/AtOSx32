@@ -4,7 +4,6 @@ unsigned long proc_time_counter = 0;
 unsigned long time_counter = 0;
 unsigned long idle_time_counter = 0;
 
-extern tcb_t* sleeping_tasks_head;
 
 void setup_clock() {
   set_periodic_interrupt();
@@ -34,6 +33,8 @@ void rtc_handler(isr_stack_t* stack) {
   manage_sleeping_tasks();
   
   // TODO: MANAGE TIME SLICE TASKS HERE: REMOVE THE TIME SLICE FROM A PROCESS THAT IS CURRENTLY RUNNING
+  manage_time_slice_tasks();
+
 
   /* To make sure a next IRQ8 will happen, read from the 0xC register */
   outportb(CMOS_REGISTER, 0xC);

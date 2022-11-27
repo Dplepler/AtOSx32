@@ -4,13 +4,14 @@ uint32_t irq_disable_counter = 0;
 bool     allow_ts = true;
 
 tcb_t* running_task = NULL;  // Current task
+tcb_t* cleaner_task = NULL;
 
 task_list_t available_tasks[] = { { NULL, NULL }, { NULL, NULL }, { NULL, NULL }, { NULL, NULL } };
 task_list_t waiting_tasks[]   = { { NULL, NULL }, { NULL, NULL }, { NULL, NULL }, { NULL, NULL } };
 
-tcb_t* sleeping_tasks_head   = NULL;
-tcb_t* terminated_tasks_head = NULL;
-tcb_t* cleaner_task          = NULL;
+task_list_t sleeping_tasks   = { NULL, NULL };
+task_list_t terminated_tasks = { NULL, NULL };
+
 
 
 /* The startup task will become our initial process, but also the cleaner task */
@@ -115,8 +116,8 @@ void terminate_task() {
 
   /* We can't cleanup the task's stack just yet, we're still in it, so signal to the next task to do so */
   task_change_state(running_task, TASK_TERMINATED);
-  running_task->flink = terminated_tasks_head;
-  terminated_tasks_head = running_task;
+  running_task->flink = terminated_tasks.head;
+  terminated_tasks.head = running_task;
 
   /* Schedule the cleaner to free up the process' memory */
   task_unblock(cleaner_task);
@@ -125,11 +126,11 @@ void terminate_task() {
 /* Process to clean up after terminated tasks */
 void task_cleaner() {
 
-  tcb_t* task = terminated_tasks_head;
+  tcb_t* task = terminated_tasks.head;
 
   while (task) {
     task_cleanup(task);
-    task = terminated_tasks_head = task->flink;
+    task = terminated_tasks.head = task->flink;
   }
 }
 
@@ -181,7 +182,7 @@ void task_unblock(tcb_t* task) {
 /* Go over all sleeping tasks and reduce their nap time */
 void manage_sleeping_tasks() {
 
-  tcb_t* task = sleeping_tasks_head;
+  tcb_t* task = sleeping_tasks.head;
 
   while (task) {
     if (task->naptime >= time_counter) { task_unblock(task); }   // Naptime over, task is ready to run
@@ -189,14 +190,33 @@ void manage_sleeping_tasks() {
   }
 }
 
+void manage_time_slice_tasks() {
+  
+  if (running_task && running_task->policy >= POLICY_2) { 
+    if (!--running_task->time_slice) {
+      task_list_insert_back(available_tasks[running_task->policy], running_task);
+    } 
+  }
+}
+
 void insert_sleeping_list(unsigned long time) {
 
   /* Add running task to sleeping task list */
-  if (!sleeping_tasks_head) { sleeping_tasks_head = running_task; running_task->flink = NULL; }
-  else { running_task->flink = sleeping_tasks_head; sleeping_tasks_head = running_task; }
+  task_list_insert_front(sleeping_tasks, running_task);
 
   running_task->naptime = time; 
 }
+
+void task_list_insert_front(task_list_t list, tcb_t* task) {
+  if (!list.head) { list.head = list.tail = task; task->flink = NULL; }
+  else { task->flink = list.head; list.head = task; }
+}
+
+void task_list_insert_back(task_list_t list, tcb_t* task) {
+  if (!list.tail) { list.tail = list.head = task; task->flink = NULL; }
+  else { list.tail->flink = task; list.tail = task; }
+}
+
 
 void update_proc_time() {
 

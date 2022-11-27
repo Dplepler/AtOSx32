@@ -101,7 +101,8 @@ void manage_sleeping_tasks();
 void insert_sleeping_list(unsigned long time);
 void task_cleaner();
 void task_cleanup(tcb_t* task);
-
+void task_list_insert_front(task_list_t list, tcb_t* task);
+void task_list_insert_back(task_list_t list, tcb_t* task);
 
 /* Scheduler */
 void schedule();

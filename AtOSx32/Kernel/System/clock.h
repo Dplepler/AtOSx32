@@ -11,6 +11,8 @@
 
 #define YEAR 2022
 
+extern tcb_t* sleeping_tasks_head;
+
 /*-------------------------------
 Date formats (Register 0xB)     |
 ---------------------------     |
