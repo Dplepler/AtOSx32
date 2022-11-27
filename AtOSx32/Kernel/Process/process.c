@@ -236,13 +236,12 @@ void schedule() {
   tcb_t* high_policy0_task = schedule_priority_task(available_tasks[POLICY_0].head);
   tcb_t* high_policy1_task = schedule_priority_task(available_tasks[POLICY_1].head);
 
-  tcb_t* high_policy_task = high_policy0_task ? high_policy0_task : high_policy1_task;
+  tcb_t* task = high_policy0_task ? high_policy0_task : high_policy1_task;
 
-  if (high_policy_task) { return; }
 
-  //tcb_t* task = schedule_time_slice_task();
+  if (!task) { task = schedule_time_slice_task(); }
 
-  // Continue here
+  if (!task) { return; }  // Give up (idle mode)
 
 
 }
@@ -265,9 +264,12 @@ tcb_t* schedule_priority_task(tcb_t* list) {
 }
 
 /* Schedule time slice based tasks (policies 2 & 3) */
-tcb_t* schedule_time_slice_task(tcb_t* list) {
+tcb_t* schedule_time_slice_task() {
 
-
+  tcb_t* time_slice_task = available_tasks[POLICY_2].head;
+  if (!time_slice_task) { time_slice_task = available_tasks[POLICY_3].head; }
+  
+  return time_slice_task;
 }
 
 

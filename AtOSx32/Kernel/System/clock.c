@@ -32,7 +32,8 @@ void rtc_handler(isr_stack_t* stack) {
   time_counter++;
 
   manage_sleeping_tasks();
-
+  
+  // TODO: MANAGE TIME SLICE TASKS HERE: REMOVE THE TIME SLICE FROM A PROCESS THAT IS CURRENTLY RUNNING
 
   /* To make sure a next IRQ8 will happen, read from the 0xC register */
   outportb(CMOS_REGISTER, 0xC);
