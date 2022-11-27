@@ -91,6 +91,9 @@ void unlock_irq();
 void task_unblock(tcb_t* task);
 void manage_sleeping_tasks();
 void insert_sleeping_list(unsigned long hertz);
+void task_cleaner();
+void task_cleanup(tcb_t* task);
+
 
 /* Scheduler */
 void schedule();

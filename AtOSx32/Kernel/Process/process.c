@@ -118,6 +118,21 @@ void terminate_task(tcb_t* task) {
 
 }
 
+void task_cleaner() {
+
+  tcb_t* task = terminated_tasks_head;
+
+  while (task) {
+    task_cleanup(task);
+    task = terminated_tasks_head = task->flink;
+  }
+}
+
+void task_cleanup(tcb_t* task) {
+  free_aligned(task->esp0 - STACK_SIZE);
+  free(task);
+} 
+
 void run_task(tcb_t* new_task) {
   
   if (!allow_ts) { return; }  // Don't task switch if we are not allowed
@@ -131,7 +146,6 @@ void run_task(tcb_t* new_task) {
 }
 
 void task_change_state(tcb_t* task, uint16_t state) {
-
   task->state = state;
 }
 
