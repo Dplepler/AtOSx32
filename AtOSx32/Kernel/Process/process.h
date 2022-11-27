@@ -87,7 +87,7 @@ extern void switch_task(struct _TASK_CONTROL_BLOCK_STRUCT* new_task);
 
 void init_multitasking();
 void run_task(tcb_t* new_task);
-void terminate_task(tcb_t* task);
+void terminate_task();
 void init_task(tcb_t* task, void* params);
 void update_proc_time();
 void task_change_state(tcb_t* task, uint16_t state);

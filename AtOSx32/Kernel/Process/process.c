@@ -8,7 +8,7 @@ tcb_t* running_task = NULL;  // Current task
 task_list_t available_tasks[] = { { NULL, NULL }, { NULL, NULL }, { NULL, NULL }, { NULL, NULL } };
 task_list_t waiting_tasks[]   = { { NULL, NULL }, { NULL, NULL }, { NULL, NULL }, { NULL, NULL } };
 
-tcb_t* sleeping_tasks_head = NULL;
+tcb_t* sleeping_tasks_head   = NULL;
 tcb_t* terminated_tasks_head = NULL;
 tcb_t* cleaner_task          = NULL;
 
@@ -111,14 +111,14 @@ void init_task(tcb_t* task, void* params) {
   
   void* (*entry)(void*) = (void*)task->eip;  
   (*entry)(params);
-  terminate_task(task);
+  terminate_task();
 }
 
 
-void terminate_task(tcb_t* task) {
+void terminate_task() {
 
   /* We can't cleanup the task's stack just yet, we're still in it, so signal to the next task to do so */
-  task_change_state(task, TASK_TERMINATED);
+  task_change_state(running_task, TASK_TERMINATED);
   task->flink = terminated_tasks_head;
   terminated_tasks_head = task;
 
