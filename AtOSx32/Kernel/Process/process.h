@@ -27,6 +27,12 @@ typedef struct _TASK_CONTROL_BLOCK_STRUCT {
   uint32_t pid;
   uint32_t cpu_time;
 
+  uint32_t* address_space;
+
+  enum {
+    PROCESS,
+    THREAD
+  } type;
 
   enum {
 
@@ -53,7 +59,7 @@ typedef struct _TASK_CONTROL_BLOCK_STRUCT {
   uint8_t priority;      // Only for policies 0 & 1
   
   uint32_t naptime;      // Duration of sleep
-
+                         
                     
 
 } __attribute__((packed)) tcb_t, process_t, thread_t;
@@ -104,7 +110,7 @@ uint32_t* create_address_space();
 uint32_t* relocate_stack(uint32_t* address, size_t size);
 uint32_t get_next_pid();
 
-tcb_t* create_task_handler(uint8_t state, uint32_t cr3, uint32_t eip, void* params, uint8_t policy);
+tcb_t* create_task_handler(uint8_t state, uint32_t* address_space, uint32_t eip, void* params, uint8_t policy, uint8_t type);
 process_t* create_process_handler(uint8_t state, uint32_t* address_space, uint32_t eip, void* params, uint8_t policy);
 thread_t* create_thread_handler(uint8_t state, uint32_t eip, void* params, uint8_t policy);
 //tcb_t* find_task(uint32_t pid);

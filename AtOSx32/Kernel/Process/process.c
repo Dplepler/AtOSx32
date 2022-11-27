@@ -11,21 +11,27 @@ task_list_t waiting_tasks[]   = { { NULL, NULL }, { NULL, NULL }, { NULL, NULL }
 tcb_t* sleeping_tasks_head = NULL;
 tcb_t* terminated_tasks_head = NULL;
 
+
 void init_multitasking() {
 
   tcb_t* current_proc = kmalloc(sizeof(tcb_t));
 
   current_proc->state = TASK_ACTIVE;
     
-  current_proc->cr3 = (uint32_t)cpu_get_address_space(); 
+  current_proc->cr3 = (uint32_t)cpu_get_address_space();
+  current_proc->address_space = NULL;   // Was not malloced
   current_proc->pid = get_next_pid();
   current_proc->esp0 = INIT_KERNEL_STACK;
   current_proc->cpu_time = 0;
+  current_proc->type     = PROCESS;
+  current_proc->priority = 255;
+  current_proc->policy = POLICY_3;     
+  current_proc->state = TASK_TERMINATED; // We want to terminate this process as soon as possible
 
   running_task = current_proc; 
 }
 
-/* Creates a virtual address space, note that only this function can modify the address space from within the caller's virtual address space */
+/* Creates a virtual address space */
 uint32_t* create_address_space() {
 
   uint32_t* address_space = kmalloc_aligned(PD_SIZE, 0x1000);
@@ -37,25 +43,26 @@ uint32_t* create_address_space() {
   address_space[PD_ENTRIES-1] = (uint32_t)page_physical_address(address_space) | READ_WRITE | PRESENT;
 
   map_higher_half(address_space);
-  return page_physical_address(address_space);
+  return address_space;
 }
 
 
 process_t* create_process_handler(uint8_t state, uint32_t* address_space, uint32_t eip, void* params, uint8_t policy) {
-  return (process_t*)create_task_handler(state, (uint32_t)address_space, eip, params, policy);  
+  return (process_t*)create_task_handler(state, address_space, eip, params, policy, PROCESS);  
 }
 
 thread_t* create_thread_handler(uint8_t state, uint32_t eip, void* params, uint8_t policy){
-  return (thread_t*)create_task_handler(state, running_task->cr3, eip, params, policy);
+  return (thread_t*)create_task_handler(state, running_task->address_space, eip, params, policy, THREAD);
 }
 
 
-tcb_t* create_task_handler(uint8_t state, uint32_t cr3, uint32_t eip, void* params, uint8_t policy) { 
+tcb_t* create_task_handler(uint8_t state, uint32_t* address_space, uint32_t eip, void* params, uint8_t policy, uint8_t type) { 
   
   tcb_t* new_task = kmalloc(sizeof(tcb_t));
   
   new_task->state = state;
-  new_task->cr3 = cr3;
+  new_task->cr3 = (uint32_t)page_physical_address(address_space);
+  new_task->address_space = address_space;
   new_task->pid = get_next_pid();
   new_task->esp0 = (uint32_t)kmalloc_aligned(STACK_SIZE, 0x1000) + STACK_SIZE;   // Create new kernel stack
   new_task->eip = eip;
@@ -64,6 +71,8 @@ tcb_t* create_task_handler(uint8_t state, uint32_t cr3, uint32_t eip, void* para
   running_task->flink = new_task; 
 
   new_task->esp = new_task->esp0; 
+
+  new_task->type = type;
  
   new_task->policy = policy;
 
@@ -114,7 +123,7 @@ void terminate_task(tcb_t* task) {
   terminated_tasks_head = task;
 
   // TODO: Cleaner task should be unblocked here to signal that there is a task that needs to be cleared
-  while(1) {}
+  //task_unblock(cleaner);
 
 }
 
@@ -129,7 +138,8 @@ void task_cleaner() {
 }
 
 void task_cleanup(tcb_t* task) {
-  free_aligned(task->esp0 - STACK_SIZE);
+  free_aligned((void*)(task->esp0 - STACK_SIZE));
+  if (task->type == PROCESS && task->address_space) { free(task->address_space); }
   free(task);
 } 
 
