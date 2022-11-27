@@ -10,25 +10,25 @@ task_list_t waiting_tasks[]   = { { NULL, NULL }, { NULL, NULL }, { NULL, NULL }
 
 tcb_t* sleeping_tasks_head = NULL;
 tcb_t* terminated_tasks_head = NULL;
+tcb_t* cleaner_task          = NULL;
 
 
+/* The startup task will become our initial process, but also the cleaner task */
 void init_multitasking() {
 
-  tcb_t* current_proc = kmalloc(sizeof(tcb_t));
+  cleaner_task = kmalloc(sizeof(tcb_t));
 
-  current_proc->state = TASK_ACTIVE;
-    
-  current_proc->cr3 = (uint32_t)cpu_get_address_space();
-  current_proc->address_space = NULL;   // Was not malloced
-  current_proc->pid = get_next_pid();
-  current_proc->esp0 = INIT_KERNEL_STACK;
-  current_proc->cpu_time = 0;
-  current_proc->type     = PROCESS;
-  current_proc->priority = 255;
-  current_proc->policy = POLICY_3;     
-  current_proc->state = TASK_TERMINATED; // We want to terminate this process as soon as possible
-
-  running_task = current_proc; 
+  cleaner_task->state = TASK_ACTIVE;   
+  cleaner_task->cr3 = (uint32_t)cpu_get_address_space();
+  cleaner_task->address_space = NULL;   // Was not malloced
+  cleaner_task->pid = get_next_pid();
+  cleaner_task->esp0 = INIT_KERNEL_STACK;
+  cleaner_task->cpu_time = 0;
+  cleaner_task->type     = PROCESS;
+  cleaner_task->priority = DEFAULT_PRIORITY;
+  cleaner_task->policy = POLICY_3;            // This is a background task     
+  
+  running_task = cleaner_task;
 }
 
 /* Creates a virtual address space */
@@ -122,8 +122,8 @@ void terminate_task(tcb_t* task) {
   task->flink = terminated_tasks_head;
   terminated_tasks_head = task;
 
-  // TODO: Cleaner task should be unblocked here to signal that there is a task that needs to be cleared
-  //task_unblock(cleaner);
+  /* Schedule the cleaner to free up the process' memory */
+  task_unblock(cleaner_task);
 
 }
 
