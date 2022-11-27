@@ -2,6 +2,7 @@
 
 unsigned long proc_time_counter = 0;
 unsigned long time_counter = 0;
+unsigned long idle_time_counter = 0;
 
 extern tcb_t* sleeping_tasks_head;
 
@@ -24,15 +25,20 @@ void set_periodic_interrupt() {
 void rtc_handler(isr_stack_t* stack) {
 
   stack = stack;    // Get rid of unused variable warning
-  
+ 
+  lock_ts();
+
   proc_time_counter++;
   time_counter++;
 
   manage_sleeping_tasks();
 
+
   /* To make sure a next IRQ8 will happen, read from the 0xC register */
-  outportb(CMOS_REGISTER, 0xC);  
-  inportb(CMOS_RW);
+  outportb(CMOS_REGISTER, 0xC);
+  inportb(CMOS_RW);            
+  
+  unlock_ts();
 }
 
 
@@ -41,7 +47,7 @@ void sleep(unsigned long milisec) {
   
   if (!milisec) { return; }
 
-  insert_sleeping_list(HERTZ(milisec));
+  insert_sleeping_list(time_counter + HERTZ(milisec));
 
   unsigned long prev = time_counter;
   while (time_counter != prev + HERTZ(milisec)) { }

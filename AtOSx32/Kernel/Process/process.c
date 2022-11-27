@@ -12,6 +12,8 @@ tcb_t* sleeping_tasks_head   = NULL;
 tcb_t* terminated_tasks_head = NULL;
 tcb_t* cleaner_task          = NULL;
 
+extern unsigned long time_counter;
+extern unsigned long idle_time_counter;
 
 /* The startup task will become our initial process, but also the cleaner task */
 void init_multitasking() {
@@ -67,13 +69,9 @@ tcb_t* create_task_handler(uint8_t state, uint32_t* address_space, uint32_t eip,
   new_task->esp0 = (uint32_t)kmalloc_aligned(STACK_SIZE, 0x1000) + STACK_SIZE;   // Create new kernel stack
   new_task->eip = eip;
   new_task->cpu_time = 0;
-  
-  running_task->flink = new_task; 
-
   new_task->esp = new_task->esp0; 
-
   new_task->type = type;
- 
+
   new_task->policy = policy;
 
   new_task->time_slice = policy >= POLICY_2 ? DEFAULT_TIME_SLICE : 0;
@@ -119,14 +117,14 @@ void terminate_task() {
 
   /* We can't cleanup the task's stack just yet, we're still in it, so signal to the next task to do so */
   task_change_state(running_task, TASK_TERMINATED);
-  task->flink = terminated_tasks_head;
-  terminated_tasks_head = task;
+  running_task->flink = terminated_tasks_head;
+  terminated_tasks_head = running_task;
 
   /* Schedule the cleaner to free up the process' memory */
   task_unblock(cleaner_task);
-
 }
 
+/* Process to clean up after terminated tasks */
 void task_cleaner() {
 
   tcb_t* task = terminated_tasks_head;
@@ -137,6 +135,7 @@ void task_cleaner() {
   }
 }
 
+/* Free up a task's allocated data */
 void task_cleanup(tcb_t* task) {
   free_aligned((void*)(task->esp0 - STACK_SIZE));
   if (task->type == PROCESS && task->address_space) { free(task->address_space); }
@@ -187,23 +186,23 @@ void manage_sleeping_tasks() {
   tcb_t* task = sleeping_tasks_head;
 
   while (task) {
-    if (!--task->naptime) { task_unblock(task); }   // Naptime over, task is ready to run
+    if (task->naptime >= time_counter) { task_unblock(task); }   // Naptime over, task is ready to run
     task = task->flink;
   }
 }
 
-void insert_sleeping_list(unsigned long hertz) {
+void insert_sleeping_list(unsigned long time) {
 
   /* Add running task to sleeping task list */
   if (!sleeping_tasks_head) { sleeping_tasks_head = running_task; running_task->flink = NULL; }
   else { running_task->flink = sleeping_tasks_head; sleeping_tasks_head = running_task; }
 
-  running_task->naptime = hertz; 
+  running_task->naptime = time; 
 }
 
 void update_proc_time() {
 
-  if (!running_task) { return; }
+  if (!running_task) { idle_time_counter++; return; }    // There doesn't have to be a running process
   
   /* Prevent a hack that will initialize a process twice if it ran for less than a milisecond */
   running_task->cpu_time += proc_time_counter ? proc_time_counter : 1;
@@ -241,15 +240,16 @@ void schedule() {
 
 }
 
-void schedule_high_priority() {
+void schedule_higher_policies() {
 
 
 }
 
-void schedule_low_priority() {
+void schedule_lower_policies() {
 
 
 }
+
 
 
 
