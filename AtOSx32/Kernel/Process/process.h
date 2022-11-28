@@ -58,11 +58,11 @@ typedef struct _TASK_CONTROL_BLOCK_STRUCT {
   } policy;
 
   uint32_t time_slice;   // Only for policies 2 & 3
-  uint8_t priority;      // Only for policies 0 & 1
-  
+  uint8_t priority;       // Only for policies 0 & 1
+
   uint32_t naptime;      // Duration of sleep
                          
-                    
+  uint32_t timer;   
 
 } __attribute__((packed)) tcb_t, process_t, thread_t;
 
@@ -98,6 +98,7 @@ void lock_ts();
 void unlock_ts();
 void task_unblock(tcb_t* task);
 void manage_sleeping_tasks();
+void manage_time_slice_tasks();
 void insert_sleeping_list(unsigned long time);
 void task_cleaner();
 void task_cleanup(tcb_t* task);

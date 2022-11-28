@@ -191,12 +191,11 @@ void manage_sleeping_tasks() {
 }
 
 void manage_time_slice_tasks() {
-  
-  if (running_task && running_task->policy >= POLICY_2) { 
-    if (!--running_task->time_slice) {
-      task_list_insert_back(available_tasks[running_task->policy], running_task);
-    } 
-  }
+
+  if (!--running_task->time_slice) {
+    task_list_insert_back(available_tasks[running_task->policy], running_task);
+    schedule();
+  } 
 }
 
 void insert_sleeping_list(unsigned long time) {
@@ -217,6 +216,21 @@ void task_list_insert_back(task_list_t list, tcb_t* task) {
   else { list.tail->flink = task; list.tail = task; }
 }
 
+void task_list_remove_task(task_list_t list, tcb_t* task) {
+  
+  task_list_insert_front(list, task);
+
+  tcb_t* it = list.head;
+
+  while (it->flink) {
+    if (it->flink == task) {
+      it->flink = it->flink->flink;
+    }
+  }
+
+  list.head = list.head->flink;
+  task->flink = NULL;
+}
 
 void update_proc_time() {
 
@@ -240,6 +254,7 @@ uint32_t get_next_pid() {
   return next_pid++;
 }
 
+
 void lock_ts() {
 
   if (!irq_disable_counter++) { cli(); allow_ts = false; } 
@@ -255,18 +270,19 @@ void schedule() {
   
   tcb_t* high_policy0_task = schedule_priority_task(available_tasks[POLICY_0].head);
   tcb_t* high_policy1_task = schedule_priority_task(available_tasks[POLICY_1].head);
-
+  
   tcb_t* task = high_policy0_task ? high_policy0_task : high_policy1_task;
 
-
   if (!task) { task = schedule_time_slice_task(); }
-
   if (!task) { return; }  // Give up (idle mode)
+  
+
+  run_task(task);
 
 
 }
 
-/* Schedule priority based tasks (policies 0 & 1) */
+/* Picks the highest priority task from the task list */
 tcb_t* schedule_priority_task(tcb_t* list) {
 
   tcb_t* highest_priority_task = list;
@@ -278,8 +294,6 @@ tcb_t* schedule_priority_task(tcb_t* list) {
     }
   }
   
-  highest_priority_task->priority--;    // Decrease it's priority so that low priority tasks will also get a chance at CPU time
-
   return highest_priority_task;
 }
 

@@ -25,22 +25,38 @@ void rtc_handler(isr_stack_t* stack) {
 
   stack = stack;    // Get rid of unused variable warning
  
-  lock_ts();
-
+  cli();
+  
   proc_time_counter++;
   time_counter++;
 
   manage_sleeping_tasks();
   
-  // TODO: MANAGE TIME SLICE TASKS HERE: REMOVE THE TIME SLICE FROM A PROCESS THAT IS CURRENTLY RUNNING
-  manage_time_slice_tasks();
+  if (running_task) {
+    
+    /* Time slice tasks */
+    if (running_task->policy >= POLICY_2) { 
+      manage_time_slice_tasks();
+      goto cleanup;
+    }
+    
+    /* Priority tasks */
+    if (!(++running_task->timer % (DEFAULT_TIME_SLICE / 2))) {
+      
+      /* Periodically decrease priority to let other tasks have a chance at cpu time */
+      if (!--running_task->priority) { 
+      
+      }
+    }
+  }
+  
+  schedule();
 
+cleanup:
 
   /* To make sure a next IRQ8 will happen, read from the 0xC register */
   outportb(CMOS_REGISTER, 0xC);
-  inportb(CMOS_RW);            
-  
-  unlock_ts();
+  inportb(CMOS_RW);              
 }
 
 
