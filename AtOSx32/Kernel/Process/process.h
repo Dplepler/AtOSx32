@@ -10,6 +10,7 @@
 #define DEFAULT_TIME_SLICE 50
 #define DEFAULT_PRIORITY   128
 
+#define MIN_DECREASED_PRIORITY 20
 
 extern unsigned long proc_time_counter; 
 extern unsigned long time_counter;
@@ -59,10 +60,10 @@ typedef struct _TASK_CONTROL_BLOCK_STRUCT {
 
   uint32_t time_slice;   // Only for policies 2 & 3
   uint8_t priority;       // Only for policies 0 & 1
+  uint8_t req_priority;
 
   uint32_t naptime;      // Duration of sleep
                          
-  uint32_t timer;   
 
 } __attribute__((packed)) tcb_t, process_t, thread_t;
 

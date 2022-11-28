@@ -26,9 +26,9 @@ void init_multitasking() {
   cleaner_task->esp0 = INIT_KERNEL_STACK;
   cleaner_task->cpu_time = 0;
   cleaner_task->type     = PROCESS;
-  cleaner_task->priority = DEFAULT_PRIORITY;
+  cleaner_task->priority = 0;
   cleaner_task->policy = POLICY_3;            // This is a background task     
-  
+   
   running_task = cleaner_task;
 }
 
@@ -74,7 +74,7 @@ tcb_t* create_task_handler(uint8_t state, uint32_t* address_space, uint32_t eip,
   new_task->policy = policy;
 
   new_task->time_slice = policy >= POLICY_2 ? DEFAULT_TIME_SLICE : 0;
-  new_task->priority   = policy <= POLICY_1 ? DEFAULT_PRIORITY   : 0;
+  new_task->req_priority = new_task->priority = policy <= POLICY_1 ? DEFAULT_PRIORITY   : 0;
 
   /* Set up initial stack layout to be popped in the task switch routine */
   uint32_t* stack = (uint32_t*)new_task->esp;  // Temporary stack pointer
@@ -272,8 +272,11 @@ void schedule() {
   tcb_t* high_policy1_task = schedule_priority_task(available_tasks[POLICY_1].head);
   
   tcb_t* task = high_policy0_task ? high_policy0_task : high_policy1_task;
+  
+  if (task) { if (!--task->priority) { task->priority = task->req_priority; } }
+  else { task = schedule_time_slice_task(); }
 
-  if (!task) { task = schedule_time_slice_task(); }
+
   if (!task) { return; }  // Give up (idle mode)
   
 

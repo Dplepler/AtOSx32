@@ -32,22 +32,11 @@ void rtc_handler(isr_stack_t* stack) {
 
   manage_sleeping_tasks();
   
-  if (running_task) {
-    
-    /* Time slice tasks */
-    if (running_task->policy >= POLICY_2) { 
-      manage_time_slice_tasks();
-      goto cleanup;
-    }
-    
-    /* Priority tasks */
-    if (!(++running_task->timer % (DEFAULT_TIME_SLICE / 2))) {
-      
-      /* Periodically decrease priority to let other tasks have a chance at cpu time */
-      if (!--running_task->priority) { 
-      
-      }
-    }
+  /* Time slice tasks */
+  if (running_task && running_task->policy >= POLICY_2) {
+    manage_time_slice_tasks();
+    goto cleanup;
+     
   }
   
   schedule();
