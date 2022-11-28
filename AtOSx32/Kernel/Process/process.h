@@ -105,8 +105,9 @@ void task_cleaner();
 void task_cleanup(tcb_t* task);
 void task_list_insert_front(task_list_t list, tcb_t* task);
 void task_list_insert_back(task_list_t list, tcb_t* task);
+void task_list_remove_task(task_list_t list, tcb_t* task);
 
-/* Scheduler */
+  /* Scheduler */
 void schedule();
 tcb_t* schedule_priority_task(tcb_t* list);
 tcb_t* schedule_time_slice_task();

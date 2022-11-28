@@ -32,16 +32,10 @@ void rtc_handler(isr_stack_t* stack) {
 
   manage_sleeping_tasks();
   
-  /* Time slice tasks */
-  if (running_task && running_task->policy >= POLICY_2) {
-    manage_time_slice_tasks();
-    goto cleanup;
-     
-  }
+  /* If a time slice task is currently running, decrease it's running time */
+  if (running_task && running_task->policy >= POLICY_2) { manage_time_slice_tasks(); }
   
   schedule();
-
-cleanup:
 
   /* To make sure a next IRQ8 will happen, read from the 0xC register */
   outportb(CMOS_REGISTER, 0xC);
@@ -54,7 +48,7 @@ void sleep(unsigned long milisec) {
   
   if (!milisec) { return; }
 
-  insert_sleeping_list(time_counter + HERTZ(milisec));
+  task_block(TASK_SLEEPING);
 
   unsigned long prev = time_counter;
   while (time_counter != prev + HERTZ(milisec)) { }

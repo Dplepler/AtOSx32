@@ -7,9 +7,9 @@ tcb_t* running_task = NULL;  // Current task
 tcb_t* cleaner_task = NULL;
 
 task_list_t available_tasks[] = { { NULL, NULL }, { NULL, NULL }, { NULL, NULL }, { NULL, NULL } };
-task_list_t waiting_tasks[]   = { { NULL, NULL }, { NULL, NULL }, { NULL, NULL }, { NULL, NULL } };
 
 task_list_t sleeping_tasks   = { NULL, NULL };
+task_list_t blocked_tasks    = { NULL, NULL };
 task_list_t terminated_tasks = { NULL, NULL };
 
 
@@ -26,7 +26,7 @@ void init_multitasking() {
   cleaner_task->esp0 = INIT_KERNEL_STACK;
   cleaner_task->cpu_time = 0;
   cleaner_task->type     = PROCESS;
-  cleaner_task->priority = 0;
+  cleaner_task->priority = cleaner_task->req_priority = 0;
   cleaner_task->policy = POLICY_3;            // This is a background task     
    
   running_task = cleaner_task;
@@ -115,9 +115,7 @@ void init_task(tcb_t* task, void* params) {
 void terminate_task() {
 
   /* We can't cleanup the task's stack just yet, we're still in it, so signal to the next task to do so */
-  task_change_state(running_task, TASK_TERMINATED);
-  running_task->flink = terminated_tasks.head;
-  terminated_tasks.head = running_task;
+  task_block(TASK_TERMINATED);
 
   /* Schedule the cleaner to free up the process' memory */
   task_unblock(cleaner_task);
@@ -132,6 +130,8 @@ void task_cleaner() {
     task_cleanup(task);
     task = terminated_tasks.head = task->flink;
   }
+
+  task_block(TASK_BLOCKED);
 }
 
 /* Free up a task's allocated data */
@@ -157,8 +157,15 @@ void task_change_state(tcb_t* task, uint16_t state) {
   task->state = state;
 }
 
+/* Block the currently running task from running */
 void task_block(uint32_t new_state) {
   
+  switch (new_state) {
+    case TASK_BLOCKED:    task_list_insert_back(blocked_tasks,    running_task); break;
+    case TASK_SLEEPING:   task_list_insert_back(sleeping_tasks,   running_task); break;
+    case TASK_TERMINATED: task_list_insert_back(terminated_tasks, running_task); break;
+  }
+
   task_change_state(running_task, new_state);
   schedule();
 }
@@ -166,17 +173,16 @@ void task_block(uint32_t new_state) {
 
 void task_unblock(tcb_t* task) {
 
+  switch (task->state) {
+    case TASK_BLOCKED:    task_list_remove_task(blocked_tasks,    task); break;
+    case TASK_SLEEPING:   task_list_remove_task(sleeping_tasks,   task); break;
+    case TASK_TERMINATED: task_list_remove_task(terminated_tasks, task); break;
+  }
+
   task_change_state(task, TASK_AVAILABLE); 
 
-  task->flink = NULL;
-  
-  /* If there are no available tasks we can switch to this one */
-  if (!available_tasks[task->policy].head) { run_task(task); } 
-  else {
-    /* Insert task to the waitlist */
-    available_tasks[task->policy].tail->flink = task;
-    available_tasks[task->policy].tail = task;
-  }
+  /* Insert task to the waitlist */
+  task_list_insert_back(available_tasks[task->policy], task);
 }
 
 /* Go over all sleeping tasks and reduce their nap time */
@@ -185,16 +191,14 @@ void manage_sleeping_tasks() {
   tcb_t* task = sleeping_tasks.head;
 
   while (task) {
-    if (task->naptime >= time_counter) { task_unblock(task); }   // Naptime over, task is ready to run
+    if (task->naptime >= time_counter) { task->naptime = 0; task_unblock(task); }   // Naptime over, task is ready to run
     task = task->flink;
   }
 }
 
 void manage_time_slice_tasks() {
-
   if (!--running_task->time_slice) {
     task_list_insert_back(available_tasks[running_task->policy], running_task);
-    schedule();
   } 
 }
 
@@ -276,13 +280,13 @@ void schedule() {
   if (task) { if (!--task->priority) { task->priority = task->req_priority; } }
   else { task = schedule_time_slice_task(); }
 
-
   if (!task) { return; }  // Give up (idle mode)
+  
+  /* Remove task from available tasks */
+  task_list_remove_task(available_tasks[task->policy], task);       
   
 
   run_task(task);
-
-
 }
 
 /* Picks the highest priority task from the task list */
