@@ -8,6 +8,16 @@
 #include "Process/process.h"
 
 extern tcb_t* running_task;
+extern task_list_t** available_tasks;
+
+
+void thread(void* params) {
+  
+  for (;;) {
+    PRINT("Wassup\n\r");
+  }
+}
+
 
 int kmain(void) {
   
@@ -24,15 +34,16 @@ int kmain(void) {
   setup_idt();
   
   init_irq();
-
-  setup_clock();
-  
+ 
   tss_install();
 
   init_multitasking();
 
-
-   
+  setup_clock();
+  
+  create_process_handler(create_address_space(), (uint32_t)thread, NULL, POLICY_0);
+  
+  //PRINTNH(available_tasks[POLICY_0]->head);
   while(1) {}
   
   /* while (true) {

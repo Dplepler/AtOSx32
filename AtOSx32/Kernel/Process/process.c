@@ -1,16 +1,16 @@
 #include "process.h"
 
 uint32_t irq_disable_counter = 0;
-bool     allow_ts = true;
+bool     allow_ts = false;
 
 tcb_t* running_task = NULL;  // Current task
 tcb_t* cleaner_task = NULL;
 
-task_list_t available_tasks[] = { { NULL, NULL }, { NULL, NULL }, { NULL, NULL }, { NULL, NULL } };
+task_list_t** available_tasks;
 
-task_list_t sleeping_tasks   = { NULL, NULL };
-task_list_t blocked_tasks    = { NULL, NULL };
-task_list_t terminated_tasks = { NULL, NULL };
+task_list_t* sleeping_tasks;
+task_list_t* blocked_tasks;
+task_list_t* terminated_tasks;
 
 
 
@@ -30,6 +30,16 @@ void init_multitasking() {
   cleaner_task->policy = POLICY_3;            // This is a background task     
    
   running_task = cleaner_task;
+  
+  /* Initialize all task lists */
+  available_tasks = kcalloc(POLICY_AMOUNT, sizeof(task_list_t*));
+  for (uint8_t i = 0; i < POLICY_AMOUNT; i++) { available_tasks[i] = kcalloc(1, sizeof(task_list_t)); }
+ 
+  sleeping_tasks   = kcalloc(1, sizeof(task_list_t));
+  blocked_tasks    = kcalloc(1, sizeof(task_list_t));
+  terminated_tasks = kcalloc(1, sizeof(task_list_t));
+  
+  unlock_ts();
 }
 
 /* Creates a virtual address space */
@@ -48,20 +58,22 @@ uint32_t* create_address_space() {
 }
 
 
-process_t* create_process_handler(uint8_t state, uint32_t* address_space, uint32_t eip, void* params, uint8_t policy) {
-  return (process_t*)create_task_handler(state, address_space, eip, params, policy, PROCESS);  
+process_t* create_process_handler(uint32_t* address_space, uint32_t eip, void* params, uint8_t policy) {
+  return (process_t*)create_task_handler(address_space, eip, params, policy);  
 }
 
-thread_t* create_thread_handler(uint8_t state, uint32_t eip, void* params, uint8_t policy){
-  return (thread_t*)create_task_handler(state, running_task->address_space, eip, params, policy, THREAD);
+thread_t* create_thread_handler(uint32_t eip, void* params, uint8_t policy){
+  return (thread_t*)create_task_handler(running_task->address_space, eip, params, policy);
 }
 
 
-tcb_t* create_task_handler(uint8_t state, uint32_t* address_space, uint32_t eip, void* params, uint8_t policy, uint8_t type) { 
-  
+tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, uint8_t policy) { 
+
+  lock_ts();
   tcb_t* new_task = kmalloc(sizeof(tcb_t));
+ 
+  new_task->state = TASK_AVAILABLE;
   
-  new_task->state = state;
   new_task->cr3 = (uint32_t)page_physical_address(address_space);
   new_task->address_space = address_space;
   new_task->pid = get_next_pid();
@@ -69,12 +81,11 @@ tcb_t* create_task_handler(uint8_t state, uint32_t* address_space, uint32_t eip,
   new_task->eip = eip;
   new_task->cpu_time = 0;
   new_task->esp = new_task->esp0; 
-  new_task->type = type;
-
   new_task->policy = policy;
 
   new_task->time_slice = policy >= POLICY_2 ? DEFAULT_TIME_SLICE : 0;
   new_task->req_priority = new_task->priority = policy <= POLICY_1 ? DEFAULT_PRIORITY   : 0;
+
 
   /* Set up initial stack layout to be popped in the task switch routine */
   uint32_t* stack = (uint32_t*)new_task->esp;  // Temporary stack pointer
@@ -100,6 +111,9 @@ tcb_t* create_task_handler(uint8_t state, uint32_t* address_space, uint32_t eip,
   /* Update stack */
   new_task->esp = (uint32_t)stack;
 
+  task_list_insert_back(available_tasks[new_task->policy], new_task);
+
+  unlock_ts();
   return new_task;
 }
 
@@ -124,11 +138,11 @@ void terminate_task() {
 /* Process to clean up after terminated tasks */
 void task_cleaner() {
 
-  tcb_t* task = terminated_tasks.head;
+  tcb_t* task = terminated_tasks->head;
 
   while (task) {
     task_cleanup(task);
-    task = terminated_tasks.head = task->flink;
+    task = terminated_tasks->head = task->flink;
   }
 
   task_block(TASK_BLOCKED);
@@ -142,12 +156,11 @@ void task_cleanup(tcb_t* task) {
 } 
 
 void run_task(tcb_t* new_task) {
-  
-  if (!allow_ts) { return; }  // Don't task switch if we are not allowed
-                              
+   
   update_proc_time();
   proc_time_counter = 0;
   
+  lock_ts();
   cli();
   new_task->state = TASK_ACTIVE;
   switch_task(new_task);
@@ -164,6 +177,8 @@ void task_block(uint32_t new_state) {
     case TASK_BLOCKED:    task_list_insert_back(blocked_tasks,    running_task); break;
     case TASK_SLEEPING:   task_list_insert_back(sleeping_tasks,   running_task); break;
     case TASK_TERMINATED: task_list_insert_back(terminated_tasks, running_task); break;
+    case TASK_ACTIVE: 
+    case TASK_AVAILABLE: return;
   }
 
   task_change_state(running_task, new_state);
@@ -177,6 +192,8 @@ void task_unblock(tcb_t* task) {
     case TASK_BLOCKED:    task_list_remove_task(blocked_tasks,    task); break;
     case TASK_SLEEPING:   task_list_remove_task(sleeping_tasks,   task); break;
     case TASK_TERMINATED: task_list_remove_task(terminated_tasks, task); break;
+    case TASK_ACTIVE: 
+    case TASK_AVAILABLE: return;
   }
 
   task_change_state(task, TASK_AVAILABLE); 
@@ -188,7 +205,7 @@ void task_unblock(tcb_t* task) {
 /* Go over all sleeping tasks and reduce their nap time */
 void manage_sleeping_tasks() {
 
-  tcb_t* task = sleeping_tasks.head;
+  tcb_t* task = sleeping_tasks->head;
 
   while (task) {
     if (task->naptime >= time_counter) { task->naptime = 0; task_unblock(task); }   // Naptime over, task is ready to run
@@ -210,21 +227,21 @@ void insert_sleeping_list(unsigned long time) {
   running_task->naptime = time; 
 }
 
-void task_list_insert_front(task_list_t list, tcb_t* task) {
-  if (!list.head) { list.head = list.tail = task; task->flink = NULL; }
-  else { task->flink = list.head; list.head = task; }
+void task_list_insert_front(task_list_t* list, tcb_t* task) {
+  if (!list->head) { list->head = list->tail = task; task->flink = NULL; }
+  else { task->flink = list->head; list->head = task; }
 }
 
-void task_list_insert_back(task_list_t list, tcb_t* task) {
-  if (!list.tail) { list.tail = list.head = task; task->flink = NULL; }
-  else { list.tail->flink = task; list.tail = task; }
+void task_list_insert_back(task_list_t* list, tcb_t* task) {
+  if (!list->tail) { list->tail = list->head = task; task->flink = NULL; }
+  else { list->tail->flink = task; list->tail = task; }
 }
 
-void task_list_remove_task(task_list_t list, tcb_t* task) {
+void task_list_remove_task(task_list_t* list, tcb_t* task) {
   
   task_list_insert_front(list, task);
 
-  tcb_t* it = list.head;
+  tcb_t* it = list->head;
 
   while (it->flink) {
     if (it->flink == task) {
@@ -232,7 +249,7 @@ void task_list_remove_task(task_list_t list, tcb_t* task) {
     }
   }
 
-  list.head = list.head->flink;
+  list->head = list->head->flink;
   task->flink = NULL;
 }
 
@@ -261,20 +278,22 @@ uint32_t get_next_pid() {
 
 void lock_ts() {
 
-  if (!irq_disable_counter++) { cli(); allow_ts = false; } 
+  allow_ts = false; 
 }
 
 void unlock_ts() {
 
-  if (!--irq_disable_counter) { sti(); allow_ts = true; }
+  allow_ts = true; 
 }
 
 
 void schedule() {
   
-  tcb_t* high_policy0_task = schedule_priority_task(available_tasks[POLICY_0].head);
-  tcb_t* high_policy1_task = schedule_priority_task(available_tasks[POLICY_1].head);
-  
+  if (!allow_ts) { return; }  // Don't task switch if we are not allowed
+
+  tcb_t* high_policy0_task = schedule_priority_task(available_tasks[POLICY_0]->head);
+  tcb_t* high_policy1_task = schedule_priority_task(available_tasks[POLICY_1]->head);
+ 
   tcb_t* task = high_policy0_task ? high_policy0_task : high_policy1_task;
   
   if (task) { if (!--task->priority) { task->priority = task->req_priority; } }
@@ -307,8 +326,8 @@ tcb_t* schedule_priority_task(tcb_t* list) {
 /* Schedule time slice based tasks (policies 2 & 3) */
 tcb_t* schedule_time_slice_task() {
 
-  tcb_t* time_slice_task = available_tasks[POLICY_2].head;
-  if (!time_slice_task) { time_slice_task = available_tasks[POLICY_3].head; }
+  tcb_t* time_slice_task = available_tasks[POLICY_2]->head;
+  if (!time_slice_task) { time_slice_task = available_tasks[POLICY_3]->head; }
   
   return time_slice_task;
 }

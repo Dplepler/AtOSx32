@@ -12,6 +12,8 @@
 
 #define MIN_DECREASED_PRIORITY 20
 
+#define POLICY_AMOUNT 4
+
 extern unsigned long proc_time_counter; 
 extern unsigned long time_counter;
 extern unsigned long idle_time_counter;
@@ -103,9 +105,9 @@ void manage_time_slice_tasks();
 void insert_sleeping_list(unsigned long time);
 void task_cleaner();
 void task_cleanup(tcb_t* task);
-void task_list_insert_front(task_list_t list, tcb_t* task);
-void task_list_insert_back(task_list_t list, tcb_t* task);
-void task_list_remove_task(task_list_t list, tcb_t* task);
+void task_list_insert_front(task_list_t* list, tcb_t* task);
+void task_list_insert_back(task_list_t* list, tcb_t* task);
+void task_list_remove_task(task_list_t* list, tcb_t* task);
 
   /* Scheduler */
 void schedule();
@@ -116,9 +118,9 @@ uint32_t* create_address_space();
 uint32_t* relocate_stack(uint32_t* address, size_t size);
 uint32_t get_next_pid();
 
-tcb_t* create_task_handler(uint8_t state, uint32_t* address_space, uint32_t eip, void* params, uint8_t policy, uint8_t type);
-process_t* create_process_handler(uint8_t state, uint32_t* address_space, uint32_t eip, void* params, uint8_t policy);
-thread_t* create_thread_handler(uint8_t state, uint32_t eip, void* params, uint8_t policy);
+tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, uint8_t policy);
+process_t* create_process_handler(uint32_t* address_space, uint32_t eip, void* params, uint8_t policy);
+thread_t* create_thread_handler(uint32_t eip, void* params, uint8_t policy);
 //tcb_t* find_task(uint32_t pid);
 
 #endif

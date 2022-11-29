@@ -12,7 +12,7 @@
 #define YEAR 2022
 
 extern tcb_t* running_task;
-extern task_list_t available_tasks[];
+extern task_list_t** available_tasks;
 
 /*-------------------------------
 Date formats (Register 0xB)     |
