@@ -15,6 +15,7 @@ void thread(void* params) {
   
   for (;;) {
     PRINT("Wassup\n\r");
+    sleep(1);
   }
 }
 
@@ -43,7 +44,6 @@ int kmain(void) {
   
   create_process_handler(create_address_space(), (uint32_t)thread, NULL, POLICY_0);
   
-  //PRINTNH(available_tasks[POLICY_0]->head);
   while(1) {}
   
   /* while (true) {

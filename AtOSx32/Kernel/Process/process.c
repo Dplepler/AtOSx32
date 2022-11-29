@@ -119,8 +119,8 @@ tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, 
 
  
 void init_task(tcb_t* task, void* params) {
-  
-  void* (*entry)(void*) = (void*)task->eip;  
+
+  void* (*entry)(void*) = (void*)task->eip; 
   (*entry)(params);
   terminate_task();
 }
@@ -160,9 +160,11 @@ void run_task(tcb_t* new_task) {
   update_proc_time();
   proc_time_counter = 0;
   
-  lock_ts();
-  cli();
   new_task->state = TASK_ACTIVE;
+  new_task->flink = NULL;
+
+
+  cli();
   switch_task(new_task);
 }
 
@@ -246,6 +248,7 @@ void task_list_remove_task(task_list_t* list, tcb_t* task) {
   while (it->flink) {
     if (it->flink == task) {
       it->flink = it->flink->flink;
+      break;
     }
   }
 
@@ -290,6 +293,7 @@ void unlock_ts() {
 void schedule() {
   
   if (!allow_ts) { return; }  // Don't task switch if we are not allowed
+  lock_ts();
 
   tcb_t* high_policy0_task = schedule_priority_task(available_tasks[POLICY_0]->head);
   tcb_t* high_policy1_task = schedule_priority_task(available_tasks[POLICY_1]->head);
@@ -303,8 +307,6 @@ void schedule() {
   
   /* Remove task from available tasks */
   task_list_remove_task(available_tasks[task->policy], task);       
-  
-
   run_task(task);
 }
 

@@ -1,5 +1,6 @@
 [extern running_task]       ; Current task
 [extern init_task]
+[extern allow_ts]
 
 [global switch_task]
 
@@ -41,6 +42,7 @@ switch_task:
   mov esi, dword [running_task]
 
   sti
+  mov dword [allow_ts], 1
 
   or dword [esi+0x1C], 0    ; CPU time, if 0 we initialize the task
   jz .wrapper
