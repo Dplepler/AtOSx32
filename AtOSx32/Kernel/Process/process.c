@@ -163,7 +163,6 @@ void run_task(tcb_t* new_task) {
   new_task->state = TASK_ACTIVE;
   new_task->flink = NULL;
 
-
   cli();
   switch_task(new_task);
 }
@@ -210,7 +209,7 @@ void manage_sleeping_tasks() {
   tcb_t* task = sleeping_tasks->head;
 
   while (task) {
-    if (task->naptime >= time_counter) { task->naptime = 0; task_unblock(task); }   // Naptime over, task is ready to run
+    if (task->naptime >= time_counter) { PRINT("EGKKEGKG"); task->naptime = 0; task_unblock(task); }   // Naptime over, task is ready to run
     task = task->flink;
   }
 }
@@ -241,7 +240,8 @@ void task_list_insert_back(task_list_t* list, tcb_t* task) {
 
 void task_list_remove_task(task_list_t* list, tcb_t* task) {
   
-  task_list_insert_front(list, task);
+  tcb_t tmp = { 0 };
+  task_list_insert_front(list, &tmp);
 
   tcb_t* it = list->head;
 
@@ -291,7 +291,7 @@ void unlock_ts() {
 
 
 void schedule() {
-  
+ 
   if (!allow_ts) { return; }  // Don't task switch if we are not allowed
   lock_ts();
 
@@ -299,14 +299,15 @@ void schedule() {
   tcb_t* high_policy1_task = schedule_priority_task(available_tasks[POLICY_1]->head);
  
   tcb_t* task = high_policy0_task ? high_policy0_task : high_policy1_task;
-  
+ 
   if (task) { if (!--task->priority) { task->priority = task->req_priority; } }
   else { task = schedule_time_slice_task(); }
 
   if (!task) { return; }  // Give up (idle mode)
   
+  
   /* Remove task from available tasks */
-  task_list_remove_task(available_tasks[task->policy], task);       
+  task_list_remove_task(available_tasks[task->policy], task);
   run_task(task);
 }
 

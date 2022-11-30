@@ -29,7 +29,7 @@ void rtc_handler(isr_stack_t* stack) {
   time_counter++;
 
   manage_sleeping_tasks();
-  
+ 
   /* If a time slice task is currently running, decrease it's running time */
   if (running_task && running_task->policy >= POLICY_2) { manage_time_slice_tasks(); }
  

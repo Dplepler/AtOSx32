@@ -41,8 +41,8 @@ switch_task:
    
   mov esi, dword [running_task]
 
-  sti
   mov dword [allow_ts], 1
+  sti
 
   or dword [esi+0x1C], 0    ; CPU time, if 0 we initialize the task
   jz .wrapper
