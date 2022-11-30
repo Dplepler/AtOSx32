@@ -24,20 +24,21 @@ void set_periodic_interrupt() {
 void rtc_handler(isr_stack_t* stack) {
 
   stack = stack;    // Get rid of unused variable warning
-  
+ 
   proc_time_counter++;
   time_counter++;
-
-  manage_sleeping_tasks();
- 
-  /* If a time slice task is currently running, decrease it's running time */
-  if (running_task && running_task->policy >= POLICY_2) { manage_time_slice_tasks(); }
- 
-  schedule();
 
   /* To make sure a next IRQ8 will happen, read from the 0xC register */
   outportb(CMOS_REGISTER, 0xC);
   inportb(CMOS_RW);              
+
+  PRINTNH(1);
+  manage_sleeping_tasks();
+
+  /* If a time slice task is currently running, decrease it's running time */
+  if (running_task && running_task->policy >= POLICY_2) { manage_time_slice_tasks(); }
+
+  schedule();
 }
 
 
@@ -46,10 +47,12 @@ void sleep(unsigned long milisec) {
   
   if (!milisec) { return; }
 
+  set_naptime(HERTZ(milisec) + time_counter);
   task_block(TASK_SLEEPING);
 
-  unsigned long prev = time_counter;
-  while (time_counter != prev + HERTZ(milisec)) { }
+  while(1) {}
+  //unsigned long prev = time_counter;
+  //while (time_counter != prev + HERTZ(milisec)) { }
 }
 
 /* The system's timer. First time it's called it will initialize the timer and the 

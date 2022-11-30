@@ -12,11 +12,15 @@ extern task_list_t** available_tasks;
 
 
 void thread(void* params) {
-  
+ 
+  sti();
+
+  PRINTNH(time_counter);
   for (;;) {
-    PRINT("Wassup\n\r");
-    sleep(1);
+    //PRINT("WASUUP");
+    //sleep(30000);
   }
+  while(1) {}
 }
 
 

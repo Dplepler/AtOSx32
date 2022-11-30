@@ -102,7 +102,7 @@ void unlock_ts();
 void task_unblock(tcb_t* task);
 void manage_sleeping_tasks();
 void manage_time_slice_tasks();
-void insert_sleeping_list(unsigned long time);
+void set_naptime(unsigned long time);
 void task_cleaner();
 void task_cleanup(tcb_t* task);
 void task_list_insert_front(task_list_t* list, tcb_t* task);

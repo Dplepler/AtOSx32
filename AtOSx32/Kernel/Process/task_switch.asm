@@ -50,7 +50,7 @@ switch_task:
   ret     ; Normal task switching, popping off the last EIP
 
 .wrapper:
-  
+ 
   call init_task
   jmp $
 

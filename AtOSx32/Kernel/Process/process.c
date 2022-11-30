@@ -120,7 +120,7 @@ tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, 
  
 void init_task(tcb_t* task, void* params) {
 
-  void* (*entry)(void*) = (void*)task->eip; 
+  void* (*entry)(void*) = (void*)task->eip;
   (*entry)(params);
   terminate_task();
 }
@@ -183,6 +183,7 @@ void task_block(uint32_t new_state) {
   }
 
   task_change_state(running_task, new_state);
+
   schedule();
 }
 
@@ -207,9 +208,9 @@ void task_unblock(tcb_t* task) {
 void manage_sleeping_tasks() {
 
   tcb_t* task = sleeping_tasks->head;
-
   while (task) {
-    if (task->naptime >= time_counter) { PRINT("EGKKEGKG"); task->naptime = 0; task_unblock(task); }   // Naptime over, task is ready to run
+    PRINTN(task->naptime);
+    if (task->naptime <= time_counter) { task->naptime = 0; task_unblock(task); }   // Naptime over, task is ready to run
     task = task->flink;
   }
 }
@@ -220,11 +221,7 @@ void manage_time_slice_tasks() {
   } 
 }
 
-void insert_sleeping_list(unsigned long time) {
-
-  /* Add running task to sleeping task list */
-  task_list_insert_front(sleeping_tasks, running_task);
-
+void set_naptime(unsigned long time) {
   running_task->naptime = time; 
 }
 
@@ -291,7 +288,7 @@ void unlock_ts() {
 
 
 void schedule() {
- 
+
   if (!allow_ts) { return; }  // Don't task switch if we are not allowed
   lock_ts();
 
@@ -303,11 +300,11 @@ void schedule() {
   if (task) { if (!--task->priority) { task->priority = task->req_priority; } }
   else { task = schedule_time_slice_task(); }
 
-  if (!task) { return; }  // Give up (idle mode)
-  
+  if (!task) { unlock_ts(); return; }  // Give up (idle mode)
   
   /* Remove task from available tasks */
   task_list_remove_task(available_tasks[task->policy], task);
+
   run_task(task);
 }
 
