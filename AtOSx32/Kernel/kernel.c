@@ -13,7 +13,6 @@ extern task_list_t** available_tasks;
 
 void thread(void* params) {
  
-  sti();
 
   PRINTNH(time_counter);
   for (;;) {

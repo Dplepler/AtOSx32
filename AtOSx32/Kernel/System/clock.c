@@ -28,15 +28,16 @@ void rtc_handler(isr_stack_t* stack) {
   proc_time_counter++;
   time_counter++;
 
+
   /* To make sure a next IRQ8 will happen, read from the 0xC register */
   outportb(CMOS_REGISTER, 0xC);
   inportb(CMOS_RW);              
-
-  PRINTNH(1);
+  
+  PRINTN(1);
   manage_sleeping_tasks();
-
+   
   /* If a time slice task is currently running, decrease it's running time */
-  if (running_task && running_task->policy >= POLICY_2) { manage_time_slice_tasks(); }
+  //if (running_task && running_task->policy >= POLICY_2) { manage_time_slice_tasks(); }
 
   schedule();
 }

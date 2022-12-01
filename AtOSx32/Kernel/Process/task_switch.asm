@@ -33,24 +33,32 @@ switch_task:
 
 .continue:
   
+   
+  mov esi, dword [running_task]
+
+  mov dword [allow_ts], 1
+
+  ; Save CPU time
+  mov eax, dword [esi+0x1C]
+  mov dword [.init_task], eax
+
   ; Cdecl registers
   pop ebp
   pop edi
   pop esi
   pop ebx
-   
-  mov esi, dword [running_task]
 
-  mov dword [allow_ts], 1
   sti
 
-  or dword [esi+0x1C], 0    ; CPU time, if 0 we initialize the task
+  ; CPU time, if 0 we initialize the task
+  or dword [.init_task], 0
   jz .wrapper
 
   ret     ; Normal task switching, popping off the last EIP
 
 .wrapper:
- 
+  
   call init_task
   jmp $
 
+.init_task dd 0

@@ -209,7 +209,7 @@ void manage_sleeping_tasks() {
 
   tcb_t* task = sleeping_tasks->head;
   while (task) {
-    PRINTN(task->naptime);
+    //PRINTN(task->naptime);
     if (task->naptime <= time_counter) { task->naptime = 0; task_unblock(task); }   // Naptime over, task is ready to run
     task = task->flink;
   }
