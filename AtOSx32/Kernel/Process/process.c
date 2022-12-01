@@ -99,8 +99,8 @@ tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, 
   __asm__ __volatile__ ("mov %%ebp, %0" : "=r" (registers.ebp));
     
   /* Push parameters for make_thread function */ 
-  *--stack = (uint32_t)params;
-  *--stack = (uint32_t)new_task;
+  //*--stack = (uint32_t)params;
+  *--stack = (uint32_t)new_task->eip;
 
   /* Push cdecl registers */
   *--stack = registers.ebx;

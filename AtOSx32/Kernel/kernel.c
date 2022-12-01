@@ -11,12 +11,13 @@ extern tcb_t* running_task;
 extern task_list_t** available_tasks;
 
 
-void thread(void* params) {
- 
+void thread() {
 
   PRINTNH(time_counter);
+
   for (;;) {
-    //PRINT("WASUUP");
+    PRINT("WASUUP");
+    while(1) {}
     //sleep(30000);
   }
   while(1) {}
@@ -45,7 +46,8 @@ int kmain(void) {
 
   setup_clock();
   
-  create_process_handler(create_address_space(), (uint32_t)thread, NULL, POLICY_0);
+  tcb_t* task = create_process_handler(create_address_space(), (uint32_t)thread, NULL, POLICY_0);
+  
   
   while(1) {}
   
