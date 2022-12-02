@@ -90,7 +90,7 @@ tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, 
   new_task->policy = policy;
 
   new_task->time_slice = policy >= POLICY_2 ? DEFAULT_TIME_SLICE : 0;
-  new_task->req_priority = new_task->priority = policy <= POLICY_1 ? DEFAULT_PRIORITY   : 0;
+  new_task->req_priority = new_task->priority = policy <= POLICY_1 ? DEFAULT_PRIORITY : 0;
 
 
   /* Set up initial stack layout to be popped in the task switch routine */
@@ -117,7 +117,7 @@ tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, 
   /* Update stack */
   new_task->esp = (uint32_t)stack;
 
-  task_list_insert_front(available_tasks[new_task->policy], new_task);
+  task_list_insert_back(available_tasks[new_task->policy], new_task);
 
   unlock_ts();
   return new_task;
@@ -190,7 +190,6 @@ void task_block(uint32_t new_state) {
   }
 
   task_change_state(running_task, new_state);
-
   schedule();
 }
 
@@ -202,11 +201,11 @@ void task_unblock(tcb_t* task) {
     case TASK_SLEEPING:   task_list_remove_task(sleeping_tasks,   task); break;
     case TASK_TERMINATED: task_list_remove_task(terminated_tasks, task); break;
     case TASK_ACTIVE: 
-    case TASK_AVAILABLE: return;
+    case TASK_AVAILABLE:  return;
   }
 
   task_change_state(task, TASK_AVAILABLE); 
-
+  
   /* Insert task to the waitlist */
   task_list_insert_back(available_tasks[task->policy], task);
 }
@@ -236,23 +235,14 @@ void task_list_insert_back(task_list_t* list, tcb_t* task) {
   else { list->tail->flink = task; list->tail = task; }
 }
 
+/* Abosolutely stunning Linus-inspired code */
 void task_list_remove_task(task_list_t* list, tcb_t* task) {
-  
-  tcb_t tmp = { 0 };
-  task_list_insert_front(list, &tmp);
+    
+  tcb_t** indirect = &list->head;
 
-  tcb_t* it = list->head;
+  while ((*indirect) != task) { indirect = &(*indirect)->flink; }
 
-  while (it->flink) {
-    if (it->flink == task) {
-      it->flink = it->flink->flink;
-      break;
-    }
-  }
-
-  list->head = list->head->flink;
-  if (!list->head) { list->tail = NULL; }
-  task->flink = NULL;
+  (*indirect) = task->flink;
 }
 
 void update_proc_time() {
@@ -287,10 +277,9 @@ void schedule() {
 
   tcb_t* high_policy0_task = schedule_priority_task(available_tasks[POLICY_0]->head);
   tcb_t* high_policy1_task = schedule_priority_task(available_tasks[POLICY_1]->head);
- 
+
   tcb_t* task = high_policy0_task ? high_policy0_task : high_policy1_task;
 
-  //PRINTNH(task);
   if (task) { if (!--task->priority) { task->priority = task->req_priority; } }
   else { task = schedule_time_slice_task(); }
 
@@ -305,12 +294,14 @@ void schedule() {
 tcb_t* schedule_priority_task(tcb_t* list) {
 
   tcb_t* highest_priority_task = list;
+  tcb_t* task = list;
 
   /* Get the highest priority task from the list */
-  while (highest_priority_task && highest_priority_task->flink) {
-    if (highest_priority_task->flink->priority < highest_priority_task->priority) {
-      highest_priority_task = highest_priority_task->flink;
+  while (task) {
+    if (task->priority > highest_priority_task->priority) {
+      highest_priority_task = task;
     }
+    task = task->flink;
   }
   
   return highest_priority_task;

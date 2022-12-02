@@ -13,10 +13,17 @@ extern task_list_t** available_tasks;
 void thread() {
 
   for(;;) {
-    PRINT("HELLO");
-    sleep(1000);
+    PRINTN(1);
   }
   while(1) {}
+}
+
+void thread2() {
+
+  for (;;) {
+    PRINTN(2);
+  }
+
 }
 
 
@@ -42,8 +49,10 @@ int kmain(void) {
   setup_clock();
   init_multitasking();
 
+  
+  create_process_handler(create_address_space(), (uint32_t)thread, NULL, POLICY_0);
+  create_process_handler(create_address_space(), (uint32_t)thread2, NULL, POLICY_0);
 
-  tcb_t* task = create_process_handler(create_address_space(), (uint32_t)thread, NULL, POLICY_0);
 
   for (;;) {
     schedule();

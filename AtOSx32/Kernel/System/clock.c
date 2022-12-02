@@ -1,39 +1,39 @@
 #include "clock.h"
 
 unsigned long proc_time_counter = 0;
-unsigned long time_counter = 0;
-unsigned long idle_time_counter = 0;
+  unsigned long time_counter = 0;
+  unsigned long idle_time_counter = 0;
 
 
-void setup_clock() {
-  set_periodic_interrupt();
-}
+  void setup_clock() {
+    set_periodic_interrupt();
+  }
 
-/* Set clock to trigger IRQ8 */
-void set_periodic_interrupt() {
+  /* Set clock to trigger IRQ8 */
+  void set_periodic_interrupt() {
 
-  cli();
-  outportb(CMOS_REGISTER, 0x8B);      // Select register 0xB and disable NMI
-  uint8_t old_data = inportb(CMOS_RW);
-  outportb(CMOS_REGISTER, 0x8B);      // For some reason reading from this port resets the CMOS register to 0xD
-  outportb(CMOS_RW, old_data | 0x40);
-  sti();
-}
+    cli();
+    outportb(CMOS_REGISTER, 0x8B);      // Select register 0xB and disable NMI
+    uint8_t old_data = inportb(CMOS_RW);
+    outportb(CMOS_REGISTER, 0x8B);      // For some reason reading from this port resets the CMOS register to 0xD
+    outportb(CMOS_RW, old_data | 0x40);
+    sti();
+  }
 
 /* Called 1024 times a second, keep track of the system's time */
 void rtc_handler(isr_stack_t* stack) {
 
-  //lock_ts();
+  lock_ts();
 
   stack = stack;    // Get rid of unused variable warning
  
   proc_time_counter++;
   time_counter++;
- 
- 
+  
   tcb_t* task = sleeping_tasks->head;
+
   while (task) {
-    if (task->naptime <= time_counter) { PRINTN(1); task->naptime = 0; task_unblock(task); }   // Naptime over, task is ready to run
+    if (task->naptime <= time_counter) { task->naptime = 0; task_unblock(task); }   // Naptime over, task is ready to run
     task = task->flink;
   }
    
@@ -51,11 +51,11 @@ void rtc_handler(isr_stack_t* stack) {
 
 /* Delay the systems by the given miliseconds */
 void sleep(unsigned long milisec) {
-  
+ 
   if (!milisec) { return; }
  
   set_naptime(HERTZ(milisec) + time_counter);
-  task_block(TASK_SLEEPING);
+  task_block(TASK_SLEEPING);  
 }
 
 /* The system's timer. First time it's called it will initialize the timer and the 
