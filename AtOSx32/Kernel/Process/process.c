@@ -1,10 +1,10 @@
 #include "process.h"
 
 uint32_t irq_disable_counter = 0;
-bool     allow_ts = false;
 
-tcb_t* running_task = NULL;  // Current task
-tcb_t* cleaner_task = NULL;
+tcb_t* running_task   = NULL;  // Current task
+tcb_t* scheduler_task = NULL;
+tcb_t* cleaner_task   = NULL;
 
 task_list_t** available_tasks;
 
@@ -12,33 +12,39 @@ task_list_t* sleeping_tasks;
 task_list_t* blocked_tasks;
 task_list_t* terminated_tasks;
 
+bool allow_ts = false;
 
+void lock_ts() { allow_ts = false; }
+void unlock_ts() { allow_ts = true; }
 
-/* The startup task will become our initial process, but also the cleaner task */
-void init_multitasking() {
+/* Initialize all task lists */
+void setup_multitasking() {
 
-  cleaner_task = kmalloc(sizeof(tcb_t));
-
-  cleaner_task->state = TASK_ACTIVE;   
-  cleaner_task->cr3 = (uint32_t)cpu_get_address_space();
-  cleaner_task->address_space = NULL;   // Was not malloced
-  cleaner_task->pid = get_next_pid();
-  cleaner_task->esp0 = INIT_KERNEL_STACK;
-  cleaner_task->cpu_time = 0;
-  cleaner_task->type     = PROCESS;
-  cleaner_task->priority = cleaner_task->req_priority = 0;
-  cleaner_task->policy = POLICY_3;            // This is a background task     
-   
-  running_task = cleaner_task;
-  
-  /* Initialize all task lists */
   available_tasks = kcalloc(POLICY_AMOUNT, sizeof(task_list_t*));
   for (uint8_t i = 0; i < POLICY_AMOUNT; i++) { available_tasks[i] = kcalloc(1, sizeof(task_list_t)); }
  
   sleeping_tasks   = kcalloc(1, sizeof(task_list_t));
   blocked_tasks    = kcalloc(1, sizeof(task_list_t));
   terminated_tasks = kcalloc(1, sizeof(task_list_t));
-  
+}
+
+/* The startup task will become our initial process, but also the cleaner task */
+void init_multitasking() {
+
+  scheduler_task = kmalloc(sizeof(tcb_t));
+
+  scheduler_task->state = TASK_ACTIVE;   
+  scheduler_task->cr3 = (uint32_t)cpu_get_address_space();
+  scheduler_task->address_space = NULL;   // Was not malloced
+  scheduler_task->pid = get_next_pid();
+  scheduler_task->esp0 = INIT_KERNEL_STACK;
+  scheduler_task->cpu_time = 0;
+  scheduler_task->type     = PROCESS;
+  scheduler_task->priority = scheduler_task->req_priority = 127;
+  scheduler_task->policy = POLICY_0;   
+   
+  running_task = scheduler_task;
+   
   unlock_ts();
 }
 
@@ -111,7 +117,7 @@ tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, 
   /* Update stack */
   new_task->esp = (uint32_t)stack;
 
-  task_list_insert_back(available_tasks[new_task->policy], new_task);
+  task_list_insert_front(available_tasks[new_task->policy], new_task);
 
   unlock_ts();
   return new_task;
@@ -155,6 +161,7 @@ void task_cleanup(tcb_t* task) {
   free(task);
 } 
 
+ 
 void run_task(tcb_t* new_task) {
    
   update_proc_time();
@@ -173,7 +180,7 @@ void task_change_state(tcb_t* task, uint16_t state) {
 
 /* Block the currently running task from running */
 void task_block(uint32_t new_state) {
-  
+ 
   switch (new_state) {
     case TASK_BLOCKED:    task_list_insert_back(blocked_tasks,    running_task); break;
     case TASK_SLEEPING:   task_list_insert_back(sleeping_tasks,   running_task); break;
@@ -206,13 +213,7 @@ void task_unblock(tcb_t* task) {
 
 /* Go over all sleeping tasks and reduce their nap time */
 void manage_sleeping_tasks() {
-
-  tcb_t* task = sleeping_tasks->head;
-  while (task) {
-    //PRINTN(task->naptime);
-    if (task->naptime <= time_counter) { task->naptime = 0; task_unblock(task); }   // Naptime over, task is ready to run
-    task = task->flink;
-  }
+    
 }
 
 void manage_time_slice_tasks() {
@@ -250,6 +251,7 @@ void task_list_remove_task(task_list_t* list, tcb_t* task) {
   }
 
   list->head = list->head->flink;
+  if (!list->head) { list->tail = NULL; }
   task->flink = NULL;
 }
 
@@ -276,35 +278,26 @@ uint32_t get_next_pid() {
 }
 
 
-void lock_ts() {
-
-  allow_ts = false; 
-}
-
-void unlock_ts() {
-
-  allow_ts = true; 
-}
 
 
 void schedule() {
 
-  if (!allow_ts) { return; }  // Don't task switch if we are not allowed
+  if (!allow_ts) { return; }  // Don't task switch if it is forbidden
   lock_ts();
 
   tcb_t* high_policy0_task = schedule_priority_task(available_tasks[POLICY_0]->head);
   tcb_t* high_policy1_task = schedule_priority_task(available_tasks[POLICY_1]->head);
  
   tcb_t* task = high_policy0_task ? high_policy0_task : high_policy1_task;
- 
+
+  //PRINTNH(task);
   if (task) { if (!--task->priority) { task->priority = task->req_priority; } }
   else { task = schedule_time_slice_task(); }
 
-  if (!task) { unlock_ts(); return; }  // Give up (idle mode)
-  
-  /* Remove task from available tasks */
-  task_list_remove_task(available_tasks[task->policy], task);
+  if (!task) { task = scheduler_task; }  /* Idle mode, keep searching for tasks */
+  else { task_list_remove_task(available_tasks[task->policy], task); }  /* Remove task from available tasks */
 
+  if (running_task == scheduler_task && task == scheduler_task) { return; }
   run_task(task);
 }
 

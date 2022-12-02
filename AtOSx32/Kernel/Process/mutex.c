@@ -39,3 +39,4 @@ void mutex_unlock(mutex_t* mutex) {
   task_unblock(mutex->wait_list.head);
   mutex->wait_list.head = mutex->wait_list.head->flink;
 }
+

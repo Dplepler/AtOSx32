@@ -23,23 +23,29 @@ void set_periodic_interrupt() {
 /* Called 1024 times a second, keep track of the system's time */
 void rtc_handler(isr_stack_t* stack) {
 
+  //lock_ts();
+
   stack = stack;    // Get rid of unused variable warning
  
   proc_time_counter++;
   time_counter++;
-
-
-  /* To make sure a next IRQ8 will happen, read from the 0xC register */
-  outportb(CMOS_REGISTER, 0xC);
-  inportb(CMOS_RW);              
-  
-  PRINTN(1);
-  manage_sleeping_tasks();
+ 
+ 
+  tcb_t* task = sleeping_tasks->head;
+  while (task) {
+    if (task->naptime <= time_counter) { PRINTN(1); task->naptime = 0; task_unblock(task); }   // Naptime over, task is ready to run
+    task = task->flink;
+  }
    
   /* If a time slice task is currently running, decrease it's running time */
   if (running_task && running_task->policy >= POLICY_2) { manage_time_slice_tasks(); }
 
-  schedule();
+
+  /* To make sure a next IRQ8 will happen, read from the 0xC register */
+  outportb(CMOS_REGISTER, 0xC);
+  inportb(CMOS_RW); 
+
+  unlock_ts();
 }
 
 
@@ -47,13 +53,9 @@ void rtc_handler(isr_stack_t* stack) {
 void sleep(unsigned long milisec) {
   
   if (!milisec) { return; }
-
+ 
   set_naptime(HERTZ(milisec) + time_counter);
   task_block(TASK_SLEEPING);
-
-  while(1) {}
-  //unsigned long prev = time_counter;
-  //while (time_counter != prev + HERTZ(milisec)) { }
 }
 
 /* The system's timer. First time it's called it will initialize the timer and the 

@@ -10,15 +10,11 @@
 extern tcb_t* running_task;
 extern task_list_t** available_tasks;
 
-
 void thread() {
 
-  PRINTNH(time_counter);
-
-  for (;;) {
-    PRINT("WASUUP");
-    while(1) {}
-    //sleep(30000);
+  for(;;) {
+    PRINT("HELLO");
+    sleep(1000);
   }
   while(1) {}
 }
@@ -42,13 +38,18 @@ int kmain(void) {
  
   tss_install();
 
+  setup_multitasking();
+  setup_clock();
   init_multitasking();
 
-  setup_clock();
-  
+
   tcb_t* task = create_process_handler(create_address_space(), (uint32_t)thread, NULL, POLICY_0);
+
+  for (;;) {
+    schedule();
+  } 
   
-  
+ 
   while(1) {}
   
   /* while (true) {

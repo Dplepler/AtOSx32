@@ -90,6 +90,10 @@ typedef struct _CDECL_REGISTERS_STRUCT {
 
 extern void switch_task(struct _TASK_CONTROL_BLOCK_STRUCT* new_task);
 
+void lock_ts();
+void unlock_ts();
+
+void setup_multitasking();
 void init_multitasking();
 void run_task(tcb_t* new_task);
 void terminate_task();
@@ -97,8 +101,6 @@ void init_task(tcb_t* task, void* params);
 void update_proc_time();
 void task_change_state(tcb_t* task, uint16_t state);
 void task_block(uint32_t new_state);
-void lock_ts();
-void unlock_ts();
 void task_unblock(tcb_t* task);
 void manage_sleeping_tasks();
 void manage_time_slice_tasks();
@@ -108,6 +110,8 @@ void task_cleanup(tcb_t* task);
 void task_list_insert_front(task_list_t* list, tcb_t* task);
 void task_list_insert_back(task_list_t* list, tcb_t* task);
 void task_list_remove_task(task_list_t* list, tcb_t* task);
+
+
 
   /* Scheduler */
 void schedule();
