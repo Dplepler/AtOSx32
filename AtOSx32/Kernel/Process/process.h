@@ -60,7 +60,7 @@ typedef struct _TASK_CONTROL_BLOCK_STRUCT {
 
   } policy;
 
-  uint32_t time_slice;   // Only for policies 2 & 3
+  uint32_t time_slice;
   uint8_t priority;       // Only for policies 0 & 1
   uint8_t req_priority;
 
@@ -103,7 +103,7 @@ void task_change_state(tcb_t* task, uint16_t state);
 void task_block(uint32_t new_state);
 void task_unblock(tcb_t* task);
 void manage_sleeping_tasks();
-void manage_time_slice_tasks();
+void manage_time_slice();
 void set_naptime(unsigned long time);
 void task_cleaner();
 void task_cleanup(tcb_t* task);

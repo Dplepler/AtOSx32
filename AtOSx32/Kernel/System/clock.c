@@ -1,8 +1,8 @@
 #include "clock.h"
 
 unsigned long proc_time_counter = 0;
-  unsigned long time_counter = 0;
-  unsigned long idle_time_counter = 0;
+unsigned long time_counter = 0;
+unsigned long idle_time_counter = 0;
 
 
   void setup_clock() {
@@ -29,7 +29,9 @@ void rtc_handler(isr_stack_t* stack) {
  
   proc_time_counter++;
   time_counter++;
-  
+ 
+  PRINTN(3);
+
   tcb_t* task = sleeping_tasks->head;
 
   while (task) {
@@ -37,15 +39,15 @@ void rtc_handler(isr_stack_t* stack) {
     task = task->flink;
   }
    
-  /* If a time slice task is currently running, decrease it's running time */
-  if (running_task && running_task->policy >= POLICY_2) { manage_time_slice_tasks(); }
-
 
   /* To make sure a next IRQ8 will happen, read from the 0xC register */
   outportb(CMOS_REGISTER, 0xC);
   inportb(CMOS_RW); 
 
   unlock_ts();
+
+  /* Decrease the tasks's time slice */
+  manage_time_slice(); 
 }
 
 

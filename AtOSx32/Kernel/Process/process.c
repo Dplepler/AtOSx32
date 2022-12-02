@@ -41,7 +41,7 @@ void init_multitasking() {
   scheduler_task->cpu_time = 0;
   scheduler_task->type     = PROCESS;
   scheduler_task->priority = scheduler_task->req_priority = 127;
-  scheduler_task->policy = POLICY_0;   
+  scheduler_task->policy = POLICY_0;  
    
   running_task = scheduler_task;
    
@@ -89,7 +89,7 @@ tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, 
   new_task->esp = new_task->esp0; 
   new_task->policy = policy;
 
-  new_task->time_slice = policy >= POLICY_2 ? DEFAULT_TIME_SLICE : 0;
+  new_task->time_slice = DEFAULT_TIME_SLICE;
   new_task->req_priority = new_task->priority = policy <= POLICY_1 ? DEFAULT_PRIORITY : 0;
 
 
@@ -215,9 +215,10 @@ void manage_sleeping_tasks() {
     
 }
 
-void manage_time_slice_tasks() {
+void manage_time_slice() {
   if (!--running_task->time_slice) {
-    task_list_insert_back(available_tasks[running_task->policy], running_task);
+    running_task->time_slice = DEFAULT_TIME_SLICE;
+    sleep(DEFAULT_TIME_SLICE);
   } 
 }
 
@@ -237,12 +238,12 @@ void task_list_insert_back(task_list_t* list, tcb_t* task) {
 
 /* Abosolutely stunning Linus-inspired code */
 void task_list_remove_task(task_list_t* list, tcb_t* task) {
-    
+   
   tcb_t** indirect = &list->head;
 
   while ((*indirect) != task) { indirect = &(*indirect)->flink; }
 
-  (*indirect) = task->flink;
+  *indirect = task->flink;
 }
 
 void update_proc_time() {
@@ -271,10 +272,10 @@ uint32_t get_next_pid() {
 
 
 void schedule() {
-
+  
   if (!allow_ts) { return; }  // Don't task switch if it is forbidden
   lock_ts();
-
+  
   tcb_t* high_policy0_task = schedule_priority_task(available_tasks[POLICY_0]->head);
   tcb_t* high_policy1_task = schedule_priority_task(available_tasks[POLICY_1]->head);
 
