@@ -84,12 +84,11 @@ void irq_handler(isr_stack_t* stack) {
   /* In any case send an End of Interrupt command to the first PIC */
   outportb(MASTER_COMMAND, EOI);
 
-  sti();
 
   /* Handle task switching */
   if (index == 0x8) {
    
-    lock_ts();
+    //lock_ts();
     /* Wake up tasks */
     manage_sleeping_tasks();
     
@@ -101,4 +100,5 @@ void irq_handler(isr_stack_t* stack) {
     
     if (next_task) { run_task(); }
   }
+  else { sti(); }
 }

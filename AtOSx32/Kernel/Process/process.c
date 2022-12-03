@@ -77,8 +77,9 @@ thread_t* create_thread_handler(uint32_t eip, void* params, uint8_t policy){
 
 tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, uint8_t policy) { 
 
+  cli();
   lock_ts();
-
+  
   tcb_t* new_task = kmalloc(sizeof(tcb_t));
  
   new_task->state = TASK_AVAILABLE;
@@ -120,9 +121,12 @@ tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, 
   /* Update stack */
   new_task->esp = (uint32_t)stack;
 
+
   task_list_insert_back(available_tasks[new_task->policy], new_task);
  
   unlock_ts();
+  sti();
+  
   return new_task;
 }
 
@@ -197,8 +201,8 @@ void task_block(uint32_t new_state) {
   
   task_change_state(running_task, new_state);
 
-  sti();
   unlock_ts();
+  sti();
   schedule();
 }
 
@@ -284,24 +288,32 @@ uint32_t get_next_pid() {
 
 
 void schedule() {
- 
+
   if (!allow_ts) { return; }  // Don't task switch if it is forbidden
+  //cli(); 
   lock_ts();
   
   tcb_t* high_policy0_task = schedule_priority_task(available_tasks[POLICY_0]->head);
   tcb_t* high_policy1_task = schedule_priority_task(available_tasks[POLICY_1]->head);
 
   tcb_t* task = high_policy0_task ? high_policy0_task : high_policy1_task;
-  
+
   if (task) { if (!--task->priority) { task->priority = task->req_priority; } }
   else { task = schedule_time_slice_task(); }
 
   if (!task) { task = scheduler_task; }  /* Idle mode, keep searching for tasks */
   else { task_list_remove_task(available_tasks[task->policy], task); }  /* Remove task from available tasks */
 
+  next_task = task;
+
+  if (running_task == scheduler_task && task == scheduler_task) { 
+    next_task = NULL;
+    unlock_ts();
+  }
   next_task = (running_task == scheduler_task && task == scheduler_task) ? NULL : task;
-  
-  //if (!next_task) { unlock_ts(); }
+ 
+
+  //sti();
 }
 
 /* Picks the highest priority task from the task list */
