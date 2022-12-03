@@ -95,7 +95,7 @@ void unlock_ts();
 
 void setup_multitasking();
 void init_multitasking();
-void run_task(tcb_t* new_task);
+void run_task();
 void terminate_task();
 void init_task(tcb_t* task, void* params);
 void update_proc_time();

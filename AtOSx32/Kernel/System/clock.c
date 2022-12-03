@@ -27,7 +27,6 @@ void rtc_handler(isr_stack_t* stack) {
 
   stack = stack;    // Get rid of unused variable warning
  
-  proc_time_counter++;
   time_counter++;
  
   /* To make sure a next IRQ8 will happen, read from the 0xC register */

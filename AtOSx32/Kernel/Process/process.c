@@ -3,6 +3,7 @@
 uint32_t irq_disable_counter = 0;
 
 tcb_t* running_task   = NULL;  // Current task
+tcb_t* next_task      = NULL;
 tcb_t* scheduler_task = NULL;
 tcb_t* cleaner_task   = NULL;
 
@@ -76,6 +77,7 @@ thread_t* create_thread_handler(uint32_t eip, void* params, uint8_t policy){
 tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, uint8_t policy) { 
 
   lock_ts();
+  cli();
   tcb_t* new_task = kmalloc(sizeof(tcb_t));
  
   new_task->state = TASK_AVAILABLE;
@@ -119,6 +121,7 @@ tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, 
 
   task_list_insert_back(available_tasks[new_task->policy], new_task);
 
+  sti();
   unlock_ts();
   return new_task;
 }
@@ -162,16 +165,14 @@ void task_cleanup(tcb_t* task) {
 } 
 
  
-void run_task(tcb_t* new_task) {
-   
-  update_proc_time();
-  proc_time_counter = 0;
+void run_task() {
   
-  new_task->state = TASK_ACTIVE;
-  new_task->flink = NULL;
-
-  cli();
-  switch_task(new_task);
+  if (!next_task) { return; }
+ 
+  next_task->state = TASK_ACTIVE;
+  next_task->flink = NULL;
+  
+  switch_task(next_task);
 }
 
 void task_change_state(tcb_t* task, uint16_t state) {
@@ -253,7 +254,7 @@ void task_list_remove_task(task_list_t* list, tcb_t* task) {
   list->tail = list->head;
   tcb_t** indirect = &list->head;
 
-  while ((*indirect) != task) { indirect = &(*indirect)->flink; list->tail = *indirect; }
+  while ((*indirect) != task) { indirect = &((*indirect)->flink); list->tail = *indirect; }
 
   *indirect = task->flink;
   
@@ -262,29 +263,11 @@ void task_list_remove_task(task_list_t* list, tcb_t* task) {
   
 }
 
-void update_proc_time() {
-
-  if (!running_task) { idle_time_counter++; return; }    // There doesn't have to be a running process
-  
-  /* Prevent a hack that will initialize a process twice if it ran for less than a milisecond */
-  running_task->cpu_time += proc_time_counter ? proc_time_counter : 1;
-}
-
-/*tcb_t* find_task(uint32_t pid) {
-
-  tcb_t* curr = root_task;
-
-  while (curr && curr->pid != pid) { curr = curr->flink; }
-
-  return curr;
-} */
 
 uint32_t get_next_pid() {
   static uint32_t next_pid = 8008;
   return next_pid++;
 }
-
-
 
 
 void schedule() {
@@ -296,16 +279,17 @@ void schedule() {
   tcb_t* high_policy1_task = schedule_priority_task(available_tasks[POLICY_1]->head);
 
   tcb_t* task = high_policy0_task ? high_policy0_task : high_policy1_task;
-  
+ 
   if (task) { if (!--task->priority) { task->priority = task->req_priority; } }
   else { task = schedule_time_slice_task(); }
 
   if (!task) { task = scheduler_task; }  /* Idle mode, keep searching for tasks */
   else { task_list_remove_task(available_tasks[task->policy], task); }  /* Remove task from available tasks */
   
+  next_task = (running_task == scheduler_task && task == scheduler_task) ? NULL : task;
+
+  if (next_task) { PRINTNH(next_task); }
   unlock_ts();
-  if (running_task == scheduler_task && task == scheduler_task) { return; }
-  run_task(task);
 }
 
 /* Picks the highest priority task from the task list */

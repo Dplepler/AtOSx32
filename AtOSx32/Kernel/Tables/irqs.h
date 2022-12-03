@@ -5,6 +5,8 @@
 
 #define EOI 0x20
 
+extern tcb_t* next_task;
+
 enum PIC_TYPES {
   MASTER_COMMAND = 0x20,
   MASTER_DATA    = 0x21,

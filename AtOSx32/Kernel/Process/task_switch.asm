@@ -1,4 +1,5 @@
 [extern running_task]       ; Current task
+[extern next_task]
 [extern init_task]
 [extern allow_ts]
 
@@ -13,6 +14,8 @@ switch_task:
   push esi
   push edi
   push ebp 
+
+  mov dword [next_task], 0
 
   mov esi, dword [running_task]
 

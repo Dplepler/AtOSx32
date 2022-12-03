@@ -12,12 +12,6 @@ extern task_list_t** available_tasks;
 
 extern task_list_t* sleeping_tasks;
 
-void thread() {
-
-  for(;;) {
-    PRINTN(1);
-  }
-}
 
 void thread2() {
 
@@ -41,6 +35,26 @@ void thread4() {
   }
 }
 
+void thread5() {
+
+  for (;;) {
+    PRINTN(5);
+  }
+}
+
+
+void thread() {
+  
+  create_thread_handler((uint32_t)thread2, NULL, POLICY_0);
+  
+
+  create_thread_handler((uint32_t)thread3, NULL, POLICY_0);
+  create_thread_handler((uint32_t)thread4, NULL, POLICY_0);
+  //create_thread_handler((uint32_t)thread5, NULL, POLICY_0);
+
+  
+  while(1) { PRINTN(1); }
+}
 
 int kmain(void) {
   
@@ -66,8 +80,6 @@ int kmain(void) {
 
   
   create_process_handler(create_address_space(), (uint32_t)thread, NULL, POLICY_0);
-  create_process_handler(create_address_space(), (uint32_t)thread2, NULL, POLICY_0);
-  create_process_handler(create_address_space(), (uint32_t)thread3, NULL, POLICY_0);
 
   for (;;) {
     schedule();
