@@ -172,6 +172,8 @@ void task_cleanup(tcb_t* task) {
 void run_task() {
   
   if (!next_task) { return; }
+
+  cli();
  
   next_task->state = TASK_ACTIVE;
   next_task->flink = NULL;
@@ -194,13 +196,13 @@ void task_block(uint32_t new_state) {
     case TASK_SLEEPING:   task_list_insert_back(sleeping_tasks,   running_task); break;
     case TASK_TERMINATED: task_list_insert_back(terminated_tasks, running_task); break;
     /* Invalid new states */
-    case TASK_WAITING:
+    case TASK_WAITING: 
     case TASK_ACTIVE: 
-    case TASK_AVAILABLE: return;
+    case TASK_AVAILABLE: sti(); return;
   }
   
   task_change_state(running_task, new_state);
-
+  
   unlock_ts();
   sti();
   schedule();
@@ -208,7 +210,7 @@ void task_block(uint32_t new_state) {
 
 
 void task_unblock(tcb_t* task) {
-  
+ 
   cli();
   lock_ts();
  
@@ -219,11 +221,11 @@ void task_unblock(tcb_t* task) {
     /* Invalid previous states */
     case TASK_WAITING:
     case TASK_ACTIVE: 
-    case TASK_AVAILABLE:  return;
+    case TASK_AVAILABLE: sti(); return;
   }
 
-  task_change_state(task, TASK_AVAILABLE); 
-  
+  task_change_state(task, TASK_AVAILABLE);
+ 
   /* Insert task to the waitlist */
   task_list_insert_back(available_tasks[task->policy], task);
   
@@ -234,20 +236,26 @@ void task_unblock(tcb_t* task) {
 /* Go over all sleeping tasks and reduce their nap time */
 void manage_sleeping_tasks() {
     
-    tcb_t* task = sleeping_tasks->head;
+    cli();
 
+    tcb_t* task = sleeping_tasks->head;
+   
     while (task) {
       if (time_counter >= task->naptime) { task->naptime = 0; task_unblock(task); }   // Naptime over, task is ready to run
       task = task->flink;
     }
+
+    sti();
 }
 
 void manage_time_slice() {
-
+  
+  cli();
   if (!--running_task->time_slice) {
     running_task->time_slice = DEFAULT_TIME_SLICE;
     sleep(DEFAULT_TIME_SLICE);
-  } 
+  }
+  sti();
 }
 
 void set_naptime(unsigned long time) {
@@ -260,9 +268,8 @@ void task_list_insert_front(task_list_t* list, tcb_t* task) {
 }
 
 void task_list_insert_back(task_list_t* list, tcb_t* task) {
-
   if (!list->tail) { list->tail = list->head = task; task->flink = NULL; }
-  else { list->tail->flink = task; list->tail = task; }
+  else { list->tail->flink = task; list->tail = task; task->flink = NULL; }
 }
 
 /* Abosolutely stunning Linus-inspired code */
@@ -310,6 +317,8 @@ void schedule() {
     next_task = NULL;
     unlock_ts();
   }
+
+ // PRINTNH(next_task); NL;
   next_task = (running_task == scheduler_task && task == scheduler_task) ? NULL : task;
  
 
