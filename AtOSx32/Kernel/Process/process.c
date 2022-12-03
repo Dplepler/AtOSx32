@@ -180,26 +180,30 @@ void task_change_state(tcb_t* task, uint16_t state) {
 
 /* Block the currently running task from running */
 void task_block(uint32_t new_state) {
- 
+  
   switch (new_state) {
     case TASK_BLOCKED:    task_list_insert_back(blocked_tasks,    running_task); break;
     case TASK_SLEEPING:   task_list_insert_back(sleeping_tasks,   running_task); break;
     case TASK_TERMINATED: task_list_insert_back(terminated_tasks, running_task); break;
+    /* Invalid new states */
+    case TASK_WAITING:
     case TASK_ACTIVE: 
     case TASK_AVAILABLE: return;
   }
-
+ 
   task_change_state(running_task, new_state);
   schedule();
 }
 
 
 void task_unblock(tcb_t* task) {
-
+ 
   switch (task->state) {
     case TASK_BLOCKED:    task_list_remove_task(blocked_tasks,    task); break;
     case TASK_SLEEPING:   task_list_remove_task(sleeping_tasks,   task); break;
     case TASK_TERMINATED: task_list_remove_task(terminated_tasks, task); break;
+    /* Invalid previous states */
+    case TASK_WAITING:
     case TASK_ACTIVE: 
     case TASK_AVAILABLE:  return;
   }
@@ -216,7 +220,7 @@ void manage_sleeping_tasks() {
     tcb_t* task = sleeping_tasks->head;
 
     while (task) {
-      if (task->naptime <= time_counter) { task->naptime = 0; task_unblock(task); }   // Naptime over, task is ready to run
+      if (time_counter >= task->naptime) { task->naptime = 0; task_unblock(task); }   // Naptime over, task is ready to run
       task = task->flink;
     }
 }
@@ -245,12 +249,17 @@ void task_list_insert_back(task_list_t* list, tcb_t* task) {
 
 /* Abosolutely stunning Linus-inspired code */
 void task_list_remove_task(task_list_t* list, tcb_t* task) {
-   
+  
+  list->tail = list->head;
   tcb_t** indirect = &list->head;
 
-  while ((*indirect) != task) { indirect = &(*indirect)->flink; }
+  while ((*indirect) != task) { indirect = &(*indirect)->flink; list->tail = *indirect; }
 
   *indirect = task->flink;
+  
+  while (list->tail->flink) { list->tail = list->tail->flink; }
+  if (!list->head) { list->tail = NULL; }
+  
 }
 
 void update_proc_time() {
@@ -279,7 +288,7 @@ uint32_t get_next_pid() {
 
 
 void schedule() {
-  
+ 
   if (!allow_ts) { return; }  // Don't task switch if it is forbidden
   lock_ts();
   
@@ -287,13 +296,14 @@ void schedule() {
   tcb_t* high_policy1_task = schedule_priority_task(available_tasks[POLICY_1]->head);
 
   tcb_t* task = high_policy0_task ? high_policy0_task : high_policy1_task;
-
+  
   if (task) { if (!--task->priority) { task->priority = task->req_priority; } }
   else { task = schedule_time_slice_task(); }
 
   if (!task) { task = scheduler_task; }  /* Idle mode, keep searching for tasks */
   else { task_list_remove_task(available_tasks[task->policy], task); }  /* Remove task from available tasks */
-
+  
+  unlock_ts();
   if (running_task == scheduler_task && task == scheduler_task) { return; }
   run_task(task);
 }

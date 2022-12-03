@@ -34,9 +34,7 @@ void rtc_handler(isr_stack_t* stack) {
   outportb(CMOS_REGISTER, 0xC);
   inportb(CMOS_RW); 
   
-
   unlock_ts();
-
 }
 
 
@@ -46,7 +44,7 @@ void sleep(unsigned long milisec) {
   if (!milisec) { return; }
  
   set_naptime(HERTZ(milisec) + time_counter);
-  task_block(TASK_SLEEPING);  
+  task_block(TASK_SLEEPING);
 }
 
 /* The system's timer. First time it's called it will initialize the timer and the 

@@ -10,12 +10,13 @@
 extern tcb_t* running_task;
 extern task_list_t** available_tasks;
 
+extern task_list_t* sleeping_tasks;
+
 void thread() {
 
   for(;;) {
     PRINTN(1);
   }
-  while(1) {}
 }
 
 void thread2() {
@@ -24,6 +25,20 @@ void thread2() {
     PRINTN(2);
   }
 
+}
+
+void thread3() {
+
+  for (;;) {
+    PRINTN(3);
+  }
+}
+
+void thread4() {
+
+  for (;;) {
+    PRINTN(4);
+  }
 }
 
 
@@ -52,7 +67,7 @@ int kmain(void) {
   
   create_process_handler(create_address_space(), (uint32_t)thread, NULL, POLICY_0);
   create_process_handler(create_address_space(), (uint32_t)thread2, NULL, POLICY_0);
-
+  create_process_handler(create_address_space(), (uint32_t)thread3, NULL, POLICY_0);
 
   for (;;) {
     schedule();
