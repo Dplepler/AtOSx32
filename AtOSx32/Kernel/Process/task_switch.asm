@@ -44,7 +44,5 @@ switch_task:
   pop esi
   pop ebx
 
-  sti
-
   ret     ; Normal task switching, popping off the last EIP
 

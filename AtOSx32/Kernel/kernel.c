@@ -31,29 +31,31 @@ void thread3() {
 void thread4() {
 
   for (;;) {
-    PRINTN(4);
+   PRINTN(4);
   }
 }
 
 void thread5() {
 
   for (;;) {
-    PRINTN(5);
+    //PRINTN(5);
   }
 }
 
 
 void thread() {
-  
-  create_thread_handler((uint32_t)thread2, NULL, POLICY_0);
-  
 
-  create_thread_handler((uint32_t)thread3, NULL, POLICY_0);
-  create_thread_handler((uint32_t)thread4, NULL, POLICY_0);
+  PRINT("WHAT");
+
+  //create_thread_handler((uint32_t)thread2, NULL, POLICY_0);
+  //create_thread_handler((uint32_t)thread3, NULL, POLICY_0);
+  //create_thread_handler((uint32_t)thread4, NULL, POLICY_0);
+  
   //create_thread_handler((uint32_t)thread5, NULL, POLICY_0);
 
   
-  while(1) { PRINTN(1); }
+  while(1) { PRINTN(1); 
+             }
 }
 
 int kmain(void) {
@@ -78,15 +80,12 @@ int kmain(void) {
   setup_clock();
   init_multitasking();
 
-  
-  create_process_handler(create_address_space(), (uint32_t)thread, NULL, POLICY_0);
+  //create_process_handler(create_address_space(), (uint32_t)thread, NULL, POLICY_0);
 
-  for (;;) {
-    schedule();
-  } 
+  tcb_t* t1 = create_process_handler(create_address_space(), (uint32_t)thread, NULL, POLICY_0);
+   
   
- 
-  while(1) {}
+  while(1) { schedule(); }
   
   /* while (true) {
     terminal_draw_rec(0, 0, 9, 1, 8); 

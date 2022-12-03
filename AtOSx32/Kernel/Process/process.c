@@ -42,7 +42,8 @@ void init_multitasking() {
   scheduler_task->cpu_time = 0;
   scheduler_task->type     = PROCESS;
   scheduler_task->priority = scheduler_task->req_priority = 127;
-  scheduler_task->policy = POLICY_0;  
+  scheduler_task->policy = POLICY_0; 
+  scheduler_task->time_slice = DEFAULT_TIME_SLICE;
    
   running_task = scheduler_task;
    
@@ -77,7 +78,7 @@ thread_t* create_thread_handler(uint32_t eip, void* params, uint8_t policy){
 tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, uint8_t policy) { 
 
   lock_ts();
-  cli();
+
   tcb_t* new_task = kmalloc(sizeof(tcb_t));
  
   new_task->state = TASK_AVAILABLE;
@@ -115,13 +116,12 @@ tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, 
   *--stack = registers.esi;
   *--stack = registers.edi;
   *--stack = registers.ebp;
-     
+
   /* Update stack */
   new_task->esp = (uint32_t)stack;
 
   task_list_insert_back(available_tasks[new_task->policy], new_task);
-
-  sti();
+ 
   unlock_ts();
   return new_task;
 }
@@ -181,7 +181,10 @@ void task_change_state(tcb_t* task, uint16_t state) {
 
 /* Block the currently running task from running */
 void task_block(uint32_t new_state) {
-  
+ 
+  lock_ts();
+  cli();
+
   switch (new_state) {
     case TASK_BLOCKED:    task_list_insert_back(blocked_tasks,    running_task); break;
     case TASK_SLEEPING:   task_list_insert_back(sleeping_tasks,   running_task); break;
@@ -191,13 +194,19 @@ void task_block(uint32_t new_state) {
     case TASK_ACTIVE: 
     case TASK_AVAILABLE: return;
   }
- 
+  
   task_change_state(running_task, new_state);
+
+  sti();
+  unlock_ts();
   schedule();
 }
 
 
 void task_unblock(tcb_t* task) {
+  
+  cli();
+  lock_ts();
  
   switch (task->state) {
     case TASK_BLOCKED:    task_list_remove_task(blocked_tasks,    task); break;
@@ -213,6 +222,9 @@ void task_unblock(tcb_t* task) {
   
   /* Insert task to the waitlist */
   task_list_insert_back(available_tasks[task->policy], task);
+  
+  sti();
+  unlock_ts();
 }
 
 /* Go over all sleeping tasks and reduce their nap time */
@@ -244,6 +256,7 @@ void task_list_insert_front(task_list_t* list, tcb_t* task) {
 }
 
 void task_list_insert_back(task_list_t* list, tcb_t* task) {
+
   if (!list->tail) { list->tail = list->head = task; task->flink = NULL; }
   else { list->tail->flink = task; list->tail = task; }
 }
@@ -279,17 +292,16 @@ void schedule() {
   tcb_t* high_policy1_task = schedule_priority_task(available_tasks[POLICY_1]->head);
 
   tcb_t* task = high_policy0_task ? high_policy0_task : high_policy1_task;
- 
+  
   if (task) { if (!--task->priority) { task->priority = task->req_priority; } }
   else { task = schedule_time_slice_task(); }
 
   if (!task) { task = scheduler_task; }  /* Idle mode, keep searching for tasks */
   else { task_list_remove_task(available_tasks[task->policy], task); }  /* Remove task from available tasks */
-  
-  next_task = (running_task == scheduler_task && task == scheduler_task) ? NULL : task;
 
-  if (next_task) { PRINTNH(next_task); }
-  unlock_ts();
+  next_task = (running_task == scheduler_task && task == scheduler_task) ? NULL : task;
+  
+  //if (!next_task) { unlock_ts(); }
 }
 
 /* Picks the highest priority task from the task list */
