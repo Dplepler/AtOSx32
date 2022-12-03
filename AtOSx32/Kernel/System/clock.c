@@ -30,24 +30,13 @@ void rtc_handler(isr_stack_t* stack) {
   proc_time_counter++;
   time_counter++;
  
-  PRINTN(3);
-
-  tcb_t* task = sleeping_tasks->head;
-
-  while (task) {
-    if (task->naptime <= time_counter) { task->naptime = 0; task_unblock(task); }   // Naptime over, task is ready to run
-    task = task->flink;
-  }
-   
-
   /* To make sure a next IRQ8 will happen, read from the 0xC register */
   outportb(CMOS_REGISTER, 0xC);
   inportb(CMOS_RW); 
+  
 
   unlock_ts();
 
-  /* Decrease the tasks's time slice */
-  manage_time_slice(); 
 }
 
 

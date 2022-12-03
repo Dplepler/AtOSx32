@@ -13,7 +13,7 @@ extern task_list_t** available_tasks;
 void thread() {
 
   for(;;) {
-    //PRINTN(1);
+    PRINTN(1);
   }
   while(1) {}
 }
@@ -21,7 +21,7 @@ void thread() {
 void thread2() {
 
   for (;;) {
-    //PRINTN(2);
+    PRINTN(2);
   }
 
 }

@@ -11,11 +11,6 @@
 
 #define YEAR 2022
 
-extern task_list_t* sleeping_tasks;
-extern tcb_t* running_task;
-extern tcb_t* scheduler_task;
-extern task_list_t** available_tasks;
-
 
 /*-------------------------------
 Date formats (Register 0xB)     |

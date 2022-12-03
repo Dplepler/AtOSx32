@@ -72,7 +72,9 @@ void init_irq() {
 /* Handle a default interrupt request */
 void irq_handler(isr_stack_t* stack) {
 
-  void (*handler)(isr_stack_t* stack) = irq_routines[(stack->index & 0xFF) - 0x20]; 
+  uint32_t index = (stack->index & 0xFF) - 0x20;
+
+  void (*handler)(isr_stack_t* stack) = irq_routines[index]; 
   
   if (handler) { (*handler)(stack); }
 
@@ -82,5 +84,14 @@ void irq_handler(isr_stack_t* stack) {
   /* In any case send an End of Interrupt command to the first PIC */
   outportb(MASTER_COMMAND, EOI);
 
-  sti(); 
+  sti();
+
+  if (index == 0x8) {
+   
+    /* Wake up tasks */
+    manage_sleeping_tasks();
+
+    /* Decrease the tasks's time slice */
+    manage_time_slice(); 
+  }
 }

@@ -213,9 +213,16 @@ void task_unblock(tcb_t* task) {
 /* Go over all sleeping tasks and reduce their nap time */
 void manage_sleeping_tasks() {
     
+    tcb_t* task = sleeping_tasks->head;
+
+    while (task) {
+      if (task->naptime <= time_counter) { task->naptime = 0; task_unblock(task); }   // Naptime over, task is ready to run
+      task = task->flink;
+    }
 }
 
 void manage_time_slice() {
+
   if (!--running_task->time_slice) {
     running_task->time_slice = DEFAULT_TIME_SLICE;
     sleep(DEFAULT_TIME_SLICE);
