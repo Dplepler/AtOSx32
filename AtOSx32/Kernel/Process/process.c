@@ -2,21 +2,23 @@
 
 uint32_t irq_disable_counter = 0;
 
-tcb_t* running_task   = NULL;  // Current task
-tcb_t* next_task      = NULL;
-tcb_t* scheduler_task = NULL;
-tcb_t* cleaner_task   = NULL;
+tcb_t* running_task   = NULL;  /* Current task */
+tcb_t* next_task      = NULL;  /* Buffer of the selected task to run */
+tcb_t* scheduler_task = NULL;  /* Default idle task, searches for other tasks to run */
+tcb_t* cleaner_task   = NULL;  /* Clean allocated memory of terminated tasks */
 
-task_list_t** available_tasks;
+task_list_t** available_tasks = NULL;  /* All tasks that are applicable to run */
 
-task_list_t* sleeping_tasks;
-task_list_t* blocked_tasks;
-task_list_t* terminated_tasks;
+/* Blocked tasks */
+task_list_t* sleeping_tasks   = NULL;  /* Tasks that invoked the sleeping operation or that have ran for too long */
+task_list_t* blocked_tasks    = NULL;  /* Tasks that are not allowed to run for any reason */
+task_list_t* terminated_tasks = NULL;  /* Tasks that have ended their lifetime */
 
-bool allow_ts = false;
 
-void lock_ts() { allow_ts = false; }
-void unlock_ts() { allow_ts = true; }
+bool allow_ts = false;  /* Task switching lock */
+
+static inline void lock_ts()   { allow_ts = false; }
+static inline void unlock_ts() { allow_ts = true; }
 
 /* Initialize all task lists */
 void setup_multitasking() {

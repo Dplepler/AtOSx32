@@ -23,8 +23,6 @@ unsigned long idle_time_counter = 0;
 /* Called 1024 times a second, keep track of the system's time */
 void rtc_handler(isr_stack_t* stack) {
 
-  lock_ts();
-
   stack = stack;    // Get rid of unused variable warning
  
   time_counter++;
@@ -32,8 +30,6 @@ void rtc_handler(isr_stack_t* stack) {
   /* To make sure a next IRQ8 will happen, read from the 0xC register */
   outportb(CMOS_REGISTER, 0xC);
   inportb(CMOS_RW); 
-  
-  unlock_ts();
 }
 
 
