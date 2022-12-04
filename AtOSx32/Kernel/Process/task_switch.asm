@@ -46,5 +46,5 @@ switch_task:
 
   sti
 
-  ret     ; Normal task switching, popping off the last EIP
-
+  pop eax     ; Normal task switching, popping off the last EIP
+  call eax

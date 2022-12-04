@@ -13,33 +13,10 @@ extern task_list_t** available_tasks;
 extern task_list_t* sleeping_tasks;
 
 
-void thread2() {
+void thread2(void* params) {
 
-  for (;;) {
-    PRINTN(2);
-  }
-
-}
-
-void thread3() {
-
-  for (;;) {
-    PRINTN(3);
-  }
-}
-
-void thread4() {
-
-  for (;;) {
-    PRINTN(4);
-  }
-}
-
-void thread5() {
-
-  for (;;) {
-    PRINTN(5);
-  }
+  PRINTNH(params);
+  while(1) { PRINTN(2); }
 }
 
 
@@ -47,15 +24,9 @@ void thread() {
 
   PRINT("WHAT");
 
-  create_thread_handler((uint32_t)thread2, NULL, POLICY_0);
-  create_thread_handler((uint32_t)thread3, NULL, POLICY_0);
-  create_thread_handler((uint32_t)thread4, NULL, POLICY_0);
+  create_thread_handler((uint32_t)thread2, 0x20, POLICY_0);
   
-  create_thread_handler((uint32_t)thread5, NULL, POLICY_0);
-
-  
-  while(1) { PRINTN(1); 
-             }
+  while(1) { PRINTN(1); }
 }
 
 int kmain(void) {

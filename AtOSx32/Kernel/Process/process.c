@@ -67,16 +67,17 @@ uint32_t* create_address_space() {
   return address_space;
 }
 
-
+/* Create a process handler */
 process_t* create_process_handler(uint32_t* address_space, uint32_t eip, void* params, uint8_t policy) {
   return (process_t*)create_task_handler(address_space, eip, params, policy);  
 }
 
+/* Create a thread handler - address space remains the same as the caller's */
 thread_t* create_thread_handler(uint32_t eip, void* params, uint8_t policy){
   return (thread_t*)create_task_handler(running_task->address_space, eip, params, policy);
 }
 
-
+/* Create a mew task handler */
 tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, uint8_t policy) { 
 
   cli();
@@ -111,7 +112,7 @@ tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, 
   __asm__ __volatile__ ("mov %%ebp, %0" : "=r" (registers.ebp));
     
   /* Push parameters for make_thread function */ 
-  //*--stack = (uint32_t)params;
+  *--stack = (uint32_t)params;
   *--stack = (uint32_t)new_task->eip;
 
   /* Push cdecl registers */
