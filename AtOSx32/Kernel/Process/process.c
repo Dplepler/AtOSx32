@@ -133,22 +133,14 @@ tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, 
   return new_task;
 }
 
- 
-void init_task(tcb_t* task, void* params) {
-
-  void* (*entry)(void*) = (void*)task->eip;
-  (*entry)(params);
-  terminate_task();
-}
-
-
+/* Let the cleaner task clear the tasks information */
 void terminate_task() {
 
   /* We can't cleanup the task's stack just yet, we're still in it, so signal to the next task to do so */
   task_block(TASK_TERMINATED);
 
   /* Schedule the cleaner to free up the process' memory */
-  task_unblock(cleaner_task);
+  if (cleaner_task->state == TASK_BLOCKED) { task_unblock(cleaner_task); }
 }
 
 /* Process to clean up after terminated tasks */
@@ -171,15 +163,14 @@ void task_cleanup(tcb_t* task) {
   free(task);
 } 
 
- 
+/* Run the task pointed to by the task buffer */
 void run_task() {
   
   if (!next_task) { return; }
 
   cli();
- 
+
   next_task->state = TASK_ACTIVE;
-  next_task->flink = NULL;
   
   switch_task(next_task);
 }
@@ -194,6 +185,7 @@ void task_block(uint32_t new_state) {
   lock_ts();
   cli();
 
+  /* Insert task to the blocked list */
   switch (new_state) {
     case TASK_BLOCKED:    task_list_insert_back(blocked_tasks,    running_task); break;
     case TASK_SLEEPING:   task_list_insert_back(sleeping_tasks,   running_task); break;
@@ -204,19 +196,26 @@ void task_block(uint32_t new_state) {
     case TASK_AVAILABLE: sti(); return;
   }
   
+  /* Update state */
   task_change_state(running_task, new_state);
+
+  running_task->time_slice = DEFAULT_TIME_SLICE;  
   
   unlock_ts();
-  sti();
+
+  /* Task can't run anymore, find another task */
   schedule();
+
+  sti();
 }
 
-
+/* Unblock task from any block list, and make it available */
 void task_unblock(tcb_t* task) {
  
   cli();
   lock_ts();
  
+  /* Remove from blocked list */
   switch (task->state) {
     case TASK_BLOCKED:    task_list_remove_task(blocked_tasks,    task); break;
     case TASK_SLEEPING:   task_list_remove_task(sleeping_tasks,   task); break;
@@ -242,7 +241,7 @@ void manage_sleeping_tasks() {
     cli();
 
     tcb_t* task = sleeping_tasks->head;
-   
+  
     while (task) {
       if (time_counter >= task->naptime) { task->naptime = 0; task_unblock(task); }   // Naptime over, task is ready to run
       task = task->flink;
@@ -251,25 +250,26 @@ void manage_sleeping_tasks() {
     sti();
 }
 
+/* Decrease the time slice for the running program, if the time slice ended, block the task and run another one */
 void manage_time_slice() {
   
   cli();
-  if (!--running_task->time_slice) {
-    running_task->time_slice = DEFAULT_TIME_SLICE;
-    sleep(DEFAULT_TIME_SLICE);
-  }
+  if (!--running_task->time_slice) { sleep(5); }
   sti();
 }
 
+/* Assign the duration to sleep for a task */
 void set_naptime(unsigned long time) {
   running_task->naptime = time; 
 }
 
+/* Insert a task to a task list's head */
 void task_list_insert_front(task_list_t* list, tcb_t* task) {
   if (!list->head) { list->head = list->tail = task; task->flink = NULL; }
   else { task->flink = list->head; list->head = task; }
 }
 
+/* Insert a task to a task list's tail */
 void task_list_insert_back(task_list_t* list, tcb_t* task) {
   if (!list->tail) { list->tail = list->head = task; task->flink = NULL; }
   else { list->tail->flink = task; list->tail = task; task->flink = NULL; }
@@ -281,51 +281,44 @@ void task_list_remove_task(task_list_t* list, tcb_t* task) {
   list->tail = list->head;
   tcb_t** indirect = &list->head;
 
-  while ((*indirect) != task) { indirect = &((*indirect)->flink); list->tail = *indirect; }
+  while ((*indirect) != task) { indirect = (tcb_t**)&((*indirect)->flink); list->tail = *indirect; }
 
   *indirect = task->flink;
   
   while (list->tail->flink) { list->tail = list->tail->flink; }
   if (!list->head) { list->tail = NULL; }
-  
 }
 
-
+/* Assign an id to a task */
 uint32_t get_next_pid() {
-  static uint32_t next_pid = 8008;
+  static uint32_t next_pid = 0xB00B;
   return next_pid++;
 }
 
-
+/* Find the next task to run and update the task buffer accordingly */
 void schedule() {
 
-  if (!allow_ts) { return; }  // Don't task switch if it is forbidden
-  //cli(); 
+  if (!allow_ts) { return; }
   lock_ts();
-  
+
+  /* Get highest policy available task */
   tcb_t* high_policy0_task = schedule_priority_task(available_tasks[POLICY_0]->head);
   tcb_t* high_policy1_task = schedule_priority_task(available_tasks[POLICY_1]->head);
 
-  tcb_t* task = high_policy0_task ? high_policy0_task : high_policy1_task;
-
+  tcb_t* task = high_policy0_task ? high_policy0_task : high_policy1_task; 
+ 
+  /* Decrease priority if we got a priority task, if priority is 0 get it back to it's desired level */
   if (task) { if (!--task->priority) { task->priority = task->req_priority; } }
-  else { task = schedule_time_slice_task(); }
+  else { task = schedule_time_slice_task(); }  /* Find a task from lower level policies */
 
   if (!task) { task = scheduler_task; }  /* Idle mode, keep searching for tasks */
-  else { task_list_remove_task(available_tasks[task->policy], task); }  /* Remove task from available tasks */
+  else { task_list_remove_task(available_tasks[task->policy], task); }  /* Remove task from available task */
 
-  next_task = task;
+  /* Idle mode couldn't find new task, stay idle */
+  if (running_task == scheduler_task && task == scheduler_task) { next_task = NULL; unlock_ts(); }
+  else { next_task = task; }  /* Update task buffer (run next task) */
 
-  if (running_task == scheduler_task && task == scheduler_task) { 
-    next_task = NULL;
-    unlock_ts();
-  }
-
- // PRINTNH(next_task); NL;
-  next_task = (running_task == scheduler_task && task == scheduler_task) ? NULL : task;
- 
-
-  //sti();
+  if (next_task) { run_task(); }
 }
 
 /* Picks the highest priority task from the task list */
@@ -336,9 +329,7 @@ tcb_t* schedule_priority_task(tcb_t* list) {
 
   /* Get the highest priority task from the list */
   while (task) {
-    if (task->priority > highest_priority_task->priority) {
-      highest_priority_task = task;
-    }
+    if (task->priority > highest_priority_task->priority) { highest_priority_task = task; }
     task = task->flink;
   }
   
@@ -353,7 +344,4 @@ tcb_t* schedule_time_slice_task() {
   
   return time_slice_task;
 }
-
-
-
 

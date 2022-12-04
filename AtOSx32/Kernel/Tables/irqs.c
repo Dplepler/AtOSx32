@@ -87,8 +87,7 @@ void irq_handler(isr_stack_t* stack) {
 
   /* Handle task switching */
   if (index == 0x8) {
-   
-    //lock_ts();
+    
     /* Wake up tasks */
     manage_sleeping_tasks();
     
@@ -96,9 +95,7 @@ void irq_handler(isr_stack_t* stack) {
       
       /* Decrease the tasks's time slice */
       manage_time_slice();
-    }
-    
-    if (next_task) { run_task(); }
+    }  
   }
   else { sti(); }
 }

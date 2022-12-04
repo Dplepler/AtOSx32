@@ -15,18 +15,23 @@ extern task_list_t* sleeping_tasks;
 
 void thread2(void* params) {
 
-  PRINTNH(params);
-  while(1) { PRINTN(2); }
+  while(1) { PRINTN(2); sleep(1000); }
 }
 
+void thread3(void* params) {
 
-void thread() {
+  while(1) { PRINTN(3); sleep(1000); }
+}
 
-  PRINT("WHAT");
+void thread(void* params) {
 
-  create_thread_handler((uint32_t)thread2, 0x20, POLICY_0);
   
-  while(1) { PRINTN(1); }
+  create_thread_handler((uint32_t)thread2, NULL, POLICY_0);
+  create_thread_handler((uint32_t)thread3, NULL, POLICY_0);
+
+  while(1) { PRINTN(1);
+    sleep(1000); }
+             
 }
 
 int kmain(void) {

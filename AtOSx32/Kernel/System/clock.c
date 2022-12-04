@@ -37,7 +37,7 @@ void rtc_handler(isr_stack_t* stack) {
 void sleep(unsigned long milisec) {
  
   if (!milisec) { return; }
-  
+ 
   set_naptime(HERTZ(milisec) + time_counter);
   task_block(TASK_SLEEPING);
 }

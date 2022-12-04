@@ -15,8 +15,6 @@ switch_task:
   push edi
   push ebp 
 
-  mov dword [next_task], 0
-
   mov esi, dword [running_task]
 
   mov dword [esi+0x8], esp    ; Set previous task's esp
@@ -44,7 +42,10 @@ switch_task:
   pop esi
   pop ebx
 
+  pop eax
+  mov dword [next_task], 0
   sti
+  jmp eax
 
   pop eax     ; Normal task switching, popping off the last EIP
   call eax
