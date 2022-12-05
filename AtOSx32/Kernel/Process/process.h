@@ -91,6 +91,9 @@ typedef struct _CDECL_REGISTERS_STRUCT {
 extern void switch_task(struct _TASK_CONTROL_BLOCK_STRUCT* new_task);
 
 
+void irq_enable();
+void irq_disable();
+
 void setup_multitasking();
 void init_multitasking();
 void run_task();

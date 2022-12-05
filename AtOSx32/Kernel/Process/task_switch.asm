@@ -42,10 +42,8 @@ switch_task:
   pop esi
   pop ebx
 
-  pop eax
+  pop eax     ; Normal task switching, popping off the last EIP
   mov dword [next_task], 0
   sti
   jmp eax
 
-  pop eax     ; Normal task switching, popping off the last EIP
-  call eax

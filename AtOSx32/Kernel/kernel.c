@@ -27,11 +27,10 @@ void thread(void* params) {
 
   
   create_thread_handler((uint32_t)thread2, NULL, POLICY_0);
-  create_thread_handler((uint32_t)thread3, NULL, POLICY_0);
+  //create_thread_handler((uint32_t)thread3, NULL, POLICY_0);
 
   while(1) { PRINTN(1);
-    sleep(1000); }
-             
+    sleep(200); }
 }
 
 int kmain(void) {

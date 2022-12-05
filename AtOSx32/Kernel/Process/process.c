@@ -17,8 +17,20 @@ task_list_t* terminated_tasks = NULL;  /* Tasks that have ended their lifetime *
 
 bool allow_ts = false;  /* Task switching lock */
 
+
 static inline void lock_ts()   { allow_ts = false; }
 static inline void unlock_ts() { allow_ts = true; }
+
+void irq_enable() {
+
+  if (!irq_disable_counter) { return; }
+  if (!--irq_disable_counter) { sti(); }
+}
+
+void irq_disable() { 
+  
+  if (!irq_disable_counter++) { cli(); }
+} 
 
 /* Initialize all task lists */
 void setup_multitasking() {
@@ -80,7 +92,7 @@ thread_t* create_thread_handler(uint32_t eip, void* params, uint8_t policy){
 /* Create a mew task handler */
 tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, uint8_t policy) { 
 
-  cli();
+  irq_disable();
   lock_ts();
   
   tcb_t* new_task = kmalloc(sizeof(tcb_t));
@@ -128,7 +140,7 @@ tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, 
   task_list_insert_back(available_tasks[new_task->policy], new_task);
  
   unlock_ts();
-  sti();
+  irq_enable();
   
   return new_task;
 }
@@ -168,7 +180,7 @@ void run_task() {
   
   if (!next_task) { return; }
 
-  cli();
+  irq_disable();
 
   next_task->state = TASK_ACTIVE;
   
@@ -183,7 +195,7 @@ void task_change_state(tcb_t* task, uint16_t state) {
 void task_block(uint32_t new_state) {
  
   lock_ts();
-  cli();
+  irq_disable();
 
   /* Insert task to the blocked list */
   switch (new_state) {
@@ -193,9 +205,9 @@ void task_block(uint32_t new_state) {
     /* Invalid new states */
     case TASK_WAITING: 
     case TASK_ACTIVE: 
-    case TASK_AVAILABLE: sti(); return;
+    case TASK_AVAILABLE: irq_enable(); return;
   }
-  
+
   /* Update state */
   task_change_state(running_task, new_state);
 
@@ -205,14 +217,13 @@ void task_block(uint32_t new_state) {
 
   /* Task can't run anymore, find another task */
   schedule();
-
-  sti();
 }
 
 /* Unblock task from any block list, and make it available */
 void task_unblock(tcb_t* task) {
  
-  cli();
+  if (task == 0xc040303f) { PRINT("HELLO"); }
+  irq_disable();
   lock_ts();
  
   /* Remove from blocked list */
@@ -223,44 +234,44 @@ void task_unblock(tcb_t* task) {
     /* Invalid previous states */
     case TASK_WAITING:
     case TASK_ACTIVE: 
-    case TASK_AVAILABLE: sti(); return;
+    case TASK_AVAILABLE: irq_enable(); return;
   }
 
   task_change_state(task, TASK_AVAILABLE);
- 
+
   /* Insert task to the waitlist */
   task_list_insert_back(available_tasks[task->policy], task);
   
-  sti();
+  irq_enable();
   unlock_ts();
 }
 
 /* Go over all sleeping tasks and reduce their nap time */
 void manage_sleeping_tasks() {
     
-    cli();
-
+    irq_disable();
+    
     tcb_t* task = sleeping_tasks->head;
-  
+ 
     while (task) {
       if (time_counter >= task->naptime) { task->naptime = 0; task_unblock(task); }   // Naptime over, task is ready to run
       task = task->flink;
     }
 
-    sti();
+    irq_enable();
 }
 
 /* Decrease the time slice for the running program, if the time slice ended, block the task and run another one */
 void manage_time_slice() {
   
-  cli();
+  irq_disable();
   if (!--running_task->time_slice) { sleep(5); }
-  sti();
+  irq_enable();
 }
 
-/* Assign the duration to sleep for a task */
+/* Assign the desired time to wake up for a task */
 void set_naptime(unsigned long time) {
-  running_task->naptime = time; 
+  running_task->naptime = time;   
 }
 
 /* Insert a task to a task list's head */
@@ -306,7 +317,7 @@ void schedule() {
   tcb_t* high_policy1_task = schedule_priority_task(available_tasks[POLICY_1]->head);
 
   tcb_t* task = high_policy0_task ? high_policy0_task : high_policy1_task; 
- 
+
   /* Decrease priority if we got a priority task, if priority is 0 get it back to it's desired level */
   if (task) { if (!--task->priority) { task->priority = task->req_priority; } }
   else { task = schedule_time_slice_task(); }  /* Find a task from lower level policies */
@@ -332,7 +343,7 @@ tcb_t* schedule_priority_task(tcb_t* list) {
     if (task->priority > highest_priority_task->priority) { highest_priority_task = task; }
     task = task->flink;
   }
-  
+ 
   return highest_priority_task;
 }
 

@@ -69,6 +69,8 @@ void init_irq() {
   idt_create_gate(47, (uint32_t)irq15, 0x8, IDT_GATE);
 }
 
+
+
 /* Handle a default interrupt request */
 void irq_handler(isr_stack_t* stack) {
 
@@ -87,15 +89,14 @@ void irq_handler(isr_stack_t* stack) {
 
   /* Handle task switching */
   if (index == 0x8) {
-    
+   
+    allow_ts = false; 
     /* Wake up tasks */
     manage_sleeping_tasks();
     
-    if (scheduler_task != running_task) {
-      
-      /* Decrease the tasks's time slice */
-      manage_time_slice();
-    }  
+    /* Decrease the tasks's time slice */
+    if (scheduler_task != running_task) { manage_time_slice(); } 
+    allow_ts = true;
   }
   else { sti(); }
 }
