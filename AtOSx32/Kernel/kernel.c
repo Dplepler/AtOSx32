@@ -15,12 +15,12 @@ extern task_list_t* sleeping_tasks;
 
 void thread2(void* params) {
 
-  PRINT("HELLO");
+  for (;;) { PRINT("HELLO"); sleep(500); }
 }
 
 void thread3(void* params) {
 
-  PRINT("WHATS UP");
+  for(;;) { PRINT("WHATS UP"); sleep(1000); }
 }
 
 void thread(void* params) {
@@ -29,7 +29,7 @@ void thread(void* params) {
   create_thread_handler((uint32_t)thread2, NULL, POLICY_0);
   create_thread_handler((uint32_t)thread3, NULL, POLICY_0);
 
-  while(1) { //PRINTN(1); }
+  while(1) { //PRINTN(1); 
   }
 }
 
@@ -82,9 +82,9 @@ int kmain(void) {
   init_cleaner_task();
   
 
-  create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);
-  create_process_handler(create_address_space(), (uint32_t)tongue, NULL, POLICY_0);
-  //create_process_handler(create_address_space(), (uint32_t)thread, NULL, POLICY_0);
+ // create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);
+  //create_process_handler(create_address_space(), (uint32_t)tongue, NULL, POLICY_0);
+  create_process_handler(create_address_space(), (uint32_t)thread, NULL, POLICY_0);
   
   while(1) { cli(); schedule(); sti(); }
   
