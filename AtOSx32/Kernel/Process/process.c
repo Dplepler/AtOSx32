@@ -213,8 +213,9 @@ void task_block(uint32_t new_state) {
 
   running_task->time_slice = DEFAULT_TIME_SLICE;  
   
+  irq_enable();
   unlock_ts();
-
+  
   /* Task can't run anymore, find another task */
   schedule();
 }
@@ -222,7 +223,6 @@ void task_block(uint32_t new_state) {
 /* Unblock task from any block list, and make it available */
 void task_unblock(tcb_t* task) {
  
-  if (task == 0xc040303f) { PRINT("HELLO"); }
   irq_disable();
   lock_ts();
  
@@ -252,7 +252,7 @@ void manage_sleeping_tasks() {
     irq_disable();
     
     tcb_t* task = sleeping_tasks->head;
- 
+
     while (task) {
       if (time_counter >= task->naptime) { task->naptime = 0; task_unblock(task); }   // Naptime over, task is ready to run
       task = task->flink;
@@ -289,15 +289,17 @@ void task_list_insert_back(task_list_t* list, tcb_t* task) {
 /* Abosolutely stunning Linus-inspired code */
 void task_list_remove_task(task_list_t* list, tcb_t* task) {
   
-  list->tail = list->head;
+  if (!list->head) { return; }
+
   tcb_t** indirect = &list->head;
 
-  while ((*indirect) != task) { indirect = (tcb_t**)&((*indirect)->flink); list->tail = *indirect; }
+  while ((*indirect) != task) { if (!((*indirect)->flink)) { return; } indirect = (tcb_t**)&((*indirect)->flink); }
 
   *indirect = task->flink;
-  
+
+  list->tail = list->head;
+  if (!list->head) { return; }
   while (list->tail->flink) { list->tail = list->tail->flink; }
-  if (!list->head) { list->tail = NULL; }
 }
 
 /* Assign an id to a task */

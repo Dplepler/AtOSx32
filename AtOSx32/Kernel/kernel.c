@@ -55,9 +55,8 @@ int kmain(void) {
   setup_clock();
   init_multitasking();
 
-  //create_process_handler(create_address_space(), (uint32_t)thread, NULL, POLICY_0);
-
   create_process_handler(create_address_space(), (uint32_t)thread, NULL, POLICY_0);
+
    
   
   while(1) { cli(); schedule(); sti(); }
