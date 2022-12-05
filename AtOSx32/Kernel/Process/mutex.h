@@ -5,7 +5,7 @@
 
 typedef struct _MUTEX_LOCK_STRUCT {
 
-  task_list_t wait_list; 
+  task_list_t* wait_list; 
   bool aquired;
 
 } mutex_t;

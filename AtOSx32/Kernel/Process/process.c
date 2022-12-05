@@ -158,7 +158,8 @@ void init_cleaner_task() {
 /* Let the cleaner task clear the tasks information */
 void terminate_task() {
 
-  irq_disable(); 
+  irq_disable();
+  NL;
   PRINTNH(running_task->pid);
   PRINT(" TERMINATED\n\r");
 
@@ -167,7 +168,7 @@ void terminate_task() {
   
   
   irq_enable();
-  while(1) {}
+
   /* We can't cleanup the task's stack just yet, we're still in it, so signal to the next task to do so */
   task_block(TASK_TERMINATED);
 }
@@ -197,6 +198,7 @@ void task_cleanup(tcb_t* task) {
   free_aligned((void*)(task->esp0 - STACK_SIZE));
   if (task->type == PROCESS && task->address_space) { free(task->address_space); }
   free(task);
+  task = NULL;
 } 
 
 /* Run the task pointed to by the task buffer */
