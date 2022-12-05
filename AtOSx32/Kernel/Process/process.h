@@ -96,6 +96,7 @@ void irq_disable();
 
 void setup_multitasking();
 void init_multitasking();
+void init_cleaner_task();
 void run_task();
 void terminate_task();
 void init_task(tcb_t* task, void* params);

@@ -51,7 +51,7 @@ void terminal_putentryat(char c, uint8_t color, const uint8_t x, const uint8_t y
 void terminal_putchar(char c);
 void terminal_put_colored_char_at(char c, uint8_t color, const uint8_t x, const uint8_t y);
 void terminal_write(const char* data, size_t amount);
-void __attribute__((stdcall)) terminal_write_string(const char* data);
+void terminal_write_string(const char* data);
 void terminal_write_int(int integer, size_t base);
 void terminal_draw_rec(const uint8_t x, const uint8_t y, const uint8_t destx, const uint8_t desty, const vga_color color);
 void terminal_draw_background(const vga_color color);

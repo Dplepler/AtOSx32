@@ -145,27 +145,51 @@ tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, 
   return new_task;
 }
 
+
+void init_cleaner_task() {
+
+  irq_disable();
+  cleaner_task = create_process_handler(create_address_space(), (uint32_t)task_cleaner, NULL, POLICY_0);
+  
+  irq_enable();
+}
+
+
 /* Let the cleaner task clear the tasks information */
 void terminate_task() {
 
-  /* We can't cleanup the task's stack just yet, we're still in it, so signal to the next task to do so */
-  task_block(TASK_TERMINATED);
+  irq_disable(); 
+  PRINTNH(running_task->pid);
+  PRINT(" TERMINATED\n\r");
 
   /* Schedule the cleaner to free up the process' memory */
   if (cleaner_task->state == TASK_BLOCKED) { task_unblock(cleaner_task); }
+  
+  
+  irq_enable();
+  while(1) {}
+  /* We can't cleanup the task's stack just yet, we're still in it, so signal to the next task to do so */
+  task_block(TASK_TERMINATED);
 }
 
 /* Process to clean up after terminated tasks */
 void task_cleaner() {
 
-  tcb_t* task = terminated_tasks->head;
+  tcb_t* task = NULL;
 
-  while (task) {
-    task_cleanup(task);
-    task = terminated_tasks->head = task->flink;
+  for (;;) {
+    
+    task = terminated_tasks->head;
+
+    while (task) {
+      task_cleanup(task);
+      task = task->flink;
+    }
+
+    terminated_tasks->head = terminated_tasks->tail = NULL;
+
+    task_block(TASK_BLOCKED);
   }
-
-  task_block(TASK_BLOCKED);
 }
 
 /* Free up a task's allocated data */
@@ -328,7 +352,7 @@ void schedule() {
   else { task_list_remove_task(available_tasks[task->policy], task); }  /* Remove task from available task */
 
   /* Idle mode couldn't find new task, stay idle */
-  if (running_task == scheduler_task && task == scheduler_task) { next_task = NULL; unlock_ts(); }
+  if (running_task == task) { next_task = NULL; unlock_ts(); }
   else { next_task = task; }  /* Update task buffer (run next task) */
 
   if (next_task) { run_task(); }

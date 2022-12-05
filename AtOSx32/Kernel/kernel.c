@@ -15,22 +15,46 @@ extern task_list_t* sleeping_tasks;
 
 void thread2(void* params) {
 
-  while(1) { PRINTN(2); sleep(1000); }
+  PRINT("HELLO");
 }
 
 void thread3(void* params) {
 
-  while(1) { PRINTN(3); sleep(1000); }
+  PRINT("WHATS UP");
 }
 
 void thread(void* params) {
 
   
   create_thread_handler((uint32_t)thread2, NULL, POLICY_0);
-  //create_thread_handler((uint32_t)thread3, NULL, POLICY_0);
+  create_thread_handler((uint32_t)thread3, NULL, POLICY_0);
 
-  while(1) { PRINTN(1);
-    sleep(200); }
+  while(1) { //PRINTN(1); }
+  }
+}
+
+
+void clock() {
+  while (true) {
+    terminal_draw_rec(0, 0, 9, 1, 8); 
+    cursor_update(0, 0);
+    cmos_time time = read_rtc();
+    PRINT(ttoa(time));
+    sleep(1000);
+  }  
+}
+
+void tongue() {
+  
+
+  for (;;)  {
+    terminal_draw_rec(31, 11, 49, 12, VGA_COLOR_LIGHT_RED);
+    sleep(100);
+    terminal_draw_rec(31, 11, 49, 12, VGA_COLOR_CYAN);
+    sleep(100);
+  }
+
+
 }
 
 int kmain(void) {
@@ -55,19 +79,15 @@ int kmain(void) {
   setup_clock();
   init_multitasking();
 
-  create_process_handler(create_address_space(), (uint32_t)thread, NULL, POLICY_0);
+  init_cleaner_task();
+  
 
-   
+  create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);
+  create_process_handler(create_address_space(), (uint32_t)tongue, NULL, POLICY_0);
+  //create_process_handler(create_address_space(), (uint32_t)thread, NULL, POLICY_0);
   
   while(1) { cli(); schedule(); sti(); }
   
-  /* while (true) {
-    terminal_draw_rec(0, 0, 9, 1, 8); 
-    cursor_update(0, 0);
-    cmos_time time = read_rtc();
-    PRINT(ttoa(time));
-    sleep(1000);
-  } */ 
 
   return 0;
 }

@@ -178,7 +178,7 @@ void terminal_write(const char* data, size_t amount) {
 terminal_write_string prints a character array to the screen
 Input: Character array to print
 */
-void __attribute__((stdcall)) terminal_write_string(const char* data) {
+void terminal_write_string(const char* data) {
   terminal_write(data, strl(data));
 }
 
@@ -211,7 +211,7 @@ void perry(const uint8_t x, const uint8_t y) {
   terminal_draw_rec(x, y, x + 30, y + 10, VGA_COLOR_CYAN);
   terminal_draw_rec(x + 3, y + 2, x + 7, y + 4, VGA_COLOR_BLACK);
   terminal_draw_rec(x + 23, y + 2, x + 27, y + 4, VGA_COLOR_BLACK);
-  terminal_draw_rec(x + 1, y + 5, x + 29, y + 6, VGA_COLOR_BROWN);
+  terminal_draw_rec(x + 1, y + 5, x + 29, y + 6, VGA_COLOR_BROWN);  
 }
 
 void terminal_display_error(const char* error) {

@@ -2,6 +2,7 @@
 [extern next_task]
 [extern init_task]
 [extern allow_ts]
+[extern terminate_task]
 
 [global switch_task]
 
@@ -44,6 +45,8 @@ switch_task:
 
   pop eax     ; Normal task switching, popping off the last EIP
   mov dword [next_task], 0
+  
   sti
-  jmp eax
+  call eax
+  jmp terminate_task 
 
