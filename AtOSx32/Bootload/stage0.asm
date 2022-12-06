@@ -5,29 +5,36 @@
 jmp short stage0_start
 nop
 
-;|====================================OEM==============================================|
-OEMLabel              db "ATOSBOOT"    ;                                               |
-BytesPerSector        dw 0x200         ; 512, standard                                 |
-SectorsPerCluster     db 0x8                                                           |
-ReservedSectors       dw 0x2           ; Stage0 + Bootloader take 2 sectors            |
-FATables              db 0x2           ; 1 Real fat table & reserved table for recovery|
-RootDirEntries        dw 0x0           ; Unused                                        |
-LogicalSectorsWord    dw 0x0           ; Stored at 0x20 (Logical Sectors entry)        |
-MediaType             db 0xF8          ; Hard Disk                                     |
-SectorsPerFat         dw 0x0           ; Unused                                        |
-SectorsPerTrack       dw 0x2           ;                                               |
-HeadCount             dw 0x2           ; Disk sides                                    |
-HiddenSectors         dd 0x2           ; Sectors until first FAT                       |
-LogicalSectors        dd               ;                                               |
-DriveNumber           db 0x0           ;                                               |
-WindowsReserved       db 0x0           ;                                               |
-Signature             db 0x28          ; Hard Drive                                    |
-VolumeID              dd 0x0           ;                                               |
-VolumeLabel           db "ATOS       " ;                                               |
-SystemIdentifier      db "FAT16   "    ;                                               |
+;|====================================OEM===============================================|
+OEMLabel              db "ATOSBOOT"    ;                                                |
+BytesPerSector        dw 0x200         ; 512, standard                                  |
+SectorsPerCluster     db 0x8           ; Cluster = 0x100 bytes                          |
+ReservedSectors       dw 0x2           ; Stage0 + Bootloader take 2 sectors             |
+FATables              db 0x2           ; 1 Real fat table & reserved table for recovery |
+RootDirEntries        dw 0x0           ; Unused                                         |
+LogicalSectors        dw 0xF000        ; 30mb of memory                                 |
+MediaType             db 0xF8          ; Hard Disk                                      |
+SectorsPerFatUDW      dw 0x0           ; Unused                                         |
+SectorsPerTrack       dw 0x2           ; Idek why                                       |
+HeadCount             dw 0x2           ; Disk sides                                     |
+HiddenSectors         dd 0x2           ; Sectors until first FAT                        |
+LogicalSectorsDD      dd 0x0           ; Stored in the other LogicalSectors field       |
+SectorsPerFat         dd 0x3C00        ; 30mb/SectorSize/32bits = 0x3C00                |
+Flags                 dw 0x0           ; No idea what to put here                       |
+FATVersion            dw 0x0           ; No idea as well                                |
+RootCluster           dd 0x2           ; Where our root directory will start            |
+FSinfoSector          dw 0x10          ; Somewhere in memory                            |
+BootBackupSector      dw 0x0           ; Who cares                                      |
+Reserved1             dd 0x0           ; Unused                                         |
+Reserved2             dd 0x0           ; Unused                                         |
+Reserved3             dd 0x0           ; Also, unused                                   |
+DriveNumber           db 0x80          ; Hard drive (0x80)                              |
+WindowsReserved       db 0x0           ; Unused                                         | 
+Signature             db 0x28          ; Hard Drive                                     |
+VolumeID              dd 0x0           ; Unused                                         |
+VolumeLabel           db "ATOS       " ; 11 random bytes                                |
+SystemIdentifier      db "FAT16   "    ; 8 random bytes                                 |
 ;|======================================================================================|
-
-
 
 
 
