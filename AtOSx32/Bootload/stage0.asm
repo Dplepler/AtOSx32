@@ -1,6 +1,36 @@
 [org 7C00h] 		; Set location counter
 [bits 16]
 
+; BPB
+jmp short stage0_start
+nop
+
+;|====================================OEM==============================================|
+OEMLabel              db "ATOSBOOT"    ;                                               |
+BytesPerSector        dw 0x200         ; 512, standard                                 |
+SectorsPerCluster     db 0x8                                                           |
+ReservedSectors       dw 0x2           ; Stage0 + Bootloader take 2 sectors            |
+FATables              db 0x2           ; 1 Real fat table & reserved table for recovery|
+RootDirEntries        dw 0x0           ; Unused                                        |
+LogicalSectorsWord    dw 0x0           ; Stored at 0x20 (Logical Sectors entry)        |
+MediaType             db 0xF8          ; Hard Disk                                     |
+SectorsPerFat         dw 0x0           ; Unused                                        |
+SectorsPerTrack       dw 0x2           ;                                               |
+HeadCount             dw 0x2           ; Disk sides                                    |
+HiddenSectors         dd 0x2           ; Sectors until first FAT                       |
+LogicalSectors        dd               ;                                               |
+DriveNumber           db 0x0           ;                                               |
+WindowsReserved       db 0x0           ;                                               |
+Signature             db 0x28          ; Hard Drive                                    |
+VolumeID              dd 0x0           ;                                               |
+VolumeLabel           db "ATOS       " ;                                               |
+SystemIdentifier      db "FAT16   "    ;                                               |
+;|======================================================================================|
+
+
+
+
+
 BOOT_OFFSET equ 7E00h
 
 stage0_start:
