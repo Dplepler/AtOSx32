@@ -11,15 +11,14 @@ BytesPerSector        dw 0x200         ; 512, standard                          
 SectorsPerCluster     db 0x8           ; Cluster = 0x100 bytes                          |
 ReservedSectors       dw 0x2           ; Stage0 + Bootloader take 2 sectors             |
 FATables              db 0x1           ; 1 Real fat                                     |
-RootDirEntries        dw 0x0           ; Unused                                         |
-LogicalSectors        dw 0xF000        ; 30mb of memory                                 |
+RootDirEntries        dw 0x200         ; Unused                                         |
+LogicalSectors        dw 0xFFFF        ; 30mb of memory                                 |
 MediaType             db 0xF8          ; Hard Disk                                      |
-SectorsPerFatDW       dw 0x0           ; Unused                                         |
+SectorsPerFat         dw 0xFF          ; Sectors per FAT                                |
 SectorsPerTrack       dw 0x2           ; Idek                                           |
 HeadCount             dw 0x2           ; Disk sides                                     |
 HiddenSectors         dd 0x2           ; Sectors until first FAT                        |
 LogicalSectorsDD      dd 0x0           ; Stored in the other LogicalSectors field       |
-SectorsPerFat         dd 0x3C00        ; 30mb/SectorSize/32bits = 0x3C00                |
 DriveNumber           db 0x80          ; Hard drive (0x80)                              |
 WindowsReserved       db 0x0           ; Unused                                         | 
 Signature             db 0x28          ; Hard Drive                                     |
