@@ -1,0 +1,20 @@
+#ifndef FS_H
+#define FS_H
+
+#define HIDDEN_SECTORS 0x2
+#define SECTOR_SIZE    0x200
+#define CLUSTER_SIZE (SECTOR_SIZE * 8)
+#define SYSTEM_SECTORS 0xFFFF
+#define SECTORS_IN_FAT (SYSTEM_SECTORS * 2 / SECTOR_SIZE) 
+
+#define FAT_OFFSET (HIDDEN_SECTORS * SECTOR_SIZE)
+
+
+
+
+
+
+
+
+
+#endif
