@@ -8,10 +8,10 @@ nop
 ;|====================================OEM===============================================|
 OEMLabel              db "ATOSBOOT"    ;                                                |
 BytesPerSector        dw 0x200         ; 512, standard                                  |
-SectorsPerCluster     db 0x8           ; Cluster = 0x100 bytes                          |
+SectorsPerCluster     db 0x1           ; Cluster = sector                               |
 ReservedSectors       dw 0x2           ; Stage0 + Bootloader take 2 sectors             |
 FATables              db 0x1           ; 1 Real fat                                     |
-RootDirEntries        dw 0x200         ; Unused                                         |
+RootDirEntries        dw 0x200         ; Directorys in root                             |
 LogicalSectors        dw 0xFFFF        ; 30mb of memory                                 |
 MediaType             db 0xF8          ; Hard Disk                                      |
 SectorsPerFat         dw 0xFF          ; Sectors per FAT                                |

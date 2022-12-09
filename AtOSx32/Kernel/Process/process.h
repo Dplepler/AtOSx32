@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "Memory/heap.h"
+#include "System/clock.h"
 
 #define INIT_KERNEL_STACK 0xC03FE000
 #define STACK_SIZE        0x1000
