@@ -7,7 +7,7 @@
 #define ATA_READ  0x20
 #define ATA_WRITE 0x30
 
-#define BUFFER_SIZE  0xFF
+#define BUFFER_SIZE  0x100
 #define BUFFER_READY 0b1000
 
 typedef enum ATA_PORTS_ENUM {

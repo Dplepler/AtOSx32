@@ -29,7 +29,9 @@ void ata_read(uint32_t addr, uint8_t sector_count) {
   while (!(inportb(PORT_COMMAND) & BUFFER_READY)) { }  
   
   /* Read to buffer */
-  for (uint16_t i = 0; i < 256; i++) { buffer[i] = inportw(PORT_DATA_PRIMARY); }
+  for (uint16_t i = 0; i < BUFFER_SIZE; i++) { buffer[i] = inportw(PORT_DATA_PRIMARY); }
+
+  io_delay();
 }
 
 void ata_write(uint32_t addr, uint8_t sector_count) {
@@ -50,16 +52,13 @@ void ata_write(uint32_t addr, uint8_t sector_count) {
   /* Wait until buffer is ready */
   while (!(inportb(PORT_COMMAND) & BUFFER_READY)) { }  
   
-  uint16_t tmp = 0;
-
   /* Read from buffer to disk */
-  for (uint16_t i = 0; i < 512; i++) {
+  for (uint16_t i = 0; i < BUFFER_SIZE; i++) {
     outportw(PORT_DATA_PRIMARY, buffer[i]);
     io_delay();
-    //PRINT("");
-    //outportb(PORT_COMMAND, 0xE7);
-  } 
+    outportw(PORT_DATA_PRIMARY, buffer[i]);
+    io_delay();
+  }
 
-  
 }
 
