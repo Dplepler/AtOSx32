@@ -56,6 +56,17 @@ unsigned long clock_time() {
   return ~0;
 }
 
+
+void singetasking_sleep(unsigned long milisec) {
+  
+  if (!milisec) { return; }
+  
+  unsigned long prev = time_counter;
+  while (time_counter != prev + HERTZ(milisec)) { }
+}
+
+
+
 /* Check if the CMOS is currently busy */
 bool cmos_update_in_progress() {
   outportb(CMOS_REGISTER, 0xA);

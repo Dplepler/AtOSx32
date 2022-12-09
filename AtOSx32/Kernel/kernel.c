@@ -12,7 +12,7 @@ extern task_list_t** available_tasks;
 
 extern task_list_t* sleeping_tasks;
 
-
+extern uint16_t buffer[];
 
 void clock() {
   while (true) {
@@ -57,22 +57,25 @@ int kmain(void) {
   setup_clock();
   init_multitasking();
 
+    
   
- ata_read(1, 0);  
-  
+  for (uint16_t i = 0; i < 512; i++) { (((uint8_t*)buffer)[i]) = 0x69; }
+  ata_write(1, 1);
+  for (uint16_t i = 0; i < 512; i++) { (((uint8_t*)buffer)[i]) = 0x11; }
+  ata_read(0, 1);
 
 
-
-
+  for (uint16_t i = 0; i < 512; i++) {
+  PRINTNH(((uint8_t*)buffer)[i]); }
   //init_cleaner_task();
 
    /* create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);
   create_process_handler(create_address_space(), (uint32_t)tongue, NULL, POLICY_0); */
 
 
+  //while(1) { cli(); schedule(); sti(); }
 
   
-  //while(1) { cli(); schedule(); sti(); }
   
 
   return 0;

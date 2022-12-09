@@ -2,10 +2,13 @@
 #define ATA_H
 
 #include "System/hal.h"
+#include <stdbool.h>
 #include "kernel_screen.h"
+#define ATA_READ  0x20
+#define ATA_WRITE 0x30
 
-#define SECTOR_SIZE 512
-
+#define BUFFER_SIZE  0xFF
+#define BUFFER_READY 0b1000
 
 typedef enum ATA_PORTS_ENUM {
 
@@ -28,7 +31,8 @@ typedef enum ATA_PORTS_ENUM {
 
 
 
-void ata_read(uint8_t sector_count, uint32_t addr);
-
+void ata_read(uint32_t addr, uint8_t sector_count);
+void ata_write(uint32_t addr, uint8_t sector_count);
+void io_delay();
 
 #endif
