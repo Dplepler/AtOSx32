@@ -18,6 +18,42 @@ typedef enum ATA_PORTS_ENUM {
 } ata_port;
 
 
+typedef struct _ATA_DEVICE_INFO_STRUCT {
+
+
+  union {
+    uint16_t lba_low;
+    uint16_t sector_number;
+  };
+
+  union {
+    uint16_t lba_mid;
+    uint16_t cylinder_low;
+  };
+
+  union {
+    uint16_t lba_high;
+    uint16_t cylinder_high;
+  };
+
+  union {
+    uint16_t head;
+    uint16_t drive;
+  };
+
+  union {
+    uint16_t command;
+    uint16_t status;
+  };
+
+  union {
+    uint16_t control;
+    uint16_t status_alternative;
+  };
+
+
+} __attribute__((packed)) ata_device_t;
+
 
 
 
