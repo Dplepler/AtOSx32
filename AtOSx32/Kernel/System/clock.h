@@ -11,6 +11,8 @@
 
 #define YEAR 2022
 
+#define ISRAEL_BOOST 2
+
 
 /*-------------------------------
 Date formats (Register 0xB)     |

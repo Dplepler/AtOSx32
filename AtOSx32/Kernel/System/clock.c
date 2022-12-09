@@ -80,6 +80,8 @@ cmos_time rtc_get_time() {
   outportb(CMOS_REGISTER, 0x9);
   rtc.year = inportb(CMOS_RW);
 
+  rtc.hour = ((rtc.hour + ISRAEL_BOOST) % 24);  /* ISRAEL POWER!!! */
+
   return rtc;
 }
 
