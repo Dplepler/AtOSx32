@@ -2,65 +2,33 @@
 #define ATA_H
 
 #include "System/hal.h"
+#include "kernel_screen.h"
+
+#define SECTOR_SIZE 512
+
 
 typedef enum ATA_PORTS_ENUM {
 
 
-  PORT_DATA           = 0x1F0,
-  PORT_DRIVE_HEAD     = 0x1F6,
+  PORT_DATA_PRIMARY   = 0x1F0,
+  PORT_FEATURES       = 0x1F1,
   PORT_SECTOR_COUNT   = 0x1F2,
-  PORT_SECTOR_NUMBER  = 0x1F3,
-  PORT_CYLINDER_LOW   = 0x1F4,
-  PORT_CYLINDER_HIGH  = 0x1F5,
+  PORT_LBA_LOW        = 0x1F3,
+  PORT_LBA_MID        = 0x1F4,
+  PORT_LBA_HIGH       = 0x1F5,
+  PORT_DRIVE_HEAD     = 0x1F6,
   PORT_COMMAND        = 0x1F7,
-  PORT_ALT_STATUS     = 0x3F6
+  
+  PORT_DATA_SECONDARY = 0x170,
+  
+  PORT_ALT_STATUS_PRIMARY   = 0x3F6,
+  PORT_ALT_STATUS_SECONDARY = 0x376,
 
 } ata_port;
 
 
-typedef struct _ATA_DEVICE_INFO_STRUCT {
 
-
-  union {
-    uint16_t lba_low;
-    uint16_t sector_number;
-  };
-
-  union {
-    uint16_t lba_mid;
-    uint16_t cylinder_low;
-  };
-
-  union {
-    uint16_t lba_high;
-    uint16_t cylinder_high;
-  };
-
-  union {
-    uint16_t head;
-    uint16_t drive;
-  };
-
-  union {
-    uint16_t command;
-    uint16_t status;
-  };
-
-  union {
-    uint16_t control;
-    uint16_t status_alternative;
-  };
-
-
-} __attribute__((packed)) ata_device_t;
-
-
-
-
-
-
-
-
+void ata_read(uint8_t sector_count, uint32_t addr);
 
 
 #endif

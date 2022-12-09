@@ -1,4 +1,3 @@
-#include "Drivers/kernel_keyboard.h"
 #include "Tables/gdt.h"
 #include "Tables/interrupts.h"
 #include "Tables/irqs.h"
@@ -6,6 +5,7 @@
 #include "System/clock.h"
 #include "Tables/tss.h"
 #include "Process/process.h"
+#include "Drivers/ATA.h"
 
 extern tcb_t* running_task;
 extern task_list_t** available_tasks;
@@ -57,13 +57,22 @@ int kmain(void) {
   setup_clock();
   init_multitasking();
 
-  init_cleaner_task();
+  
+ ata_read(1, 0);  
   
 
-  create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);
-  create_process_handler(create_address_space(), (uint32_t)tongue, NULL, POLICY_0);
+
+
+
+  //init_cleaner_task();
+
+   /* create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);
+  create_process_handler(create_address_space(), (uint32_t)tongue, NULL, POLICY_0); */
+
+
+
   
-  while(1) { cli(); schedule(); sti(); }
+  //while(1) { cli(); schedule(); sti(); }
   
 
   return 0;
