@@ -1,6 +1,6 @@
 #include "ATA.h"
 
-uint16_t buffer[BUFFER_SIZE] = { 0 };
+uint16_t sector_buffer[BUFFER_SIZE] = { 0 };
 
 void io_delay() {
 
@@ -10,9 +10,11 @@ void io_delay() {
     inportb(PORT_ALT_STATUS_PRIMARY);
 }
 
-void ata_read(uint32_t addr, uint8_t sector_count) {
+/* Read from specified address on the disk to the sector_buffer */
+void ata_read_sector(uint32_t addr) {
 
-  outportb(PORT_SECTOR_COUNT, sector_count);
+  /* Read one sector */
+  outportb(PORT_SECTOR_COUNT, 0x1);
 
   /* Choose address */
   outportb(PORT_LBA_LOW,  (uint8_t)addr);          // First byte
@@ -29,14 +31,16 @@ void ata_read(uint32_t addr, uint8_t sector_count) {
   while (!(inportb(PORT_COMMAND) & BUFFER_READY)) { }  
   
   /* Read to buffer */
-  for (uint16_t i = 0; i < BUFFER_SIZE; i++) { buffer[i] = inportw(PORT_DATA_PRIMARY); }
+  for (uint16_t i = 0; i < BUFFER_SIZE; i++) { sector_buffer[i] = inportw(PORT_DATA_PRIMARY); }
 
   io_delay();
 }
 
-void ata_write(uint32_t addr, uint8_t sector_count) {
+/* Write from the sector_buffer to a specified addr on the disk */
+void ata_write_sector(uint32_t addr) {
 
-  outportb(PORT_SECTOR_COUNT, sector_count);
+  /* Write one sector */
+  outportb(PORT_SECTOR_COUNT, 0x1);
 
   /* Choose address */
   outportb(PORT_LBA_LOW,  (uint8_t)addr);          // First byte
@@ -52,11 +56,11 @@ void ata_write(uint32_t addr, uint8_t sector_count) {
   /* Wait until buffer is ready */
   while (!(inportb(PORT_COMMAND) & BUFFER_READY)) { }  
   
-  /* Read from buffer to disk */
+  /* Write from buffer to disk */
   for (uint16_t i = 0; i < BUFFER_SIZE; i++) {
-    outportw(PORT_DATA_PRIMARY, buffer[i]);
+    outportw(PORT_DATA_PRIMARY, sector_buffer[i]);
     io_delay();
-    outportw(PORT_DATA_PRIMARY, buffer[i]);
+    outportw(PORT_DATA_PRIMARY, sector_buffer[i]);
     io_delay();
   }
 

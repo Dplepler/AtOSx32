@@ -31,8 +31,8 @@ typedef enum ATA_PORTS_ENUM {
 
 
 
-void ata_read(uint32_t addr, uint8_t sector_count);
-void ata_write(uint32_t addr, uint8_t sector_count);
+void ata_read_sector(uint32_t addr);
+void ata_write_sector(uint32_t addr);
 void io_delay();
 
 #endif
