@@ -9,6 +9,16 @@ void* memset(void* addr, uint8_t c, size_t n) {
   return addr;
 }
 
+void* memsetw(void* addr, uint16_t val, size_t n) {
+  
+
+  for (uint32_t i = 0; i < n / 2; i++) {
+    ((uint16_t*)addr)[i] = val;
+  }
+
+  return addr;
+}
+
 void memcpy(void* s1, const void* s2, size_t n) {
   for (; n > 0; n--) { *(uint8_t*)s1++ = *(uint8_t*)s2++; }
 }

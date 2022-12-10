@@ -9,7 +9,7 @@ clean:
 	rm -rf  $(shell find Bootload/ -type f -name '*.bin')
 
 DiskImages/AtOS.img: makeImg
-	qemu-system-x86_64 DiskImages/AtOS.img
+	qemu-system-x86_64 -drive file=DiskImages/AtOS.img,format=raw
 
 DiskImages/AtOSDebug.img: makeImg
 	qemu-system-x86_64 -hda DiskImages/AtOS.img -monitor stdio

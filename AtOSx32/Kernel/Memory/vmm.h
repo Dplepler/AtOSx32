@@ -34,6 +34,7 @@ enum PAGE_FLAGS {
 };
 
 void* memset(void* addr, uint8_t c, size_t n);
+void* memsetw(void* addr, uint16_t val, size_t n);
 void  memcpy(void* s1, const void* s2, size_t n);
 
 pgulong_t* page_physical_address(pgulong_t* addr);

@@ -36,7 +36,7 @@ void outportw(uint16_t port, uint16_t value) {
 }
 
 
-void outportl(uint16_t port, uint16_t value) {  
+void outportl(uint16_t port, uint32_t value) {  
   __asm__ __volatile__ ("outl %%eax, %%dx": :"d" (port), "a" (value));
 }
 

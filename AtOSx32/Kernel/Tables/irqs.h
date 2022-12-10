@@ -8,6 +8,7 @@
 extern tcb_t* scheduler_task;
 extern tcb_t* running_task;
 extern tcb_t* next_task;
+
 extern bool allow_ts;
 
 enum PIC_TYPES {
