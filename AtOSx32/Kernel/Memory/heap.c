@@ -1,7 +1,7 @@
 #include "heap.h"
 
 static heap_header_t* free_blocks[20];      // Each index represents 2^index allocated pages size
-static uint8_t     complete_pages[20];   // Keep track of unused pages so we can free some if there are too many
+static uint8_t     complete_pages[20];      // Keep track of unused pages so we can free some if there are too many
 
 /* Unused memory blocks will be indexed to the free_blocks array based on how many pages they take
    2^index <= pages < 2^(index+1) */
