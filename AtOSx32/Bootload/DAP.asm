@@ -23,10 +23,10 @@ DAP_START:
 		dw INIT_KERNEL_OFFSET
 		dw 0
 
-	; Write third disk sector, where kernel is located on the disk
+	; Load from disk, 101h's sector (after FAT and boot)
 	.DAP_LBA:
 
-		dd 2
+		dd 101h
 		dd 0
 
 DAP_END:	

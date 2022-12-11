@@ -52,14 +52,14 @@ int kmain(void) {
   setup_clock();
   init_multitasking();
 
-  //init_fat();
-  //PRINT("HI");
-
-  unsigned char buffer[512 * 5];
-  memsetw(buffer, 0x1234, 512 * 5);
-
-  ata_write(0x1, 0x5, buffer, 512 * 5);
+  init_fat();
+  //unsigned char buffer[512];
+  //memsetw(buffer, 0x9999, 512);
   
+  //ata_write(0, 1, buffer);
+  //ata_write(1, 1, buffer);
+  //ata_write(2, 1, buffer);
+  //ata_write(3, 1, buffer);
 
 
   

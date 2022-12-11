@@ -4,11 +4,18 @@
 #include "System/hal.h"
 #include <stdbool.h>
 #include "kernel_screen.h"
+#include "Process/process.h" 
+
 #define ATA_READ  0x20
 #define ATA_WRITE 0x30
 
 #define BUFFER_SIZE  0x100
 #define BUFFER_READY 0b1000
+
+#define SECTOR_SIZE 0x200
+
+#define BSY 0x80
+#define DRQ 0x40
 
 typedef enum ATA_PORTS_ENUM {
 
@@ -31,11 +38,10 @@ typedef enum ATA_PORTS_ENUM {
 
 
 
-void ata_read(uint32_t addr, size_t sectors, void* buffer, size_t buffer_size);
-void ata_write(uint32_t addr, size_t sectors, void* buffer, size_t buffer_size);
+void ata_read(uint32_t sector_index, size_t sectors, void* buffer);
+void ata_write(uint32_t sector_index, size_t sectors, void* buffer);
 
-void ata_read_sector(uint32_t addr, void* buffer, size_t buffer_size);
-void ata_write_sector(uint32_t addr, void* buffer, size_t buffer_size);
+
 void io_delay();
 
 #endif

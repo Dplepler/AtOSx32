@@ -1,6 +1,6 @@
-[org 7E00h] 										; Load right after the stage0 boot sector
+[org 7E00h] 										; Load to the correct program counter after the stage0 boot sector
 [bits 16]
-INIT_KERNEL_OFFSET equ 1000h 		; Location of our kernel in memory at first
+INIT_KERNEL_OFFSET equ 1000h 		; Location of our kernel in memory at the beginning (kernel will be moved)
 PHYS_KERNEL_OFFSET equ 100000h	; Location of our kernel in memory
 
 ; Start of the boot sector's main routine
@@ -148,7 +148,6 @@ load_kernel:
 	mov dl, 80h
 	int 13h
 	jc .no_extentions
-
 
 	mov dl, 80h					  ; Boot device number - First HDD
 	mov si, DAP_START			; SI will hold the Disk Address Packet offset
