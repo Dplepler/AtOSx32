@@ -2,6 +2,8 @@
 #define FS_H
 
 #include <stdint.h>
+#include "Drivers/ata.h"
+#include "Memory/vmm.h"
 #include "Drivers/kernel_screen.h"
 
 #define HIDDEN_SECTORS 0x2
@@ -15,13 +17,21 @@
 #define EOC        0xFFF8     /* End of cluster */
 #define BAD_CLUSTER 0xFFF7
 
+#define FAT_SIGNATURE 0xA00A
+
 #define get_next_cluster fat_extract_value
 
 void init_fat();
 void fat_setup_table();
 uint16_t fat_extract_value(uint16_t index);
 
+typedef struct _INODE_ENTRY_STRUCT {
 
+  
+
+
+
+} inode_t;
 
 
 

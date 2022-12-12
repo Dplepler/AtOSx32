@@ -52,16 +52,16 @@ int kmain(void) {
   setup_clock();
   init_multitasking();
 
-  //init_fat();
+  init_fat();
 
   
-  init_cleaner_task();
+  //init_cleaner_task();
 
-  create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);
+  /*create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);
   create_process_handler(create_address_space(), (uint32_t)tongue, NULL, POLICY_0);
 
 
-  while(1) { cli(); schedule(); sti(); }
+  while(1) { cli(); schedule(); sti(); } */
 
 
   return 0;
