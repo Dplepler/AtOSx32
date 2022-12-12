@@ -34,5 +34,41 @@ void fat_create_filename(inode_t* inode, char* name) {
   strncpy(inode->ext, it, EXTENTION_SIZE);
 }
 
+/* Convert time to FAT time format */
+uint16_t fat_create_time(cmos_time time) {
+  
+  uint16_t fat_time = (time.seconds / 2);  // Seconds are counted in 2's 
+  fat_time |= ((uint16_t)time.minute << 5);
+  fat_time |= ((uint16_t)time.hour << 11);
+
+  return fat_time;
+}
+
+
+uint16_t fat_create_date(cmos_time date) {
+  
+  uint16_t fat_date = date.day;
+  fat_date |= ((uint16_t)date.month << 5);
+  fat_date |= ((uint16_t)(date.year - 1980) <<  9);
+
+  return fat_date;
+}
+
+inode_t* create_inode(char* filename, attribute_t attributes) {
+  
+  inode_t* inode = kcalloc(1, sizeof(inode_t));
+
+  fat_create_filename(inode, filename);
+
+  inode->attributes = attributes;
+  
+  cmos_time datetime = read_rtc();
+
+  inode->creation_time = fat_create_time(datetime);
+  inode->creation_date = fat_create_date(datetime);
+  
+
+
+}
 
 

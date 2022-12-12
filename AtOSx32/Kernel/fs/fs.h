@@ -5,6 +5,7 @@
 #include "Drivers/ata.h"
 #include "Memory/vmm.h"
 #include "Drivers/kernel_screen.h"
+#include "System/clock.h"
 
 #define HIDDEN_SECTORS 0x2
 #define SECTOR_SIZE    0x200
@@ -41,7 +42,7 @@ typedef struct _INODE_ENTRY_STRUCT {
   char filename[FILENAME_SIZE];
   char ext[EXTENTION_SIZE];
 
-  attribute_t attribute;
+  attribute_t attributes;
 
   uint8_t reserved1;
 
@@ -68,7 +69,8 @@ void fat_setup_table();
 uint16_t fat_extract_value(uint16_t index);
 
 void fat_create_filename(inode_t* inode, char* name);
-
+uint16_t fat_create_time(cmos_time date);
+uint16_t fat_create_date(cmos_time date);
 
 
 
