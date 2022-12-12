@@ -1,5 +1,21 @@
 #include "utils.h"
 
+/* Check if a character is in the English alphabet */
+bool isalpha(char c) {  
+  return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) ? true : false;
+}
+
+/* Check if a character is a uppercase character */
+bool isupper(char c) {
+  return (c >= 'A' && c <= 'Z') ? true : false;
+}
+
+/* Check if a character is a lowercase character */
+bool islower(char c) {
+  return (c >= 'a' && c <= 'z') ? true : false;
+}
+
+
 /* Get the character length of a string */
 size_t strl(const char* str) {
 
@@ -49,5 +65,15 @@ char* strcat(char* dest, const char* src) {
   for (; i - dest_length < src_length; i++) { dest[i] = src[i - dest_length]; }  
 
   return dest;
+}
+
+/* Make all lower characters in the string uppercase */
+char* upper(char* src, size_t n) {
+  
+  for (unsigned long i = 0; i < n; i++) { 
+    if (islower(src[i])) { src[i] += ('A' - 'a'); }
+  }
+
+  return src;
 }
 

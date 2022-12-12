@@ -54,7 +54,6 @@ int kmain(void) {
 
   init_fat();
 
-  
   //init_cleaner_task();
 
   /*create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);
