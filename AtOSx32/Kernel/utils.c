@@ -1,5 +1,27 @@
 #include "utils.h"
 
+void* memset(void* addr, uint8_t c, size_t n) {
+
+  for (uint32_t i = 0; i < n; i++) {
+    ((char*)addr)[i] = c;
+  }
+
+  return addr;
+}
+
+void* memsetw(void* addr, uint16_t val, size_t n) {
+  
+  for (uint32_t i = 0; i < n / 2; i++) {
+    ((uint16_t*)addr)[i] = val;
+  }
+
+  return addr;
+}
+
+void memcpy(void* s1, const void* s2, size_t n) {
+  for (; n > 0; n--) { *(uint8_t*)s1++ = *(uint8_t*)s2++; }
+}
+
 /* Check if a character is in the English alphabet */
 bool isalpha(char c) {  
   return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) ? true : false;
@@ -54,6 +76,19 @@ char* itoa(int value, size_t base) {
   return &buf[i+1];
 }
 
+/* Copy contents of one string into another */
+char* strcpy(char* dest, const char* src) { 
+  
+  memcpy(dest, src, strl(dest));
+  return dest;
+}
+
+char* strncpy(char* dest, const char* src, size_t n) {
+
+  memcpy(dest, src, n);
+  return dest;
+}
+
 /* Copy src string to dest string */
 char* strcat(char* dest, const char* src) {
 
@@ -76,4 +111,5 @@ char* upper(char* src, size_t n) {
 
   return src;
 }
+
 

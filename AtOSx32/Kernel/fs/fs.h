@@ -35,9 +35,6 @@ typedef enum _ATTRIBUTE_FLAGS_ENUM {
 
 } attribute_t;
 
-void init_fat();
-void fat_setup_table();
-uint16_t fat_extract_value(uint16_t index);
 
 typedef struct _INODE_ENTRY_STRUCT {
 
@@ -64,6 +61,14 @@ typedef struct _INODE_ENTRY_STRUCT {
   uint32_t size;
 
 } __attribute__((packed)) inode_t;
+
+
+void init_fat();
+void fat_setup_table();
+uint16_t fat_extract_value(uint16_t index);
+
+void fat_create_filename(inode_t* inode, char* name);
+
 
 
 

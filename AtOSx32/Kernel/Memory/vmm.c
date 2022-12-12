@@ -1,28 +1,5 @@
 #include "vmm.h"
 
-void* memset(void* addr, uint8_t c, size_t n) {
-
-  for (uint32_t i = 0; i < n; i++) {
-    ((char*)addr)[i] = c;
-  }
-
-  return addr;
-}
-
-void* memsetw(void* addr, uint16_t val, size_t n) {
-  
-
-  for (uint32_t i = 0; i < n / 2; i++) {
-    ((uint16_t*)addr)[i] = val;
-  }
-
-  return addr;
-}
-
-void memcpy(void* s1, const void* s2, size_t n) {
-  for (; n > 0; n--) { *(uint8_t*)s1++ = *(uint8_t*)s2++; }
-}
-
 /* Returns a page directory index from a given virtual address */
 pgulong_t pd_get_entry_index(pgulong_t* addr) {
   return (pgulong_t)addr >> 22;

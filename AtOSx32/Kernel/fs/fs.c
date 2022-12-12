@@ -22,3 +22,17 @@ uint16_t fat_extract_value(uint16_t index) {
 }
 
 
+void fat_create_filename(inode_t* inode, char* name) {
+
+  char* it = name;
+
+  while (*it != '.') { it++; }
+
+  *it++ = '\0';
+
+  strcpy(inode->filename, name);
+  strncpy(inode->ext, it, EXTENTION_SIZE);
+}
+
+
+
