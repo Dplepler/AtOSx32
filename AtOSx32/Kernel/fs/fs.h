@@ -50,7 +50,7 @@ typedef struct _INODE_ENTRY_STRUCT {
   
   uint16_t creation_time;
   uint16_t creation_date;
-  uint16_t last_access;
+  uint16_t last_access_date;
 
   uint16_t reserved2;
 
@@ -72,6 +72,6 @@ void fat_create_filename(inode_t* inode, char* name);
 uint16_t fat_create_time(cmos_time date);
 uint16_t fat_create_date(cmos_time date);
 
-
+inode_t* create_file(char* filename, attribute_t attributes);
 
 #endif

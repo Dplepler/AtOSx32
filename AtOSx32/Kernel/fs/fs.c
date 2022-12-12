@@ -54,7 +54,7 @@ uint16_t fat_create_date(cmos_time date) {
   return fat_date;
 }
 
-inode_t* create_inode(char* filename, attribute_t attributes) {
+inode_t* create_file(char* filename, attribute_t attributes) {
   
   inode_t* inode = kcalloc(1, sizeof(inode_t));
 
@@ -65,10 +65,9 @@ inode_t* create_inode(char* filename, attribute_t attributes) {
   cmos_time datetime = read_rtc();
 
   inode->creation_time = fat_create_time(datetime);
-  inode->creation_date = fat_create_date(datetime);
-  
+  inode->last_access_date = inode->creation_date = fat_create_date(datetime);
 
-
+  return inode;
 }
 
 

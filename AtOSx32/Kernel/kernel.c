@@ -53,13 +53,8 @@ int kmain(void) {
   init_multitasking();
 
   init_fat();
-
-  cmos_time t = read_rtc();
-
-  PRINT(dtoa(t));
-NL;
-  PRINTNH(fat_create_date(t));
   
+
   //init_cleaner_task();
 
   /*create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);
