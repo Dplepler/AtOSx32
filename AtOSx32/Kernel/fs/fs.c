@@ -1,7 +1,7 @@
 #include "fs.h"
 
 
-uint8_t fat_buffer[SECTORS_IN_FAT * SECTOR_SIZE];
+uint8_t fat_buffer[FAT_BUFFER_SIZE];
 
 void init_fat() {  
   if (fat_extract_value(0) != FAT_SIGNATURE) { fat_setup_table(); }
@@ -9,7 +9,7 @@ void init_fat() {
 
 void fat_setup_table() {
  
-  memsetw(fat_buffer, 0x0, SECTORS_IN_FAT * SECTOR_SIZE);
+  memsetw(fat_buffer, 0x0, FAT_BUFFER_SIZE);
   ((uint16_t*)fat_buffer)[0] = FAT_SIGNATURE;
   ata_write(HIDDEN_SECTORS + 1, SECTORS_IN_FAT, fat_buffer);
 }
@@ -17,7 +17,7 @@ void fat_setup_table() {
 
 uint16_t fat_extract_value(uint16_t index) {
   
-  ata_read(HIDDEN_SECTORS + 1, SECTORS_IN_FAT, fat_buffer);
+  READ_FAT(fat_buffer);
   return (uint16_t)(((uint16_t*)fat_buffer)[index]);
 }
 
@@ -70,4 +70,30 @@ inode_t* create_file(char* filename, attribute_t attributes) {
   return inode;
 }
 
+uint16_t fat_find_free_cluster(int* err) {
+  
+  READ_FAT(fat_buffer);
 
+  for (uint16_t i = 0; i < (FAT_BUFFER_SIZE / sizeof(uint16_t)); i++) {
+    if (VALID_CLUSTER(((uint16_t*)fat_buffer)[i])) {
+      return ((uint16_t*)fat_buffer)[i];
+    }
+  }
+
+  *err = ERROR_NOT_ENOUGH_DISK_SPACE;
+  
+  return 0;
+}
+
+
+void write_file(inode_t* inode, void* buffer, size_t size) {
+
+  int err = NO_ERROR;
+  
+  inode->cluster = fat_find_free_cluster(&err);
+
+  if (err) { panic(err); }
+
+
+
+}

@@ -66,7 +66,7 @@ pgulong_t* page_memory_above4mb(size_t length, int* err) {
     uint32_t i2 = i;
     for (; i2 < i + req_pd_entries; i2++) {
 
-      if (i2 > PD_ENTRIES) { *err = NOT_ENOUGH_SPACE; return NULL; }
+      if (i2 > PD_ENTRIES) { *err = ERROR_NOT_ENOUGH_SPACE; return NULL; }
 
       addr = (pgulong_t*)((pgulong_t*)PD_ADDRESS)[i2];
 
@@ -90,7 +90,7 @@ pgulong_t* page_memory_above4mb(size_t length, int* err) {
     }
   }
 
-  *err = NOT_ENOUGH_SPACE;
+  *err = ERROR_NOT_ENOUGH_SPACE;
   return NULL;  // Unsuccesful
 }
 
@@ -116,7 +116,7 @@ pgulong_t* page_memory_under4mb(size_t length, int* err) {
     }
   }
 
-  *err = NOT_ENOUGH_SPACE;
+  *err = ERROR_NOT_ENOUGH_SPACE;
   return NULL;
 }
 
@@ -148,7 +148,7 @@ pgulong_t* page_map(pgulong_t* addr, size_t pages, uint16_t flags) {
   int err = NO_ERROR;
 
   if (!addr) { addr = page_get_free_addr(pages * PAGE_SIZE, &err); }
-  if (err == NOT_ENOUGH_SPACE) { return NULL; }
+  if (err) { panic(err); }
   
   pgulong_t pd_index = pd_get_entry_index(addr);
   pgulong_t pt_index = page_get_entry_index(addr);

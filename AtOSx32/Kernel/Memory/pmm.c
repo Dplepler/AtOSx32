@@ -26,7 +26,7 @@ pgulong_t* palloc_single() {
     if (frame_bitmap[i] ^ ~0 && CHECK_FREE_FRAME(frame_bitmap, i)) { break; }   
   }
 
-  if (i == NPAGES) { PANIC("You ran out of RAM :("); }
+  if (i == NPAGES) { panic(ERROR_NOT_ENOUGH_SPACE); }
 
   MARK_USED(frame_bitmap, i);
 

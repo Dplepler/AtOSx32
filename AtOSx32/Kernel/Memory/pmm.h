@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "System/hal.h"
+#include "System/errors.h"
 #include "Drivers/kernel_screen.h"
 
 #define KERNEL_PHYSICAL 0x100000

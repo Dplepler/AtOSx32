@@ -1,5 +1,17 @@
+#ifndef ERRORS_H
+#define ERRORS_H
+
+#include "Drivers/kernel_screen.h"
+
 typedef enum _ERRORS_ENUM {
 
-  NO_ERROR,
-  NOT_ENOUGH_SPACE
-} error;
+  NO_ERROR = 0x0,
+
+  ERROR_NOT_ENOUGH_SPACE,
+  ERROR_NOT_ENOUGH_DISK_SPACE,
+} error_t;
+
+
+void panic(int error);
+
+#endif

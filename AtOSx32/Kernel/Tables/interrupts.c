@@ -105,8 +105,7 @@ void idt_install_gates() {
 
 void fault_handler(isr_stack_t* stack) {
 
-  if ((stack->index & 0xFF) > 31) { return; }
-  if ((stack->index & 0xFF) > 18) { PANIC("Reserved"); }    // Exceptions 19-31 are reserved
+  if ((stack->index & 0xFF) > 18) { return; }    // Exceptions 19-31 are reserved
   
   /* Exceptions */
   char* exceptions[] =  {
@@ -132,6 +131,5 @@ void fault_handler(isr_stack_t* stack) {
     "Machine Check"
   };
 
-  if ((stack->index & 0xFF) > 18) { PANIC("Reserved"); }
-  PANIC(exceptions[stack->index & 0xFF]);
+  terminal_display_error(exceptions[stack->index & 0xFF]);
 }

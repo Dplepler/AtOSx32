@@ -6,24 +6,31 @@
 #include "Memory/vmm.h"
 #include "Drivers/kernel_screen.h"
 #include "System/clock.h"
+#include "System/errors.h"
+
 
 #define HIDDEN_SECTORS 0x2
 #define SECTOR_SIZE    0x200
 #define CLUSTER_SIZE (SECTOR_SIZE * 8)
 #define SYSTEM_SECTORS 0xFFFF
-#define SECTORS_IN_FAT ((SYSTEM_SECTORS * 2) / SECTOR_SIZE) 
+#define SECTORS_IN_FAT ((SYSTEM_SECTORS * 2) / SECTOR_SIZE)
+
+#define FAT_BUFFER_SIZE (SECTORS_IN_FAT * SECTOR_SIZE)
 
 #define FAT_OFFSET (HIDDEN_SECTORS * SECTOR_SIZE)
 
-#define EOC        0xFFF8     /* End of cluster */
+#define EOC         0xFFF8     /* End of cluster */
 #define BAD_CLUSTER 0xFFF7
 
 #define FAT_SIGNATURE 0xA00A
 
-#define FILENAME_SIZE 8
-#define EXTENTION_SIZE 3
+#define FILENAME_SIZE  0x8
+#define EXTENTION_SIZE 0x3
 
 #define get_next_cluster fat_extract_value
+
+#define READ_FAT(buffer) (ata_read(HIDDEN_SECTORS + 0x1, SECTORS_IN_FAT, buffer))
+#define VALID_CLUSTER(cluster) (cluster < BAD_CLUSTER && cluster > 0x2)
 
 typedef enum _ATTRIBUTE_FLAGS_ENUM {
 
