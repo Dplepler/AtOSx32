@@ -9,6 +9,7 @@ typedef enum _ERRORS_ENUM {
 
   ERROR_NOT_ENOUGH_SPACE,
   ERROR_NOT_ENOUGH_DISK_SPACE,
+  ERROR_FILE_TOO_LARGE,
 } error_t;
 
 

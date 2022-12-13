@@ -8,10 +8,11 @@ void init_fat() {
 }
 
 void fat_setup_table() {
- 
+
   memsetw(fat_buffer, 0x0, FAT_BUFFER_SIZE);
   ((uint16_t*)fat_buffer)[0] = FAT_SIGNATURE;
-  ata_write(HIDDEN_SECTORS + 1, SECTORS_IN_FAT, fat_buffer);
+  ((uint16_t*)fat_buffer)[1] = FAT_SIGNATURE;
+  ata_write(HIDDEN_SECTORS, SECTORS_IN_FAT, fat_buffer);
 }
 
 
@@ -70,14 +71,10 @@ inode_t* create_file(char* filename, attribute_t attributes) {
   return inode;
 }
 
-uint16_t fat_find_free_cluster(int* err) {
+uint16_t fat_find_free_cluster(void* buffer, int* err) {
   
-  READ_FAT(fat_buffer);
-
-  for (uint16_t i = 0; i < (FAT_BUFFER_SIZE / sizeof(uint16_t)); i++) {
-    if (VALID_CLUSTER(((uint16_t*)fat_buffer)[i])) {
-      return ((uint16_t*)fat_buffer)[i];
-    }
+  for (uint16_t i = DATA_START; i < SYSTEM_SECTORS; i++) {
+    if (!(((uint16_t*)buffer)[i])) { return i; }
   }
 
   *err = ERROR_NOT_ENOUGH_DISK_SPACE;
@@ -89,11 +86,39 @@ uint16_t fat_find_free_cluster(int* err) {
 void write_file(inode_t* inode, void* buffer, size_t size) {
 
   int err = NO_ERROR;
+
+  READ_FAT(fat_buffer);
   
-  inode->cluster = fat_find_free_cluster(&err);
+  size_t remainder = size % SECTOR_SIZE;
+  size_t sectors = size / SECTOR_SIZE;
+
+  if (sectors > SYSTEM_SECTORS) { err = ERROR_FILE_TOO_LARGE; return; }
+
+  uint16_t cluster = inode->cluster = fat_find_free_cluster(buffer, &err);
 
   if (err) { panic(err); }
 
+  for (uint16_t i = 0; i < sectors; i++) {
+        
+    ata_write(cluster * CLUSTERS_IN_SECTOR, 0x1, buffer);   /* Write one cluster */ 
+    
+    ((uint16_t*)fat_buffer)[cluster] = ((i == sectors - 1) && !remainder) ? EOC : fat_find_free_cluster(buffer, &err);
+    if (err) { panic(err); }
+    
+    cluster = ((uint16_t*)fat_buffer)[cluster];
 
+    buffer += SECTOR_SIZE;
+  }
 
+  if (remainder) { 
+    uint8_t* remainder_buffer = kmalloc(SECTOR_SIZE);
+    memcpy(remainder_buffer, buffer, remainder);
+    memset((void*)((size_t)remainder_buffer + remainder), '\0', SECTOR_SIZE - remainder);
+
+    ata_write(cluster * CLUSTERS_IN_SECTOR, 0x1, (void*)remainder_buffer);
+
+    ((uint16_t*)fat_buffer)[cluster] = EOC;
+  }
+
+  WRITE_FAT(fat_buffer);
 }

@@ -53,7 +53,12 @@ int kmain(void) {
   init_multitasking();
 
   init_fat();
-  
+ 
+  char* buff = "HELLO THERE I LOVE WORLD SO MUCH!!!!!!!!!!!!!!!";
+
+  inode_t* node = create_file("HELLO.txt", 0x0);
+  write_file(node, buff, strl(buff));
+
 
   //init_cleaner_task();
 

@@ -11,9 +11,14 @@
 
 #define HIDDEN_SECTORS 0x2
 #define SECTOR_SIZE    0x200
-#define CLUSTER_SIZE (SECTOR_SIZE * 8)
+#define CLUSTER_SIZE SECTOR_SIZE
+#define CLUSTERS_IN_SECTOR (CLUSTER_SIZE / SECTOR_SIZE)
 #define SYSTEM_SECTORS 0xFFFF
 #define SECTORS_IN_FAT ((SYSTEM_SECTORS * 2) / SECTOR_SIZE)
+
+#define KERNEL_SECTORS 100
+#define KERNEL_CLUSTERS KERNEL_SECTORS
+#define DATA_START (HIDDEN_SECTORS + SECTORS_IN_FAT + KERNEL_SECTORS)  /* Sector index indicating the beginning of data */
 
 #define FAT_BUFFER_SIZE (SECTORS_IN_FAT * SECTOR_SIZE)
 
@@ -29,8 +34,11 @@
 
 #define get_next_cluster fat_extract_value
 
-#define READ_FAT(buffer) (ata_read(HIDDEN_SECTORS + 0x1, SECTORS_IN_FAT, buffer))
-#define VALID_CLUSTER(cluster) (cluster < BAD_CLUSTER && cluster > 0x2)
+#define READ_FAT(buffer)  (ata_read(HIDDEN_SECTORS, SECTORS_IN_FAT, buffer))
+#define WRITE_FAT(buffer) (ata_write(HIDDEN_SECTORS, SECTORS_IN_FAT, buffer))
+
+#define VALID_CLUSTER(cluster) (cluster != BAD_CLUSTER && cluster > 0x2)
+
 
 typedef enum _ATTRIBUTE_FLAGS_ENUM {
 
@@ -80,5 +88,11 @@ uint16_t fat_create_time(cmos_time date);
 uint16_t fat_create_date(cmos_time date);
 
 inode_t* create_file(char* filename, attribute_t attributes);
+
+
+uint16_t fat_find_free_cluster(void* buffer, int* err);
+
+void write_file(inode_t* inode, void* buffer, size_t size);
+
 
 #endif
