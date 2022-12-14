@@ -69,9 +69,55 @@ inode_t* create_directory(char* dirname, uint8_t attributes) {
   return create_file(dirname, attributes | ATTRIBUTE_DIRECTORY);
 }
 
-inode_t* create_file(char* filename, uint8_t attributes) {
+char* eat_path(char* path) {
+
+  if (path == NULL) { return NULL; }
+
+  char* it = path;
+
+  while (*it != '/' || *it != '\\') {
+    it++;
+    if (((uint32_t)it - (uint32_t)path) > FILENAME_SIZE) { return NULL; }
+  }
+
+  size_t size = ((uint32_t)it - (uint32_t)path) + 1;
+  char* ret = kmalloc(size);
+
+  for (uint8_t i = 0; i < size; i++) { ret[i] = *path++; }
+
+  ret[size - 1] = '\0';
+
+  return ret;
+}
+
+inode_t* navigate(char* path) {
+
+  char* navigate_path = path;
+  READ_ROOT(root_buffer);
+  char* dir = root_buffer;
+
+  while (navigate_path) {
+
+    dir = eat_path(navigate_path);
+
+
+
+
+
+  }
+} 
+
+inode_t* find_file(inode_t* dir, char* filename) {
+
+  char* buffer = read_file(dir);
+
+}
+
+inode_t* create_file(char* filename, char* path, uint8_t attributes) {
   
   inode_t* inode = kcalloc(1, sizeof(inode_t));
+
+  READ_ROOT(root_buffer);
 
   fat_create_filename(inode, filename);
 
