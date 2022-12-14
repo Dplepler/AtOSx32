@@ -23,10 +23,10 @@ DAP_START:
 		dw INIT_KERNEL_OFFSET
 		dw 0
 
-	; Load from disk, 101h's sector (after FAT and boot)
+	; Load from disk, 121h's sector (after FAT and boot)
 	.DAP_LBA:
 
-		dd 101h
+		dd 121h
 		dd 0
 
 DAP_END:	

@@ -1,6 +1,17 @@
 #include "fs.h"
 
-uint8_t fat_buffer[FAT_BUFFER_SIZE];
+uint8_t fat_buffer[FAT_SIZE];
+uint8_t root_buffer[ROOT_SIZE];
+
+unsigned char* current_path = NULL;
+
+void setup_root_dir() {
+  memset(root_buffer, '\0', ROOT_SIZE);
+  ata_write(ROOT_SECTOR_OFFSET, ROOT_SIZE / SECTOR_SIZE, root_buffer);
+  current_path = kmalloc(sizeof(char) + 1);
+  current_path[0] = '~';
+  current_path[1] = '\0';
+}
 
 void init_fat() {  
   if (fat_extract_value(0) != FAT_SIGNATURE) { fat_setup_table(); }
@@ -8,7 +19,7 @@ void init_fat() {
 
 void fat_setup_table() {
 
-  memsetw(fat_buffer, 0x0, FAT_BUFFER_SIZE);
+  memsetw(fat_buffer, 0x0, FAT_SIZE);
   ((uint16_t*)fat_buffer)[0] = FAT_SIGNATURE;
   ((uint16_t*)fat_buffer)[1] = FAT_SIGNATURE;
   WRITE_FAT(fat_buffer);
@@ -52,6 +63,10 @@ uint16_t fat_create_date(cmos_time date) {
   fat_date |= ((uint16_t)(date.year - 1980) <<  9);
 
   return fat_date;
+}
+
+inode_t* create_directory(char* dirname, uint8_t attributes) {
+  return create_file(dirname, attributes | ATTRIBUTE_DIRECTORY);
 }
 
 inode_t* create_file(char* filename, uint8_t attributes) {
