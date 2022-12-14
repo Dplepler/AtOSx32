@@ -54,15 +54,14 @@ int kmain(void) {
 
   //init_fat();
  
-  char buff[3000];
-  memset(buff, 'a', 2999);
-  buff[2999] = 0;
-
+  char* txt = "Hello there my friends my name is Obama and I sex";
 
   inode_t* node = create_file("HELLO.txt", 0x0);
-  write_file(node, buff, strl(buff));
+  write_file(node, txt, strl(txt));
 
+  uint8_t* bruh = read_file(node);
 
+  PRINT(bruh);
   /* init_cleaner_task();
 
   create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);

@@ -93,6 +93,6 @@ inode_t* create_file(char* filename, attribute_t attributes);
 uint16_t fat_find_free_cluster(void* buffer, int* err);
 
 void write_file(inode_t* inode, void* buffer, size_t size);
-
+void* read_file(inode_t* inode);
 
 #endif

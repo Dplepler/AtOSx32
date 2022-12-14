@@ -119,7 +119,30 @@ void write_file(inode_t* inode, void* buffer, size_t size) {
     ata_write(cluster * CLUSTERS_IN_SECTOR, CLUSTERS_IN_SECTOR, (void*)remainder_buffer);
 
     ((uint16_t*)fat_buffer)[cluster] = EOC;
+
+    free(remainder_buffer);
   }
 
+  inode->size = size;
   WRITE_FAT(fat_buffer);
 }
+
+
+void* read_file(inode_t* inode) {
+
+  uint8_t* buffer = kmalloc(inode->size);
+
+  READ_FAT(fat_buffer);
+
+  uint16_t cluster = inode->cluster;
+  uint8_t* it = buffer;
+  
+  for (uint16_t cluster = inode->cluster; cluster != EOC; cluster = ((uint16_t*)fat_buffer)[cluster]) {
+      
+    ata_read(cluster * CLUSTERS_IN_SECTOR, CLUSTERS_IN_SECTOR, it);
+    it += SECTOR_SIZE;
+  }
+
+  return buffer;
+}
+
