@@ -1,6 +1,5 @@
 #include "fs.h"
 
-
 uint8_t fat_buffer[FAT_BUFFER_SIZE];
 
 void init_fat() {  
@@ -12,7 +11,7 @@ void fat_setup_table() {
   memsetw(fat_buffer, 0x0, FAT_BUFFER_SIZE);
   ((uint16_t*)fat_buffer)[0] = FAT_SIGNATURE;
   ((uint16_t*)fat_buffer)[1] = FAT_SIGNATURE;
-  ata_write(HIDDEN_SECTORS, SECTORS_IN_FAT, fat_buffer);
+  WRITE_FAT(fat_buffer);
 }
 
 
@@ -55,7 +54,7 @@ uint16_t fat_create_date(cmos_time date) {
   return fat_date;
 }
 
-inode_t* create_file(char* filename, unsigned int attributes) {
+inode_t* create_file(char* filename, uint8_t attributes) {
   
   inode_t* inode = kcalloc(1, sizeof(inode_t));
 
@@ -107,7 +106,7 @@ void write_file(inode_t* inode, void* buffer, size_t size) {
  
     cluster = ((uint16_t*)fat_buffer)[cluster];
 
-    buffer += SECTOR_SIZE;
+    buffer += CLUSTER_SIZE;
   }
 
   if (remainder) { 
@@ -134,13 +133,12 @@ void* read_file(inode_t* inode) {
 
   READ_FAT(fat_buffer);
 
-  uint16_t cluster = inode->cluster;
   uint8_t* it = buffer;
   
   for (uint16_t cluster = inode->cluster; cluster != EOC; cluster = ((uint16_t*)fat_buffer)[cluster]) {
       
     ata_read(cluster * CLUSTERS_IN_SECTOR, CLUSTERS_IN_SECTOR, it);
-    it += SECTOR_SIZE;
+    it += CLUSTER_SIZE;
   }
 
   return buffer;

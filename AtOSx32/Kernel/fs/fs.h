@@ -39,13 +39,7 @@
 
 #define VALID_CLUSTER(cluster) (cluster != BAD_CLUSTER && cluster > 0x2)
 
-
-typedef struct _INODE_ENTRY_STRUCT {
-
-  char filename[FILENAME_SIZE];
-  char ext[EXTENTION_SIZE];
-
-  enum {
+typedef enum ATTRIBUTES_ENUM {
 
   ATTRIBUTE_READ = 0x0,
   ATTRIBUTE_HIDDEN,
@@ -54,7 +48,15 @@ typedef struct _INODE_ENTRY_STRUCT {
   ATTRIBUTE_DIRECTORY,
   ATTRIBUTE_ACHIEVE
 
-  } attributes;
+  };
+
+
+typedef struct _INODE_ENTRY_STRUCT {
+
+  char filename[FILENAME_SIZE];
+  char ext[EXTENTION_SIZE];
+
+  uint8_t attributes;
 
   uint8_t reserved1;
 
