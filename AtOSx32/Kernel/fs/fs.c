@@ -94,28 +94,29 @@ void write_file(inode_t* inode, void* buffer, size_t size) {
 
   if (sectors > SYSTEM_SECTORS) { err = ERROR_FILE_TOO_LARGE; return; }
 
-  uint16_t cluster = inode->cluster = fat_find_free_cluster(buffer, &err);
-
+  uint16_t cluster = inode->cluster = fat_find_free_cluster(fat_buffer, &err);
   if (err) { panic(err); }
-
+ 
   for (uint16_t i = 0; i < sectors; i++) {
-        
-    ata_write(cluster * CLUSTERS_IN_SECTOR, 0x1, buffer);   /* Write one cluster */ 
+
+    ata_write(cluster * CLUSTERS_IN_SECTOR, CLUSTERS_IN_SECTOR, buffer);   /* Write one cluster */ 
     
-    ((uint16_t*)fat_buffer)[cluster] = ((i == sectors - 1) && !remainder) ? EOC : fat_find_free_cluster(buffer, &err);
+    ((uint16_t*)fat_buffer)[cluster] = EOC;
+    if ((i != sectors - 1) || remainder) { ((uint16_t*)fat_buffer)[cluster] = fat_find_free_cluster(fat_buffer, &err); }
     if (err) { panic(err); }
-    
+ 
     cluster = ((uint16_t*)fat_buffer)[cluster];
 
     buffer += SECTOR_SIZE;
   }
 
   if (remainder) { 
+
     uint8_t* remainder_buffer = kmalloc(SECTOR_SIZE);
     memcpy(remainder_buffer, buffer, remainder);
     memset((void*)((size_t)remainder_buffer + remainder), '\0', SECTOR_SIZE - remainder);
 
-    ata_write(cluster * CLUSTERS_IN_SECTOR, 0x1, (void*)remainder_buffer);
+    ata_write(cluster * CLUSTERS_IN_SECTOR, CLUSTERS_IN_SECTOR, (void*)remainder_buffer);
 
     ((uint16_t*)fat_buffer)[cluster] = EOC;
   }

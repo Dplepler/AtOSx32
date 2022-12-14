@@ -18,6 +18,8 @@ void ata_read(uint32_t sector_index, size_t sectors, void* buffer) {
   
   irq_disable();
 
+  while (inportb(PORT_COMMAND) & BSY) { } 
+  
   /* Read one sector */
   outportb(PORT_SECTOR_COUNT, sectors);
 
@@ -62,6 +64,7 @@ void ata_write(uint32_t sector_index, size_t sectors, void* buffer) {
   
   irq_disable();
 
+  while (inportb(PORT_COMMAND) & BSY) { } 
   
   /* Choose drive & head */
   outportb(PORT_DRIVE_HEAD, 0x40);

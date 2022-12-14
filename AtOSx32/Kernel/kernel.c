@@ -52,17 +52,20 @@ int kmain(void) {
   setup_clock();
   init_multitasking();
 
-  init_fat();
+  //init_fat();
  
-  char* buff = "HELLO THERE I LOVE WORLD SO MUCH!!!!!!!!!!!!!!!";
+  char buff[3000];
+  memset(buff, 'a', 2999);
+  buff[2999] = 0;
+
 
   inode_t* node = create_file("HELLO.txt", 0x0);
   write_file(node, buff, strl(buff));
 
 
-  //init_cleaner_task();
+  /* init_cleaner_task();
 
-  /*create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);
+  create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);
   create_process_handler(create_address_space(), (uint32_t)tongue, NULL, POLICY_0);
 
 
