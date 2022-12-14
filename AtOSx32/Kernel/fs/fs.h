@@ -40,7 +40,12 @@
 #define VALID_CLUSTER(cluster) (cluster != BAD_CLUSTER && cluster > 0x2)
 
 
-typedef enum _ATTRIBUTE_FLAGS_ENUM {
+typedef struct _INODE_ENTRY_STRUCT {
+
+  char filename[FILENAME_SIZE];
+  char ext[EXTENTION_SIZE];
+
+  enum {
 
   ATTRIBUTE_READ = 0x0,
   ATTRIBUTE_HIDDEN,
@@ -49,15 +54,7 @@ typedef enum _ATTRIBUTE_FLAGS_ENUM {
   ATTRIBUTE_DIRECTORY,
   ATTRIBUTE_ACHIEVE
 
-} attribute_t;
-
-
-typedef struct _INODE_ENTRY_STRUCT {
-
-  char filename[FILENAME_SIZE];
-  char ext[EXTENTION_SIZE];
-
-  attribute_t attributes;
+  } attributes;
 
   uint8_t reserved1;
 
@@ -87,7 +84,7 @@ void fat_create_filename(inode_t* inode, char* name);
 uint16_t fat_create_time(cmos_time date);
 uint16_t fat_create_date(cmos_time date);
 
-inode_t* create_file(char* filename, attribute_t attributes);
+inode_t* create_file(char* filename, unsigned int attributes);
 
 
 uint16_t fat_find_free_cluster(void* buffer, int* err);

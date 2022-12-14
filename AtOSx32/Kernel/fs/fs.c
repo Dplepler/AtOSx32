@@ -55,7 +55,7 @@ uint16_t fat_create_date(cmos_time date) {
   return fat_date;
 }
 
-inode_t* create_file(char* filename, attribute_t attributes) {
+inode_t* create_file(char* filename, unsigned int attributes) {
   
   inode_t* inode = kcalloc(1, sizeof(inode_t));
 
