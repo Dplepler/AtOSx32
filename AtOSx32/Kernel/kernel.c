@@ -50,18 +50,20 @@ int kmain(void) {
 
   setup_multitasking();
   setup_clock();
-  init_multitasking();
+  //init_multitasking();
 
-  //init_fat();
- 
+
+  init_fat();
+  setup_root_dir();
+
   char* txt = "Hello there my friends my name is Obama and I sex";
 
-  inode_t* node = create_file("HELLO.txt", 0x0);
-  write_file(node, txt, strl(txt));
+  inode_t* node = create_file("bruhh.txt", NULL, 0x0);
+  
 
-  uint8_t* bruh = read_file(node);
+  
 
-  PRINT(bruh);
+
   /* init_cleaner_task();
 
   create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);

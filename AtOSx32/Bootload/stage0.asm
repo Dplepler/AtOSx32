@@ -41,7 +41,7 @@ stage0_start:
     
 	call load_stage1
 
-	call BOOT_OFFSET
+	jmp BOOT_OFFSET
 	jmp $
 
 

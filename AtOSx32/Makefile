@@ -34,7 +34,7 @@ Kernel/kernel.bin : Kernel/kernel_start.o ${OBJS} ${OBJC}
 	i686-elf-gcc -T linker.ld -o $@ -ffreestanding -nostdlib Kernel/kernel_start.o $^ -lgcc
 
 %.o : %.c
-	i686-elf-gcc -c $< -o $@ -I./Kernel -std=gnu99 -ffreestanding -Wall -Wextra
+	i686-elf-gcc -c $< -o $@ -I./Kernel -std=gnu99 -ffreestanding -Wall -Wextra -Waddress-of-packed-member
 
 %.o : %.asm
 	nasm $< -f elf32 -o $@

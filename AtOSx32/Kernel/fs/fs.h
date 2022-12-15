@@ -18,7 +18,7 @@
 #define DIR_ENTRY_SIZE sizeof(inode_t)
 
 #define SECTORS_IN_FAT ((SYSTEM_SECTORS * 2) / SECTOR_SIZE)
-#define SECTORS_IN_ROOT ROOT_ENTRIES
+#define SECTORS_IN_ROOT ((ROOT_ENTRIES * DIR_ENTRY_SIZE) / SECTOR_SIZE)
 
 
 #define KERNEL_SECTORS 100
@@ -41,6 +41,7 @@
 
 #define FILENAME_SIZE  0x8
 #define EXTENTION_SIZE 0x3
+#define FULL_FILENAME_SIZE (FILENAME_SIZE + EXTENTION_SIZE + sizeof(char))
 
 #define get_next_cluster fat_extract_value
 
@@ -49,6 +50,8 @@
 
 #define READ_ROOT(buffer) (ata_read(ROOT_SECTOR_OFFSET, ROOT_SIZE / SECTOR_SIZE, buffer))
 #define WRITE_ROOT(buffer) (ata_write(ROOT_SECTOR_OFFSET, ROOT_SIZE / SECTOR_SIZE, buffer))
+
+#define CHECK_SEPERATOR(c) (c == '/' || c == '\\')
 
 #define VALID_CLUSTER(cluster) (cluster != BAD_CLUSTER && cluster > 0x2)
 
@@ -61,7 +64,7 @@ typedef enum ATTRIBUTES_ENUM {
   ATTRIBUTE_DIRECTORY,
   ATTRIBUTE_ACHIEVE
 
-  };
+} attribute_t;
 
 
 typedef struct _INODE_ENTRY_STRUCT {
@@ -90,21 +93,41 @@ typedef struct _INODE_ENTRY_STRUCT {
 
 } __attribute__((packed)) inode_t;
 
-
+void setup_root_dir();
 void init_fat();
 void fat_setup_table();
-uint16_t fat_extract_value(uint16_t index);
 
+uint16_t fat_extract_value(uint16_t index);
 void fat_create_filename(inode_t* inode, char* name);
-uint16_t fat_create_time(cmos_time date);
+
+uint16_t fat_create_time(cmos_time time);
 uint16_t fat_create_date(cmos_time date);
 
-inode_t* create_file(char* filename,  uint8_t attributes);
-inode_t* create_directory(char* dirname, uint8_t attributes);
+inode_t* create_directory(char* dirname, char* path, uint8_t attributes);
+
+char* eat_path(char* path);
+
+inode_t* navigate(char* path);
+
+char* make_full_filename(char* filename, char* ext);
+
+inode_t* find_file(char* buffer, size_t size, char* filename);
+
+inode_t* create_file(char* filename, char* path, uint8_t attributes);
+
+inode_t* init_file(char* filename, uint8_t attributes);
+
+void enter_file(inode_t* file, inode_t* dir);
 
 uint16_t fat_find_free_cluster(void* buffer, int* err);
 
-void write_file(inode_t* inode, void* buffer, size_t size);
+void write_file_data(inode_t* inode, void* buffer, size_t size);
+
+void cat_file(inode_t* inode, void* buffer, size_t size);
+
 void* read_file(inode_t* inode);
 
+void fat_delete_file(inode_t* inode);
+
+void fat_edit_file(inode_t* inode, void* buffer, size_t size);
 #endif
