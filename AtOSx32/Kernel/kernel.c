@@ -58,8 +58,12 @@ int kmain(void) {
   char* txt = "Hello there my friends my name is Obama and I sex";
 
   inode_t* node = create_file("bruhh.txt", NULL, 0x0);
-  
 
+  edit_file(node, txt, strl(txt));
+  
+  char* hello = read_file(node);
+
+  PRINT(hello);
   
 
 

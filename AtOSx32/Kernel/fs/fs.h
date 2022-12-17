@@ -93,41 +93,30 @@ typedef struct _INODE_ENTRY_STRUCT {
 
 } __attribute__((packed)) inode_t;
 
+void* read_file(inode_t* inode);
+
+char* eat_path(char* path);
+char* make_full_filename(char* filename, char* ext);
+
+uint16_t fat_extract_value(uint16_t index);
+uint16_t fat_create_time(cmos_time time);
+uint16_t fat_create_date(cmos_time date);
+uint16_t fat_find_free_cluster(void* buffer, int* err);
+
+inode_t* create_directory(char* dirname, char* path, uint8_t attributes);
+inode_t* navigate(char* path);
+inode_t* find_file(char* buffer, size_t size, char* filename);
+inode_t* create_file(char* filename, char* path, uint8_t attributes);
+inode_t* init_file(char* filename, uint8_t attributes);
+
 void init_fs();
 void root_setup_dir();
 void fat_setup_table();
-
-uint16_t fat_extract_value(uint16_t index);
+void enter_file(inode_t* file, inode_t* dir);
+void write_file_data(inode_t* inode, void* buffer, size_t size);
+void cat_file(inode_t* inode, void* buffer, size_t size);
+void edit_file(inode_t* inode, void* buffer, size_t size);
+void fat_delete_file(inode_t* inode);
 void fat_create_filename(inode_t* inode, char* name);
 
-uint16_t fat_create_time(cmos_time time);
-uint16_t fat_create_date(cmos_time date);
-
-inode_t* create_directory(char* dirname, char* path, uint8_t attributes);
-
-char* eat_path(char* path);
-
-inode_t* navigate(char* path);
-
-char* make_full_filename(char* filename, char* ext);
-
-inode_t* find_file(char* buffer, size_t size, char* filename);
-
-inode_t* create_file(char* filename, char* path, uint8_t attributes);
-
-inode_t* init_file(char* filename, uint8_t attributes);
-
-void enter_file(inode_t* file, inode_t* dir);
-
-uint16_t fat_find_free_cluster(void* buffer, int* err);
-
-void write_file_data(inode_t* inode, void* buffer, size_t size);
-
-void cat_file(inode_t* inode, void* buffer, size_t size);
-
-void* read_file(inode_t* inode);
-
-void fat_delete_file(inode_t* inode);
-
-void fat_edit_file(inode_t* inode, void* buffer, size_t size);
 #endif

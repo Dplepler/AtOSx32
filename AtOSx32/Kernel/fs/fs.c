@@ -249,12 +249,12 @@ void cat_file(inode_t* inode, void* buffer, size_t size) {
   uint8_t* appended_buffer = (uint8_t*)((uint32_t)file_data + prev_size);
   memcpy(appended_buffer, buffer, size);
   
-  fat_edit_file(inode, file_data, prev_size + size);
+  edit_file(inode, file_data, prev_size + size);
   free(file_data);
 }
 
 
-void fat_edit_file(inode_t* inode, void* buffer, size_t size) {
+void edit_file(inode_t* inode, void* buffer, size_t size) {
   
   if (!inode) { buffer = krealloc(buffer, ROOT_SIZE); WRITE_ROOT(buffer); return; }
   
@@ -265,6 +265,8 @@ void fat_edit_file(inode_t* inode, void* buffer, size_t size) {
 
 void fat_delete_file(inode_t* inode) {
   
+  if (!inode || !inode->cluster) { return; }
+
   READ_FAT(fat_buffer);
   
   uint16_t cluster = inode->cluster;
