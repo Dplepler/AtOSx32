@@ -54,9 +54,7 @@ int kmain(void) {
 
 
 
-  init_fat();
-  setup_root_dir();
-
+  init_fs();
   char* txt = "Hello there my friends my name is Obama and I sex";
 
   inode_t* node = create_file("bruhh.txt", NULL, 0x0);

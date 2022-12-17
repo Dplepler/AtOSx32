@@ -93,8 +93,8 @@ typedef struct _INODE_ENTRY_STRUCT {
 
 } __attribute__((packed)) inode_t;
 
-void setup_root_dir();
-void init_fat();
+void init_fs();
+void root_setup_dir();
 void fat_setup_table();
 
 uint16_t fat_extract_value(uint16_t index);
