@@ -53,6 +53,7 @@ int kmain(void) {
   //init_multitasking();
 
 
+
   init_fat();
   setup_root_dir();
 

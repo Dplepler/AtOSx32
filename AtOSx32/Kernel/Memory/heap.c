@@ -25,10 +25,10 @@ void heap_insert_unused_header(heap_header_t* header) {
   /* Insert header as the head node */
   if (free_blocks[header->index]) { 
     free_blocks[header->index]->blink = header; 
-    header->flink = free_blocks[header->index];
   }
   
-  free_blocks[header->index] = header;
+  header->flink = free_blocks[header->index];
+  free_blocks[header->index] = header;  
 }
 
 /* Remove memory block from the free blocks array */
@@ -50,9 +50,8 @@ void heap_split_header(heap_header_t* header) {
   if (header->size == header->req_size) { return; }
 
   heap_header_t* split_header = (heap_header_t*)((unsigned long)header + sizeof(heap_header_t) + header->req_size);
-
+  
   split_header->size = split_header->req_size = header->size - header->req_size - sizeof(heap_header_t);
-
   split_header->req_size -= sizeof(heap_header_t);
   if (!split_header->size) { return; }
 
@@ -60,13 +59,15 @@ void heap_split_header(heap_header_t* header) {
 
   if (header->page_flink) { header->page_flink->page_blink = split_header; }
   split_header->page_flink = header->page_flink;
+
   split_header->page_blink = header;
   header->page_flink = split_header;
   
   header->size -= split_header->size;
-  
+
   split_header->used = false;
   split_header->flink = split_header->blink = NULL;
+  
   heap_insert_unused_header(split_header);
 }
 
@@ -132,18 +133,20 @@ void* kmalloc(size_t size) {
     if (header->size - sizeof(heap_header_t) >= size) { break; }
     header = header->flink;
   }
-  
+
   if (!header) { header = heap_allocate_header(size); header->used = true; }   // Get a new header
   else {
 
     header->used = true;
     header->req_size = size;
+
     heap_remove_header(header);   // Remove from free headers
   
     if (!header->page_flink && !header->page_blink) { complete_pages[header->index]--; }
   }
- 
-  heap_split_header(header);    // If there's extra space that will never be used, split it to a new header 
+  
+  heap_split_header(header);    // If there's extra space that will never be used, split it to a new header
+  
   return (void*)((unsigned long)header + sizeof(heap_header_t));
 }
 
@@ -151,7 +154,7 @@ void* kmalloc(size_t size) {
 void free(void* ptr) {
 
   if (!ptr) { return; }   // Nothing to free
-    
+   
   heap_header_t* header = (heap_header_t*)((unsigned long)ptr - sizeof(heap_header_t));
   if (header->signature != HEAP_SIGNATURE) { return; }        // Not an allocated memory 
    
@@ -183,7 +186,6 @@ void* krealloc(void* ptr, size_t size) {
 
   /* Normal reallocation */
   void* np = kmalloc(size);
-  
   memcpy(np, ptr, (header->req_size > size ? size : header->req_size));
 
   free(ptr);

@@ -121,7 +121,7 @@ inode_t* navigate(char* path) {
 
     buffer = read_file(current_file);
   }
-
+  
   return current_file;
 } 
 
@@ -157,7 +157,6 @@ inode_t* create_file(char* filename, char* path, uint8_t attributes) {
   inode_t* file = init_file(filename, attributes);
   
   enter_file(file, navigate(path));
-  
   return file;
 }
 
@@ -225,15 +224,15 @@ void write_file_data(inode_t* inode, void* buffer, size_t size) {
   }
 
   if (remainder) { 
-
+    
     uint8_t* remainder_buffer = kmalloc(SECTOR_SIZE);
+    
     memcpy(remainder_buffer, buffer, remainder);
     memset((void*)((size_t)remainder_buffer + remainder), '\0', SECTOR_SIZE - remainder);
 
     ata_write(cluster * CLUSTERS_IN_SECTOR, CLUSTERS_IN_SECTOR, (void*)remainder_buffer);
 
     ((uint16_t*)fat_buffer)[cluster] = EOC;
-
     free(remainder_buffer);
   }
 
@@ -245,8 +244,7 @@ void write_file_data(inode_t* inode, void* buffer, size_t size) {
 void cat_file(inode_t* inode, void* buffer, size_t size) {
 
   uint8_t* file_data = read_file(inode);
-  //PRINTN(size + inode->size);
-  while(1) {}
+  
   file_data = krealloc(file_data, size + inode->size);
 
   uint8_t* appended_buffer = (uint8_t*)((uint32_t)file_data + inode->size);
@@ -254,6 +252,7 @@ void cat_file(inode_t* inode, void* buffer, size_t size) {
   
   fat_edit_file(inode, file_data, inode->size + size);
   free(file_data);
+  PRINT("HELLO?");
 }
 
 
@@ -271,18 +270,21 @@ void fat_delete_file(inode_t* inode) {
   uint16_t cluster = inode->cluster;
   uint16_t it = cluster;
 
+  inode->cluster = 0x0;
+
   while (it != EOC) { it = fat_buffer[it]; fat_buffer[cluster] = 0x0; cluster = it; }
 
   fat_buffer[it] = 0x0;
-
   WRITE_FAT(fat_buffer);
 }
 
 
 void* read_file(inode_t* inode) {
   
-  uint8_t* buffer = kmalloc(inode->size);
+  size_t buff_size = inode->size / SECTOR_SIZE;
+  if (inode->size % SECTOR_SIZE) { buff_size += SECTOR_SIZE; }
 
+  uint8_t* buffer = kmalloc(buff_size);
   READ_FAT(fat_buffer);
 
   uint8_t* it = buffer;
