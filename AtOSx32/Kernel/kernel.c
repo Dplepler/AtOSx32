@@ -56,13 +56,11 @@ int kmain(void) {
 
   init_fs();
   char* txt = "Hello there my friends my name is Obama and I sex";
-
-  inode_t* node = create_file("bruhh.txt", NULL, 0x0);
-
-  edit_file(node, txt, strl(txt));
+  inode_t* dir = create_directory("dir", NULL, 0x0);
   
+  inode_t* node = create_file("bruhh.txt", "dir", 0x0);
+  edit_file(node, txt, strl(txt));
   char* hello = read_file(node);
-
   PRINT(hello);
   
 

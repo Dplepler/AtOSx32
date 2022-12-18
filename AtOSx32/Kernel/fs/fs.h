@@ -95,7 +95,7 @@ typedef struct _INODE_ENTRY_STRUCT {
 
 void* read_file(inode_t* inode);
 
-char* eat_path(char* path);
+char* eat_path(char** path);
 char* make_full_filename(char* filename, char* ext);
 
 uint16_t fat_extract_value(uint16_t index);
@@ -104,7 +104,7 @@ uint16_t fat_create_date(cmos_time date);
 uint16_t fat_find_free_cluster(void* buffer, int* err);
 
 inode_t* create_directory(char* dirname, char* path, uint8_t attributes);
-inode_t* navigate(char* path);
+inode_t* navigate_dir(char* path);
 inode_t* find_file(char* buffer, size_t size, char* filename);
 inode_t* create_file(char* filename, char* path, uint8_t attributes);
 inode_t* init_file(char* filename, uint8_t attributes);

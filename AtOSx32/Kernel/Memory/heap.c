@@ -24,21 +24,21 @@ void heap_insert_unused_header(heap_header_t* header) {
   
   /* Insert header as the head node */
   if (free_blocks[header->index]) { 
-    free_blocks[header->index]->blink = header; 
+    free_blocks[header->index]->blink = header;
   }
   
   header->flink = free_blocks[header->index];
-  free_blocks[header->index] = header;  
+  free_blocks[header->index] = header; 
 }
 
 /* Remove memory block from the free blocks array */
 void heap_remove_header(heap_header_t* header) {
 
   if (header->flink) { header->flink->blink = header->blink; }
+  if (header->blink) { header->blink->flink = header->flink; }
 
   if (free_blocks[header->index] == header) { free_blocks[header->index] = header->flink; }
-  else if (header->blink) { header->blink->flink = header->flink; }
-  
+
   header->flink = header->blink = NULL;
 }
 
@@ -47,11 +47,13 @@ void heap_remove_header(heap_header_t* header) {
    so we split it to a new header */
 void heap_split_header(heap_header_t* header) {
 
-  if (header->size == header->req_size) { return; }
-
+  if (sizeof(heap_header_t) > header->size - header->req_size) { return; }
+  if (sizeof(heap_header_t) > header->size - header->req_size - sizeof(heap_header_t)) { return; }
+  
   heap_header_t* split_header = (heap_header_t*)((unsigned long)header + sizeof(heap_header_t) + header->req_size);
   
   split_header->size = split_header->req_size = header->size - header->req_size - sizeof(heap_header_t);
+
   split_header->req_size -= sizeof(heap_header_t);
   if (!split_header->size) { return; }
 
@@ -126,22 +128,21 @@ heap_header_t* heap_allocate_header(unsigned int size) {
 void* kmalloc(size_t size) {
 
   uint8_t index = heap_get_index(size);
-
-  heap_header_t* header = free_blocks[index];
- 
+  
+  heap_header_t* header = free_blocks[index];  
+  
   while (header) {
     if (header->size - sizeof(heap_header_t) >= size) { break; }
     header = header->flink;
   }
 
+  
   if (!header) { header = heap_allocate_header(size); header->used = true; }   // Get a new header
   else {
-
     header->used = true;
     header->req_size = size;
-
     heap_remove_header(header);   // Remove from free headers
-  
+    
     if (!header->page_flink && !header->page_blink) { complete_pages[header->index]--; }
   }
   
@@ -152,7 +153,7 @@ void* kmalloc(size_t size) {
 
 /* Free allocated dynamic memory */
 void free(void* ptr) {
-
+  
   if (!ptr) { return; }   // Nothing to free
    
   heap_header_t* header = (heap_header_t*)((unsigned long)ptr - sizeof(heap_header_t));

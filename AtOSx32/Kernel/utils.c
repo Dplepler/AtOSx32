@@ -40,6 +40,8 @@ bool islower(char c) {
 
 /* Get the character length of a string */
 size_t strl(const char* str) {
+  
+  if (!str) { return 0; }
 
   size_t len = 0;
   while (str[len]) { len++; }
