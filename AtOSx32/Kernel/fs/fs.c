@@ -151,11 +151,21 @@ char* eat_path(char** path) {
   return ret;
 }
 
-/* Takes a file path and returns the last specified directory */
-inode_t* navigate_dir(char* path, inode_t* file, void** buff_ref) {
-  
-  if ((uint32_t)file - (uint32_t)root_buffer < ROOT_SIZE) { return NULL; }
+/* Eat the last file/directory in a path */
+char* eat_path_reverse(char** path) {
 
+  strrev(*path);
+  if (CHECK_SEPERATOR(**path)) { (*path)++; }
+  char* ret = eat_path(path);
+  strrev(ret);
+  strrev(*path);
+
+  return ret;
+}
+
+/* Takes a file path and returns the last specified directory */
+inode_t* navigate_dir(char* path, void** buff_ref) {
+  
   inode_t* parent = NULL;
   char* name = NULL;
 
@@ -169,18 +179,19 @@ inode_t* navigate_dir(char* path, inode_t* file, void** buff_ref) {
   while (navigate_path && *navigate_path) {
    
     parent = current_file;
+
     name = eat_path(&navigate_path);
-   
-    current_file = current_file ? find_file(buffer, current_file->size, name) : find_file(buffer, root_entries * DIR_ENTRY_SIZE, name);
-    
-    if (buffer != (char*)root_buffer) { free(buffer); }
  
+    current_file = current_file ? find_file(buffer, current_file->size, name) : find_file(buffer, root_entries * DIR_ENTRY_SIZE, name);
     free(name);
 
     if (!(current_file->attributes & ATTRIBUTE_DIRECTORY)) { return parent; }
-    if (file && file == current_file) { return parent; }
-    
-    if (navigate_path && *navigate_path) { buffer = read_file(current_file); }
+
+    if (navigate_path && *navigate_path) {  
+      if (buffer != (char*)root_buffer) { free(buffer); }
+      buffer = read_file(current_file); 
+    }
+
     if (buff_ref) { *buff_ref = buffer; }
   }
   
@@ -236,13 +247,14 @@ inode_t* create_file(char* filename, char* path, uint8_t attributes) {
   init_first_cluster(file);
 
   void* dir_buffer;
-  inode_t* dir = navigate_dir(path, NULL, &dir_buffer);
+  inode_t* dir = navigate_dir(path, &dir_buffer);
 
   enter_file(file, dir);
- 
+  
   if (dir) {
-    
-    inode_t* dir_dir = navigate_dir(path, dir, NULL);
+    eat_path_reverse(&path);
+    inode_t* dir_dir = navigate_dir(path, NULL);
+    if (dir_dir) { PRINTN(dir_dir->size); }
     edit_file(dir_dir, dir_buffer, (dir_dir ? dir_dir->size : ROOT_SIZE));   /* Edit directory's size */
   }
 
@@ -344,12 +356,10 @@ write:
  * */
 void write_file_data(inode_t* inode, void* buffer, size_t size) {
 
-  int err = NO_ERROR; 
-
   size_t remainder = size % SECTOR_SIZE;
   size_t sectors = size / SECTOR_SIZE;
 
-  if (sectors > SYSTEM_SECTORS) { err = ERROR_FILE_TOO_LARGE; return; }
+  if (sectors > SYSTEM_SECTORS) { panic(ERROR_FILE_TOO_LARGE); }
 
   fat_resize_file(inode, size);
   
@@ -470,7 +480,7 @@ void* read_file(inode_t* inode) {
 
   /* Normal file read */
   size_t buff_sector_size = inode->size / SECTOR_SIZE;
-  if (inode->size % SECTOR_SIZE) { buff_sector_size += SECTOR_SIZE; }
+  if (inode->size % SECTOR_SIZE) { buff_sector_size++; }
  
   if (!buff_sector_size) { return NULL; }
 

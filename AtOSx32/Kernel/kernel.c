@@ -54,7 +54,6 @@ int kmain(void) {
   //init_multitasking();
 
 
-
   init_fs();
   char* txt = "1337 1337";
 
@@ -71,7 +70,7 @@ int kmain(void) {
   PRINTN(bbb->size);
   inode_t* ccc = find_file(buff2, bbb->size, "aa.txt");
   PRINT("BYEW<F");
-  //PRINTNH(ccc);   
+  //PRINTNH(ccc);
   
   
 

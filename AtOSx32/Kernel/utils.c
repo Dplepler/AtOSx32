@@ -119,3 +119,18 @@ int strcmp(const char* s1, const char* s2) {
   return *(const unsigned char*)s1 - *(const unsigned char*)s2;
 }
 
+void strrev(char* str) {
+
+  size_t size = strl(str);
+  char c = 0;
+
+  for (unsigned long i = 0; i < size / 2; i++) {
+    c = str[i];
+    str[i] = str[size - i - 1];
+    str[size - i - 1] = c;
+  }
+}
+
+
+
+

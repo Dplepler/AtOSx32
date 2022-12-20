@@ -136,7 +136,6 @@ void* kmalloc(size_t size) {
     header = header->flink;
   }
 
-  
   if (!header) { header = heap_allocate_header(size); header->used = true; }   // Get a new header
   else {
     header->used = true;
