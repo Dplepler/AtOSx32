@@ -8,6 +8,7 @@
 #include "Drivers/ata.h"
 #include "fs/fs.h"
 
+extern uint8_t* root_buffer;
 
 void clock() {
   while (true) {
@@ -55,22 +56,22 @@ int kmain(void) {
 
 
   init_fs();
-  char* txt = "Hello there my friends my name is Obama and I sex";
+  char* txt = "1337 1337";
 
-  inode_t* dir = create_directory("dir", NULL, 0x0);
-
-  inode_t* dir2 = create_directory("dir2", "dir", 0x0);
-
+  create_directory("dir", NULL, 0x0);
+  create_directory("dir2", "dir", 0x0);
   create_file("aa.txt", "dir/dir2", 0x0);
-  
-  inode_t* aaa = navigate_dir("dir/dir2", NULL, NULL); 
-  PRINTN(aaa->cluster);
-  //void* rtn = read_file(aaa);
-  
-  //PRINTNH(rtn); NL;
 
-  //inode_t* file = create_file("file.txt", "dir/dir2", 0x0);
- 
+  root_read(root_buffer);
+  inode_t* aaa = find_file(root_buffer, ROOT_SIZE, "dir");
+  void* buff = read_file(aaa);
+  inode_t* bbb = find_file(buff, aaa->size, "dir2");
+  void* buff2 = read_file(bbb);
+
+  PRINTN(bbb->size);
+  inode_t* ccc = find_file(buff2, bbb->size, "aa.txt");
+  PRINT("BYEW<F");
+  //PRINTNH(ccc);   
   
   
 

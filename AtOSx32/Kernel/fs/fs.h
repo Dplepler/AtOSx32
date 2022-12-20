@@ -44,12 +44,6 @@
 
 #define get_next_cluster fat_extract_value
 
-#define READ_FAT(buffer)  (ata_read(FAT_SECTOR_OFFSET, SECTORS_IN_FAT, buffer))
-#define WRITE_FAT(buffer) (ata_write(FAT_SECTOR_OFFSET, SECTORS_IN_FAT, buffer))
-
-#define READ_ROOT(buffer) (ata_read(ROOT_SECTOR_OFFSET, ROOT_SIZE / SECTOR_SIZE, buffer))
-#define WRITE_ROOT(buffer) (ata_write(ROOT_SECTOR_OFFSET, ROOT_SIZE / SECTOR_SIZE, buffer))
-
 #define CHECK_SEPERATOR(c) (c == '/' || c == '\\')
 
 #define VALID_CLUSTER(cluster) (cluster != BAD_CLUSTER && cluster > 0x2)
@@ -92,6 +86,13 @@ typedef struct _INODE_ENTRY_STRUCT {
 
 } __attribute__((packed)) inode_t;
 
+
+
+void fat_write(void* buffer);
+void fat_read(void* buffer);
+void root_write(void* buffer);
+void root_read(void* buffer);
+
 void* read_file(inode_t* inode);
 
 char* eat_path(char** path);
@@ -113,6 +114,7 @@ void root_setup_dir();
 void fat_setup_table();
 void enter_file(inode_t* file, inode_t* dir);
 void fat_resize_file(inode_t* inode, size_t size);
+void init_first_cluster(inode_t* inode);
 void write_file_data(inode_t* inode, void* buffer, size_t size);
 void cat_file(inode_t* inode, void* buffer, size_t size);
 void edit_file(inode_t* inode, void* buffer, size_t size);

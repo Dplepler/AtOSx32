@@ -5,6 +5,31 @@ uint8_t* root_buffer = NULL;
 
 uint16_t root_entries = 0;
 
+static bool was_fat_read = false;
+static bool was_root_read = false;
+
+void fat_write(void* buffer) {
+
+  ata_write(FAT_SECTOR_OFFSET, SECTORS_IN_FAT, buffer);
+  was_fat_read = false;
+}
+
+void fat_read(void* buffer) {
+
+  if (!was_fat_read) { was_fat_read = true; ata_read(FAT_SECTOR_OFFSET, SECTORS_IN_FAT, buffer); }
+}
+
+void root_write(void* buffer) {
+
+  ata_write(ROOT_SECTOR_OFFSET, ROOT_SIZE / SECTOR_SIZE, buffer);
+  was_root_read = false;
+}
+
+void root_read(void* buffer) {
+  if (!was_root_read) { was_root_read = true; ata_read(ROOT_SECTOR_OFFSET, ROOT_SIZE / SECTOR_SIZE, buffer); }
+}
+
+
 /* Initialize fat table and root directory if they weren't initialised yet */
 void init_fs() {
 
@@ -19,7 +44,7 @@ void init_fs() {
 
 /* Setup the root directory */
 void root_setup_dir() {
-  WRITE_ROOT(root_buffer);
+  root_write(root_buffer);
 }
 
 /* Setup initial table values, indexes 0 & 1 are reserved */
@@ -30,13 +55,13 @@ void fat_setup_table() {
   ((uint16_t*)fat_buffer)[0] = FAT_SIGNATURE;
   ((uint16_t*)fat_buffer)[1] = FAT_SIGNATURE;
 
-  WRITE_FAT(fat_buffer);
+  fat_write(fat_buffer);
 }
 
 /* Returns a value from the fat table at the given location */
 uint16_t fat_extract_value(uint16_t index) {
   
-  READ_FAT(fat_buffer);
+  fat_read(fat_buffer);
   return (uint16_t)(((uint16_t*)fat_buffer)[index]);
 }
 
@@ -136,7 +161,7 @@ inode_t* navigate_dir(char* path, inode_t* file, void** buff_ref) {
 
   char* navigate_path = path;
 
-  READ_ROOT(root_buffer);
+  root_read(root_buffer);
   
   inode_t* current_file = NULL;
   char* buffer = (char*)root_buffer;
@@ -170,17 +195,34 @@ inode_t* navigate_dir(char* path, inode_t* file, void** buff_ref) {
 inode_t* find_file(char* buffer, size_t size, char* filename) {
   
   char* it = NULL;
-  
+ 
   for (uint32_t i = 0; i < size; i += DIR_ENTRY_SIZE, buffer += DIR_ENTRY_SIZE) {
-
+  
     it = make_full_filename(((inode_t*)buffer)->filename, ((inode_t*)buffer)->ext);
     if (!strcmp(it, filename)) { free(it); return (inode_t*)buffer; } 
     free(it);
   }
 
+  while(1) {}
   panic(ERROR_PATH_INCORRECT);
   return NULL;
 }
+
+
+void init_first_cluster(inode_t* inode) {
+  
+  fat_read(fat_buffer);
+
+  int err = NO_ERROR;
+  inode->cluster = fat_find_free_cluster(fat_buffer, &err); 
+  if (err) { panic(err); } 
+
+
+  ((uint16_t*)fat_buffer)[inode->cluster] = EOC; 
+
+  fat_write(fat_buffer);
+}
+
 
 /* Create a file 
  * Input: Desired filename, [up to 8 bytes of name].[up to 3 bytes of file extention]
@@ -189,18 +231,18 @@ inode_t* find_file(char* buffer, size_t size, char* filename) {
  * */
 inode_t* create_file(char* filename, char* path, uint8_t attributes) {
     
-  inode_t* file = init_file(filename, attributes); 
-  
+  inode_t* file = init_file(filename, attributes);
+
+  init_first_cluster(file);
+
   void* dir_buffer;
   inode_t* dir = navigate_dir(path, NULL, &dir_buffer);
-  
+
   enter_file(file, dir);
  
   if (dir) {
     
     inode_t* dir_dir = navigate_dir(path, dir, NULL);
-    dir->size += DIR_ENTRY_SIZE;
-    
     edit_file(dir_dir, dir_buffer, (dir_dir ? dir_dir->size : ROOT_SIZE));   /* Edit directory's size */
   }
 
@@ -251,8 +293,7 @@ void fat_resize_file(inode_t* inode, size_t size) {
   uint16_t old_cluster_amount = inode->size / CLUSTER_SIZE;
   if (inode->size % CLUSTER_SIZE) { old_cluster_amount++; }
 
-
-  READ_FAT(fat_buffer);
+  fat_read(fat_buffer);
 
   if (inode->size > size) {
 
@@ -271,14 +312,6 @@ void fat_resize_file(inode_t* inode, size_t size) {
 
   
   int err = NO_ERROR;
-  
-  if (!cluster) { 
-    cluster = inode->cluster = fat_find_free_cluster(fat_buffer, &err); 
-    if (err) { panic(err); } 
-
-    ((uint16_t*)fat_buffer)[cluster] = EOC;
-    inode->size = 0;
-  }
   
   if (inode->size < size) {
     
@@ -300,7 +333,7 @@ void fat_resize_file(inode_t* inode, size_t size) {
 write:
 
   inode->size = size;
-  WRITE_FAT(fat_buffer);
+  fat_write(fat_buffer);
 }
 
 
@@ -311,7 +344,7 @@ write:
  * */
 void write_file_data(inode_t* inode, void* buffer, size_t size) {
 
-  int err = NO_ERROR;  
+  int err = NO_ERROR; 
 
   size_t remainder = size % SECTOR_SIZE;
   size_t sectors = size / SECTOR_SIZE;
@@ -320,20 +353,22 @@ void write_file_data(inode_t* inode, void* buffer, size_t size) {
 
   fat_resize_file(inode, size);
   
-  READ_FAT(fat_buffer);
+  fat_read(fat_buffer);
 
   uint16_t cluster = inode->cluster;
-
-  do {
-
-    ata_write(cluster * CLUSTERS_IN_SECTOR, CLUSTERS_IN_SECTOR, buffer);   /* Write one cluster */ 
-    
-    cluster = ((uint16_t*)fat_buffer)[cluster];
-    buffer += CLUSTER_SIZE;
-
-    size -= CLUSTER_SIZE;
   
-  } while (cluster != EOC && size >= CLUSTER_SIZE);
+  if (sectors) {
+    do {
+
+      ata_write(cluster * CLUSTERS_IN_SECTOR, CLUSTERS_IN_SECTOR, buffer);   /* Write one cluster */ 
+      
+      cluster = ((uint16_t*)fat_buffer)[cluster];
+      buffer += CLUSTER_SIZE;
+      size -= CLUSTER_SIZE;
+    
+    } while (cluster != EOC && size >= CLUSTER_SIZE);
+  }
+
 
   /* Last sector to write is smaller than the default sector size */
   if (remainder) { 
@@ -352,12 +387,12 @@ void write_file_data(inode_t* inode, void* buffer, size_t size) {
 /* Concatenate a file's contents with a given buffer and buffer size */
 void cat_file(inode_t* inode, void* buffer, size_t size) {
 
-  uint8_t* file_data = read_file(inode);
+  void* file_data = read_file(inode);
   size_t prev_size = inode ? inode->size : (root_entries++ * DIR_ENTRY_SIZE);
 
   file_data = krealloc(file_data, prev_size + size);
 
-  uint8_t* appended_buffer = (uint8_t*)((uint32_t)file_data + prev_size);
+  void* appended_buffer = (void*)((uint32_t)file_data + prev_size);
   memcpy(appended_buffer, buffer, size);
   
   edit_file(inode, file_data, prev_size + size);
@@ -377,7 +412,7 @@ void edit_file(inode_t* inode, void* buffer, size_t size) {
   /* Only for cases where the file is NULL, we're going to edit the root directory */
   void* root = kmalloc(ROOT_SIZE);
   memcpy(root, buffer, size);
-  WRITE_ROOT(root);
+  root_write(root);
 
   free(root);
 }
@@ -387,7 +422,7 @@ void fat_delete_file(inode_t* inode) {
   
   if (!inode || !inode->cluster) { return; }
 
-  READ_FAT(fat_buffer);
+  fat_read(fat_buffer);
   
   uint16_t cluster = inode->cluster;
   uint16_t it = cluster;
@@ -397,7 +432,7 @@ void fat_delete_file(inode_t* inode) {
   while (it != EOC) { it = ((uint16_t*)fat_buffer)[it]; ((uint16_t*)fat_buffer)[cluster] = 0x0; cluster = it; }
 
   ((uint16_t*)fat_buffer)[it] = 0x0;
-  WRITE_FAT(fat_buffer);
+  fat_write(fat_buffer);
 }
 
 void fat_clear_file(inode_t* inode) {
@@ -405,7 +440,7 @@ void fat_clear_file(inode_t* inode) {
   
   if (!inode || !inode->cluster) { return; }
 
-  READ_FAT(fat_buffer);
+  fat_read(fat_buffer);
   
   uint16_t cluster = inode->cluster;
   uint16_t it = cluster;
@@ -414,7 +449,7 @@ void fat_clear_file(inode_t* inode) {
 
   ((uint16_t*)fat_buffer)[it] = 0x0;
   ((uint16_t*)fat_buffer)[inode->cluster] = EOC;
-  WRITE_FAT(fat_buffer);
+  fat_write(fat_buffer);
 }
 
 
@@ -426,7 +461,7 @@ void* read_file(inode_t* inode) {
   /* Read from root */
   if (!inode) {
    
-    READ_ROOT(root_buffer);
+    root_read(root_buffer);
     buffer = kmalloc(root_entries * DIR_ENTRY_SIZE);
     memcpy(buffer, root_buffer, root_entries * DIR_ENTRY_SIZE);
     
@@ -434,13 +469,13 @@ void* read_file(inode_t* inode) {
   }
 
   /* Normal file read */
-  size_t buff_size = inode->size / SECTOR_SIZE;
-  if (inode->size % SECTOR_SIZE) { buff_size += SECTOR_SIZE; }
+  size_t buff_sector_size = inode->size / SECTOR_SIZE;
+  if (inode->size % SECTOR_SIZE) { buff_sector_size += SECTOR_SIZE; }
  
-  if (!buff_size) { return NULL; }
+  if (!buff_sector_size) { return NULL; }
 
-  buffer = kmalloc(buff_size);
-  READ_FAT(fat_buffer);
+  buffer = kmalloc(buff_sector_size * SECTOR_SIZE);
+  fat_read(fat_buffer);
 
   uint8_t* it = buffer; 
 
