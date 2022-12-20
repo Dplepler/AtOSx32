@@ -57,14 +57,25 @@ int kmain(void) {
   init_fs();
   char* txt = "1337 1337";
 
+
   create_directory("dir", NULL, 0x0);
+
   create_directory("dir2", "dir", 0x0);
+
   create_file("aa.txt", "dir/dir2", 0x0);
 
   root_read(root_buffer);
+  
   inode_t* aaa = find_file(root_buffer, ROOT_SIZE, "dir");
+  PRINTNH(aaa);
+
   void* buff = read_file(aaa);
+
+  PRINTNH(buff);
+
+  PRINTN(aaa->size);
   inode_t* bbb = find_file(buff, aaa->size, "dir2");
+
   void* buff2 = read_file(bbb);
 
   PRINTN(bbb->size);

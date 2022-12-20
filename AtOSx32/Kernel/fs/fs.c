@@ -131,41 +131,61 @@ inode_t* create_directory(char* dirname, char* path, uint8_t attributes) {
 }
 
 /* Eats the first directory in a given path reference, deletes it from the string and returns it's name */
-char* eat_path(char** path) {
+char* eat_path(char* path) {
 
-  if (path == NULL) { return NULL; }
+  if (!path) { return NULL; }
 
-  char* it = *path;
+  char* it = path;
 
   while (*it && !CHECK_SEPERATOR(*it)) {
     it++;
-    if (((uint32_t)it - (uint32_t)*path) > FULL_FILENAME_SIZE) { return NULL; }
+    if (((uint32_t)it - (uint32_t)path) > FULL_FILENAME_SIZE) { return NULL; }
+  }
+ 
+  return *it ? ++it : it;
+}
+
+char* get_first_file_from_path(char* path) {
+  
+  if (path == NULL) { return NULL; }
+
+  char* it = path;
+
+  while (*it && !CHECK_SEPERATOR(*it)) {
+    it++;
+    if (((uint32_t)it - (uint32_t)path) > FULL_FILENAME_SIZE) { return NULL; }
   }
 
-  size_t size = (uint32_t)it - (uint32_t)*path;
-  
-  char* ret = kcalloc(1, size + 1);
-  for (uint8_t i = 0; i < size; i++) { ret[i] = **path; (*path)++; }
-  
-  if (CHECK_SEPERATOR(*it)) { (*path)++; }
-  return ret;
+  size_t size = (uint32_t)it - (uint32_t)path + 1;
+  char* filename = kmalloc(size);
+  memcpy(filename, path, size);
+  filename[size - 1] = '\0';
+
+  return filename;
 }
 
 /* Eat the last file/directory in a path */
-char* eat_path_reverse(char** path) {
+void eat_path_reverse(char* path) {
 
-  strrev(*path);
-  if (CHECK_SEPERATOR(**path)) { (*path)++; }
-  char* ret = eat_path(path);
-  strrev(ret);
-  strrev(*path);
+  if (!path || !*path) { return NULL; }
+  
+  size_t size = strl(path);
 
-  return ret;
+  char* it = path;
+
+  if (CHECK_SEPERATOR(it[size - 1])) { size--; }
+  
+  unsigned long i = size - 1;
+  for (; i > 0 && !CHECK_SEPERATOR(it[i]); i--) { }
+  
+  it[i] = '\0';
+
+  return path;
 }
 
 /* Takes a file path and returns the last specified directory */
 inode_t* navigate_dir(char* path, void** buff_ref) {
-  
+ 
   inode_t* parent = NULL;
   char* name = NULL;
 
@@ -180,8 +200,9 @@ inode_t* navigate_dir(char* path, void** buff_ref) {
    
     parent = current_file;
 
-    name = eat_path(&navigate_path);
- 
+    name = get_first_file_from_path(navigate_path);
+    navigate_path = eat_path(navigate_path);
+
     current_file = current_file ? find_file(buffer, current_file->size, name) : find_file(buffer, root_entries * DIR_ENTRY_SIZE, name);
     free(name);
 
@@ -194,7 +215,7 @@ inode_t* navigate_dir(char* path, void** buff_ref) {
 
     if (buff_ref) { *buff_ref = buffer; }
   }
-  
+ 
   return current_file;
 } 
 
@@ -205,15 +226,16 @@ inode_t* navigate_dir(char* path, void** buff_ref) {
  * */
 inode_t* find_file(char* buffer, size_t size, char* filename) {
   
-  char* it = NULL;
- 
+  char* it = NULL; 
+
+  PRINTNH(buffer);
   for (uint32_t i = 0; i < size; i += DIR_ENTRY_SIZE, buffer += DIR_ENTRY_SIZE) {
-  
     it = make_full_filename(((inode_t*)buffer)->filename, ((inode_t*)buffer)->ext);
     if (!strcmp(it, filename)) { free(it); return (inode_t*)buffer; } 
     free(it);
   }
 
+  PRINT(filename);
   while(1) {}
   panic(ERROR_PATH_INCORRECT);
   return NULL;
@@ -227,7 +249,6 @@ void init_first_cluster(inode_t* inode) {
   int err = NO_ERROR;
   inode->cluster = fat_find_free_cluster(fat_buffer, &err); 
   if (err) { panic(err); } 
-
 
   ((uint16_t*)fat_buffer)[inode->cluster] = EOC; 
 
@@ -252,9 +273,8 @@ inode_t* create_file(char* filename, char* path, uint8_t attributes) {
   enter_file(file, dir);
   
   if (dir) {
-    eat_path_reverse(&path);
+    eat_path_reverse(path); 
     inode_t* dir_dir = navigate_dir(path, NULL);
-    if (dir_dir) { PRINTN(dir_dir->size); }
     edit_file(dir_dir, dir_buffer, (dir_dir ? dir_dir->size : ROOT_SIZE));   /* Edit directory's size */
   }
 

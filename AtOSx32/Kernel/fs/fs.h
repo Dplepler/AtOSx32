@@ -95,8 +95,8 @@ void root_read(void* buffer);
 
 void* read_file(inode_t* inode);
 
-char* eat_path(char** path);
-char* eat_path_reverse(char** path);
+char* eat_path(char* path);
+char* get_first_file_from_path(char* path);
 char* make_full_filename(char* filename, char* ext);
 
 uint16_t fat_extract_value(uint16_t index);
@@ -121,6 +121,7 @@ void cat_file(inode_t* inode, void* buffer, size_t size);
 void edit_file(inode_t* inode, void* buffer, size_t size);
 void fat_delete_file(inode_t* inode);
 void fat_create_filename(inode_t* inode, char* name);
+void eat_path_reverse(char* path);
 
 #endif
 
