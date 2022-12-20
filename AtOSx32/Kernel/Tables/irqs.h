@@ -25,7 +25,5 @@ void irq_remap();
 void init_irq();
 void irq_handler(isr_stack_t* stack);
 
-
-
-
 #endif
+

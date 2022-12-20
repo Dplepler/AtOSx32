@@ -54,4 +54,3 @@ irq_common_handler:
   add esp, 8
   iret
 
-

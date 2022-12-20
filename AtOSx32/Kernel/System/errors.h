@@ -18,3 +18,4 @@ typedef enum _ERRORS_ENUM {
 void panic(int error);
 
 #endif
+

@@ -106,3 +106,4 @@ disk_error_message 	db "Disk read error!" , 0
 
 times 510-($-$$) 		db 0	; Pad memory so that the size of the bootloader will always be 510 (+2 signature bytes)
 dw 0AA55h		; Boot sector signature - tell the CPU this is our bootloader
+

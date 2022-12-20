@@ -38,6 +38,5 @@ pgulong_t* palloc();
 pgulong_t* palloc_single();
 
 
-
-
 #endif
+

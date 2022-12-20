@@ -39,3 +39,4 @@ void gdt_install_gates() {
 
   load_gdt();
 }
+

@@ -45,3 +45,4 @@ void ata_write(uint32_t sector_index, size_t sectors, void* buffer);
 void io_delay();
 
 #endif
+

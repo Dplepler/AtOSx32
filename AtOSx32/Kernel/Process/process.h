@@ -128,6 +128,6 @@ uint32_t get_next_pid();
 tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, uint8_t policy);
 process_t* create_process_handler(uint32_t* address_space, uint32_t eip, void* params, uint8_t policy);
 thread_t* create_thread_handler(uint32_t eip, void* params, uint8_t policy);
-//tcb_t* find_task(uint32_t pid);
 
 #endif
+

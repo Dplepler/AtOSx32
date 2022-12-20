@@ -51,3 +51,4 @@ heap_header_t* heap_allocate_header(unsigned int size);
 uint8_t heap_get_index(size_t size);
 
 #endif
+

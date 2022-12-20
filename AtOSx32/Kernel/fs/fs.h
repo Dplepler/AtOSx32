@@ -20,7 +20,6 @@
 #define SECTORS_IN_FAT ((SYSTEM_SECTORS * 2) / SECTOR_SIZE)
 #define SECTORS_IN_ROOT ((ROOT_ENTRIES * DIR_ENTRY_SIZE) / SECTOR_SIZE)
 
-
 #define KERNEL_SECTORS 100
 #define KERNEL_CLUSTERS KERNEL_SECTORS
 #define DATA_START (HIDDEN_SECTORS + SECTORS_IN_FAT + SECTORS_IN_ROOT + KERNEL_SECTORS)  /* Sector index indicating the beginning of data */
@@ -88,7 +87,7 @@ typedef struct _INODE_ENTRY_STRUCT {
   uint16_t last_write_date;
 
   uint16_t cluster;
-
+    
   uint32_t size;
 
 } __attribute__((packed)) inode_t;
@@ -104,7 +103,7 @@ uint16_t fat_create_date(cmos_time date);
 uint16_t fat_find_free_cluster(void* buffer, int* err);
 
 inode_t* create_directory(char* dirname, char* path, uint8_t attributes);
-inode_t* navigate_dir(char* path);
+inode_t* navigate_dir(char* path, inode_t* file, void** buff_ref);
 inode_t* find_file(char* buffer, size_t size, char* filename);
 inode_t* create_file(char* filename, char* path, uint8_t attributes);
 inode_t* init_file(char* filename, uint8_t attributes);
@@ -113,6 +112,7 @@ void init_fs();
 void root_setup_dir();
 void fat_setup_table();
 void enter_file(inode_t* file, inode_t* dir);
+void fat_resize_file(inode_t* inode, size_t size);
 void write_file_data(inode_t* inode, void* buffer, size_t size);
 void cat_file(inode_t* inode, void* buffer, size_t size);
 void edit_file(inode_t* inode, void* buffer, size_t size);
@@ -120,3 +120,4 @@ void fat_delete_file(inode_t* inode);
 void fat_create_filename(inode_t* inode, char* name);
 
 #endif
+

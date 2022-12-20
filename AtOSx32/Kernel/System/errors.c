@@ -13,7 +13,5 @@ void panic(int error) {
   }
 
   for(;;) {}
-
-
-
 }
+

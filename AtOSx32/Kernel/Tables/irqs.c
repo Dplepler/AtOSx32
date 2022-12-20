@@ -100,3 +100,4 @@ void irq_handler(isr_stack_t* stack) {
   }
   else { sti(); }
 }
+

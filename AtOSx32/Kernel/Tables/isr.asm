@@ -86,4 +86,3 @@ isr_common_handler:
   add esp, 8     ; Cleanup
   iret           ; Return from interrupt
 
-

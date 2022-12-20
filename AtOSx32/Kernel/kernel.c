@@ -56,14 +56,23 @@ int kmain(void) {
 
   init_fs();
   char* txt = "Hello there my friends my name is Obama and I sex";
-  inode_t* dir = create_directory("dir", NULL, 0x0);
-  
-  inode_t* node = create_file("bruhh.txt", "dir", 0x0);
-  edit_file(node, txt, strl(txt));
-  char* hello = read_file(node);
-  PRINT(hello);
-  
 
+  inode_t* dir = create_directory("dir", NULL, 0x0);
+
+  inode_t* dir2 = create_directory("dir2", "dir", 0x0);
+
+  create_file("aa.txt", "dir/dir2", 0x0);
+  
+  inode_t* aaa = navigate_dir("dir/dir2", NULL, NULL); 
+  PRINTN(aaa->cluster);
+  //void* rtn = read_file(aaa);
+  
+  //PRINTNH(rtn); NL;
+
+  //inode_t* file = create_file("file.txt", "dir/dir2", 0x0);
+ 
+  
+  
 
   /* init_cleaner_task();
 

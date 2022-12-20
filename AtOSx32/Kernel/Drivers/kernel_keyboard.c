@@ -44,4 +44,3 @@ void keyboard_enc_send_cmd(uint8_t cmd) {
   outportb(KEYBOARD_ENC_CMD_REG, cmd);  // Send command
 }
 
-

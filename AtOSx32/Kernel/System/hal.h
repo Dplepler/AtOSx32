@@ -62,3 +62,4 @@ static inline void disable_nmi() {
 }
 
 #endif
+

@@ -241,3 +241,4 @@ bool terminal_special_chars(char c) {
 
   return false;
 }
+
