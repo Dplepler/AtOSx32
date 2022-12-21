@@ -98,10 +98,11 @@ void fat_create_filename(inode_t* inode, char* name) {
 
   char* it = name;
   while (*it != '.' && *it) { it++; }
-
-  if (*it) { *it++ = '\0'; }
+  
+  size_t name_size = it - name;
+  if (*it) { it++; }
  
-  memcpy(inode->filename, name, strl(name));
+  memcpy(inode->filename, name, name_size);
   memcpy(inode->ext, it, strl(it));
 }
 
@@ -137,12 +138,21 @@ char* eat_path(char* path) {
 
   char* it = path;
 
+  if (*it && CHECK_SEPERATOR(*it)) { it++; }
+
   while (*it && !CHECK_SEPERATOR(*it)) {
     it++;
     if (((uint32_t)it - (uint32_t)path) > FULL_FILENAME_SIZE) { return NULL; }
   }
  
-  return *it ? ++it : it;
+  if (*it && CHECK_SEPERATOR(*it)) { it++; }
+
+  size_t size = strl(path) - (strl(path) - strl(it)) + 1;
+
+  char* ret = kmalloc(size);
+  memcpy(ret, it, size);
+
+  return ret;
 }
 
 char* get_first_file_from_path(char* path) {
@@ -165,9 +175,9 @@ char* get_first_file_from_path(char* path) {
 }
 
 /* Eat the last file/directory in a path */
-void eat_path_reverse(char* path) {
+char* eat_path_reverse(char* path) {
 
-  if (!path || !*path) { return NULL; }
+  if (!path || !*path) { return; }
   
   size_t size = strl(path);
 
@@ -178,9 +188,14 @@ void eat_path_reverse(char* path) {
   unsigned long i = size - 1;
   for (; i > 0 && !CHECK_SEPERATOR(it[i]); i--) { }
   
+  char k = it[i];
   it[i] = '\0';
 
-  return path;
+  char* ret = kmalloc(i + 1);
+  memcpy(ret, it, i + 1);
+  
+  it[i] = k;
+  return ret;
 }
 
 /* Takes a file path and returns the last specified directory */
@@ -228,15 +243,12 @@ inode_t* find_file(char* buffer, size_t size, char* filename) {
   
   char* it = NULL; 
 
-  PRINTNH(buffer);
   for (uint32_t i = 0; i < size; i += DIR_ENTRY_SIZE, buffer += DIR_ENTRY_SIZE) {
     it = make_full_filename(((inode_t*)buffer)->filename, ((inode_t*)buffer)->ext);
     if (!strcmp(it, filename)) { free(it); return (inode_t*)buffer; } 
     free(it);
   }
 
-  PRINT(filename);
-  while(1) {}
   panic(ERROR_PATH_INCORRECT);
   return NULL;
 }
@@ -273,8 +285,8 @@ inode_t* create_file(char* filename, char* path, uint8_t attributes) {
   enter_file(file, dir);
   
   if (dir) {
-    eat_path_reverse(path); 
-    inode_t* dir_dir = navigate_dir(path, NULL);
+    char* dir_path = eat_path_reverse(path);
+    inode_t* dir_dir = navigate_dir(dir_path, NULL);
     edit_file(dir_dir, dir_buffer, (dir_dir ? dir_dir->size : ROOT_SIZE));   /* Edit directory's size */
   }
 
