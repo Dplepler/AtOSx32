@@ -312,7 +312,7 @@ void task_list_insert_back(task_list_t* list, tcb_t* task) {
   else { list->tail->flink = task; list->tail = task; task->flink = NULL; }
 }
 
-/* Abosolutely stunning Linus-inspired code */
+/* Remove task from given list */
 void task_list_remove_task(task_list_t* list, tcb_t* task) {
   
   if (!list->head) { return; }

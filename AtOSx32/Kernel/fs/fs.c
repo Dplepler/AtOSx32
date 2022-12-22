@@ -133,6 +133,15 @@ inode_t* create_directory(char* dirname, char* path, uint8_t attributes) {
   return create_file(dirname, path, attributes | ATTRIBUTE_DIRECTORY);
 }
 
+
+bool file_has_extention(char* full_filename) {
+
+  size_t size = strl(full_filename);
+  for (uint8_t i = 0; i < size; i++) { if (full_filename[i] == '.') { return true; } }
+
+  return false;
+}
+
 /* Eats the first directory in a given path reference, deletes it from the string and returns it's name */
 char* eat_path(char* path) {
 
@@ -232,6 +241,7 @@ inode_t* navigate_dir(char* path, void** buff_ref) {
   
   inode_t* current_file = NULL;
   char* buffer = (char*)root_buffer;
+  char* tb = NULL;
 
   while (navigate_path && *navigate_path) {
    
@@ -239,30 +249,36 @@ inode_t* navigate_dir(char* path, void** buff_ref) {
 
     name = get_first_file_from_path(navigate_path);
     navigate_path = eat_path(navigate_path);
+  
+    if (file_has_extention(name)) { return current_file; } 
 
+    if (tb != (char*)root_buffer) { free(tb); }
+    
     current_file = current_file ? find_file(buffer, current_file->size, name) : find_file(buffer, root_entries * DIR_ENTRY_SIZE, name);
+    
     free(name);
 
-    if (!(current_file->attributes & ATTRIBUTE_DIRECTORY)) { return parent; }
-
-    if (navigate_path && *navigate_path) {  
-      if (buffer != (char*)root_buffer) { free(buffer); }
+    if (navigate_path && *navigate_path) { 
+      tb = buffer;
       buffer = read_file(current_file); 
     }
 
     if (buff_ref) { *buff_ref = buffer; }
+    
   }
  
   return current_file;
 } 
 
 
-/*inode_t* navigate_file(char* path, void** buff_ref) {
+inode_t* navigate_file(char* path, void** buff_ref) {
 
   inode_t* dir = navigate_dir(path, NULL);
-  *buff_ref = read_file(navigate_dir(path, NULL));
 
-  return find_file(*buff_ref, dir ? dir->size : ROOT_SIZE, get_last_file_from_path(path));
+  char* buffer = read_file(dir);
+  
+  if (buff_ref) { *buff_ref = buffer; }
+  return find_file(buffer, dir ? dir->size : ROOT_SIZE, get_last_file_from_path(path));
 }
 
 
@@ -549,7 +565,7 @@ void* read_file(inode_t* inode) {
   buffer = kmalloc(buff_sector_size * SECTOR_SIZE);
   fat_read(fat_buffer);
 
-  uint8_t* it = buffer; 
+  void* it = buffer; 
 
   for (uint16_t cluster = inode->cluster; cluster != EOC; cluster = ((uint16_t*)fat_buffer)[cluster]) {
     ata_read(cluster * CLUSTERS_IN_SECTOR, CLUSTERS_IN_SECTOR, it);
@@ -560,7 +576,7 @@ void* read_file(inode_t* inode) {
 }
 
 
-/* void copy_file(inode_t* file, char* new_path) {
+void copy_file(inode_t* file, char* new_path) {
 
   create_file(make_full_filename(file->filename, file->ext), new_path, file->attributes);
 
@@ -568,6 +584,5 @@ void* read_file(inode_t* inode) {
   
 
 
-} */
-
+}
 

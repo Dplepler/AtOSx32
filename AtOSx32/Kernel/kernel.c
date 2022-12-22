@@ -51,21 +51,21 @@ int kmain(void) {
   setup_clock();
   //init_multitasking();
 
-
-  //while(1) {}
   init_fs();
   
   create_directory("dir", NULL, 0x0);
 
   create_directory("dir2", "dir", 0x0);
-
+  
   create_file("aa.txt", "dir/dir2/", 0x0);
+  char* txt = "OMG!!!";  
 
-  //inode_t* file = navigate_file("dir/dir2/aa.txt", NULL);
+  inode_t* file = navigate_file("dir/dir2/aa.txt", NULL);
 
-  //char* a = read_file(file);
+  write_file_data(file, txt, strl(txt));
+  char* a = read_file(file);
 
-  //PRINT(a);
+  PRINT(a);
 
   /* init_cleaner_task();
 

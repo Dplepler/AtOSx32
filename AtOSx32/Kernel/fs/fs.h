@@ -124,7 +124,7 @@ void edit_file(inode_t* inode, void* buffer, size_t size);
 void fat_delete_file(inode_t* inode);
 void fat_create_filename(inode_t* inode, char* name);
 
-
+bool file_has_extention(char* full_filename);
 
 
 inode_t* navigate_file(char* path, void** buff_ref);
