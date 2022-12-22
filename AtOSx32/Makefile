@@ -21,7 +21,7 @@ makeImg: Bootload/stage0.bin Bootload/Bootloader.bin Kernel/kernel.bin
 	dd if=/dev/zero of=DiskImages/AtOS.img bs=1024 count=3354
 	dd if=Bootload/stage0.bin of=DiskImages/AtOS.img conv=notrunc
 	dd if=Bootload/Bootloader.bin of=DiskImages/AtOS.img bs=512 seek=1 conv=notrunc
-	dd if=Kernel/kernel.bin of=DiskImages/AtOS.img bs=512 seek=289 conv=notrunc
+	dd if=Kernel/kernel.bin of=DiskImages/AtOS.img bs=512 seek=290 conv=notrunc
 	
 
 C_SOURCES = $(shell find Kernel/ -type f -name '*.c')

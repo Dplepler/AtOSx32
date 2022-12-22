@@ -1,7 +1,8 @@
 #include "fs.h"
 
-uint8_t* fat_buffer  = NULL;
-uint8_t* root_buffer = NULL;
+void* fat_buffer  = NULL;
+void* root_buffer = NULL;
+void* hello = NULL;
 
 uint16_t root_entries = 0;
 
@@ -32,7 +33,8 @@ void root_read(void* buffer) {
 
 /* Initialize fat table and root directory if they weren't initialised yet */
 void init_fs() {
-
+  
+  
   fat_buffer = kcalloc(1, FAT_SIZE);
   root_buffer = kcalloc(1, ROOT_SIZE);
 
@@ -174,15 +176,35 @@ char* get_first_file_from_path(char* path) {
   return filename;
 }
 
+
+char* get_last_file_from_path(char* path) {
+
+  if (!path || !*path) { return NULL; }
+
+  size_t size = strl(path);
+
+  char* it = path;
+  if (CHECK_SEPERATOR(it[size - 1])) { size--; }
+  
+  unsigned long i = size - 1;
+  for (; i > 0 && !CHECK_SEPERATOR(it[i]); i--) { }
+ 
+  if (CHECK_SEPERATOR(it[i])) { i++; }
+
+  char* ret = kmalloc(size - i + 1);
+  memcpy(ret, it + i, size - i + 1);
+  ret[size - i] = '\0';
+  return ret;
+}
+
 /* Eat the last file/directory in a path */
 char* eat_path_reverse(char* path) {
 
-  if (!path || !*path) { return; }
+  if (!path || !*path) { return NULL; }
   
   size_t size = strl(path);
 
   char* it = path;
-
   if (CHECK_SEPERATOR(it[size - 1])) { size--; }
   
   unsigned long i = size - 1;
@@ -233,6 +255,15 @@ inode_t* navigate_dir(char* path, void** buff_ref) {
  
   return current_file;
 } 
+
+
+/*inode_t* navigate_file(char* path, void** buff_ref) {
+
+  inode_t* dir = navigate_dir(path, NULL);
+  *buff_ref = read_file(navigate_dir(path, NULL));
+
+  return find_file(*buff_ref, dir ? dir->size : ROOT_SIZE, get_last_file_from_path(path));
+}
 
 
 /* Find a file by it's name from a given data buffer
@@ -479,7 +510,6 @@ void fat_delete_file(inode_t* inode) {
 
 void fat_clear_file(inode_t* inode) {
 
-  
   if (!inode || !inode->cluster) { return; }
 
   fat_read(fat_buffer);
@@ -528,4 +558,16 @@ void* read_file(inode_t* inode) {
 
   return buffer;
 }
+
+
+/* void copy_file(inode_t* file, char* new_path) {
+
+  create_file(make_full_filename(file->filename, file->ext), new_path, file->attributes);
+
+  //write_file_data();
+  
+
+
+} */
+
 

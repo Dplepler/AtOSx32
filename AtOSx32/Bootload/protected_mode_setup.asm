@@ -18,7 +18,7 @@ switch_to_pm:
 	; there is a risk that it will use the pipeline mode to process instructions instead
 	; A way to avoid that is to clear the pipeline by far jumping to another segment 
 	; This will automatically set CS to our code segment + clear the pipeline
-	
+
 	jmp CODE_SEG:init_protected_mode
 
 [bits 32]
@@ -34,7 +34,12 @@ KERNEL_ENTRY_OFFSET equ 300h 	; Entry in the page directory for our higher half 
 
 init_protected_mode:
 
-	call relocate_kernel 				; Before we start, relocate the kernel beyond 1MB
+  mov ebx, 100
+  mov ecx, 122h
+  mov edi, PHYS_KERNEL_OFFSET
+  call ata_read_s
+
+	;call relocate_kernel 				; Before we start, relocate the kernel beyond 1MB
 	
 	; Set all segment registers to the beginning of the data segment
 	; Note that CS will already be set to the code segment after the far jump to here
@@ -91,20 +96,9 @@ init_protected_mode:
 	mov eax, cr0					    ; To enable paging we need to set the correct flags in the cr0 register
 	or 	eax, 80000000h
 	mov cr0, eax
-
+ 
 	jmp genesis 					; Go back to the bootloader to start executing the kernel!
 			
-relocate_kernel:
-
-	; Relocate 50 sectors of kernel from below 1MB to above 1MB
-	mov ecx, 1900h
-	
-	mov esi, INIT_KERNEL_OFFSET
-	mov edi, PHYS_KERNEL_OFFSET
-
-	rep movsd
-
-	ret
 
 ; Map a page table's entries to physical page frames
 ; In: EDI = Page table offset to fill, ECX = Physical page frame index, EDX = Page directory entry index to point to new table

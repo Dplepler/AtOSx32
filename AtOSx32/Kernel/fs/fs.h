@@ -9,7 +9,7 @@
 #include "System/errors.h"
 
 
-#define HIDDEN_SECTORS 0x2
+#define HIDDEN_SECTORS 0x3
 #define SECTOR_SIZE    0x200
 #define CLUSTER_SIZE SECTOR_SIZE
 #define CLUSTERS_IN_SECTOR (CLUSTER_SIZE / SECTOR_SIZE)
@@ -98,6 +98,7 @@ void* read_file(inode_t* inode);
 char* eat_path(char* path);
 char* eat_path_reverse(char* path);
 char* get_first_file_from_path(char* path);
+char* get_last_file_from_path(char* path);
 char* make_full_filename(char* filename, char* ext);
 
 uint16_t fat_extract_value(uint16_t index);
@@ -123,5 +124,9 @@ void edit_file(inode_t* inode, void* buffer, size_t size);
 void fat_delete_file(inode_t* inode);
 void fat_create_filename(inode_t* inode, char* name);
 
+
+
+
+inode_t* navigate_file(char* path, void** buff_ref);
 #endif
 

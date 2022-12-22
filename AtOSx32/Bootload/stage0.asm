@@ -52,7 +52,7 @@ load_stage1:
 	
 	mov bx, BOOT_OFFSET
 	mov dl, [BOOT_DRIVE]		; Boot device number 
-	mov dh, 1								; Amount of sectors to load
+	mov dh, 2								; Amount of sectors to load
 	call load_boot					; Call routine
 
 	ret

@@ -9,13 +9,13 @@ bootload_start:
 	; Set segment and stack
 	xor ax, ax       	
 	mov ds, ax          
-	mov ss, ax          
-	mov sp, 9c00h
+	mov ss, ax
+  mov es, ax
+	mov sp, 9000h
 
 	call enable_a20
-	call unreal_mode
-	call load_kernel
-	call switch_to_pm
+  call unreal_mode
+  call switch_to_pm
 
 	jmp $ 	; Hang
 	
@@ -33,7 +33,6 @@ enable_a20:
 	; Activate A20 address line
 	mov ax, 2401h               
 	int 15h
-
 
 .exit:
 
@@ -118,7 +117,7 @@ unreal_mode:
 .continue:
 
 	mov  bx, 0x8         ; Select descriptor 1
-	mov  ds, bx          ; 8h = 1000b
+	mov  ds, bx       
 
 	; Back to real mode
 	and al, 0FEh
@@ -135,6 +134,7 @@ unreal_mode:
 %include "Bootload/GDT.asm" 				        ;		Global descriptor table
 %include "Bootload/DAP.asm"					        ;		Disk address packet
 %include "Bootload/protected_mode_setup.asm";		Routines to set up and initialize protected mode
+%include "Bootload/ata.asm"
 ;===========================================;
 
 [bits 16]
@@ -151,7 +151,18 @@ load_kernel:
 
 	mov dl, 80h					  ; Boot device number - First HDD
 	mov si, DAP_START			; SI will hold the Disk Address Packet offset
+
 	call load_disk
+  
+  ;mov dl, 80h
+  ;mov si, DAP_START
+  ;add dword [DAP_LBA], 50
+  ;add word [DAP_KERNEL_OFFSET], 6400h
+
+  ;mov si, DAP_START
+  ;jmp $
+
+  ;call load_disk
 
 	ret
 
@@ -206,8 +217,12 @@ print_string:
 genesis:
 
 	call 0C0000000h 		; Call the virtual address of the Kernel
-	jmp $					; Hang at the end of the kernel
+	jmp $					      ; Hang at the end of the kernel
 	
+
+
+
+
 
 
 ; Variables

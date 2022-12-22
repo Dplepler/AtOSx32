@@ -20,7 +20,7 @@ DAP_START:
 	; Initially we write to a 16 bit offset, in this case 0x1000
 	.DAP_KERNEL_OFFSET:
 
-		dw INIT_KERNEL_OFFSET
+		dw 1000h
 		dw 0
 
 	; Load from disk, 121h's sector (after FAT and boot)

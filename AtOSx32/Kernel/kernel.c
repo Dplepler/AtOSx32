@@ -8,8 +8,6 @@
 #include "Drivers/ata.h"
 #include "fs/fs.h"
 
-extern uint8_t* root_buffer;
-
 void clock() {
   while (true) {
     terminal_draw_rec(0, 0, 9, 1, 8); 
@@ -32,7 +30,7 @@ void tongue() {
 }
 
 int kmain(void) {
-  
+ 
   pd_remove_entry(0); 	// Remove identity mapping
   
   /* Initialize terminal interface */
@@ -53,30 +51,21 @@ int kmain(void) {
   setup_clock();
   //init_multitasking();
 
-  init_fs();
-  char* txt = "1337 1337";
 
+  //while(1) {}
+  init_fs();
+  
   create_directory("dir", NULL, 0x0);
 
   create_directory("dir2", "dir", 0x0);
 
-  create_file("aa.txt", "dir/dir2", 0x0);
+  create_file("aa.txt", "dir/dir2/", 0x0);
 
-  root_read(root_buffer);
- 
-  inode_t* aaa = find_file(root_buffer, ROOT_SIZE, "dir");
+  //inode_t* file = navigate_file("dir/dir2/aa.txt", NULL);
 
-  void* buff = read_file(aaa);
+  //char* a = read_file(file);
 
-  inode_t* bbb = find_file(buff, aaa->size, "dir2");
-
-  void* buff2 = read_file(bbb);
-
-  inode_t* ccc = find_file(buff2, bbb->size, "aa.txt");
-  //write_file_data(ccc, txt, strl(txt));
-
-   
-  
+  //PRINT(a);
 
   /* init_cleaner_task();
 
