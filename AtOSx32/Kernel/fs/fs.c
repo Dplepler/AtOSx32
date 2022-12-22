@@ -84,14 +84,16 @@ char* make_full_filename(char* filename, char* ext) {
 
   size = strl(filename) + strl(ext) + sizeof(char) + 1;
 
-  filename_buff = kmalloc(size);
+  filename_buff = kcalloc(1, size);
 
   memcpy(filename_buff, filename, strl(filename));
   strcat(filename_buff, ".");
   strcat(filename_buff, ext);
 
   filename_buff[size - 1] = '\0';
-  
+ 
+  PRINTN(size); NL;
+  PRINT(filename_buff); NL;
   return filename_buff;
 }
 
@@ -232,9 +234,7 @@ char* eat_path_reverse(char* path) {
 /* Takes a file path and returns the last specified directory */
 inode_t* navigate_dir(char* path, void** buff_ref) {
  
-  inode_t* parent = NULL;
   char* name = NULL;
-
   char* navigate_path = path;
 
   root_read(root_buffer);
@@ -245,8 +245,6 @@ inode_t* navigate_dir(char* path, void** buff_ref) {
 
   while (navigate_path && *navigate_path) {
    
-    parent = current_file;
-
     name = get_first_file_from_path(navigate_path);
     navigate_path = eat_path(navigate_path);
   
@@ -292,7 +290,7 @@ inode_t* find_file(char* buffer, size_t size, char* filename) {
 
   for (uint32_t i = 0; i < size; i += DIR_ENTRY_SIZE, buffer += DIR_ENTRY_SIZE) {
     it = make_full_filename(((inode_t*)buffer)->filename, ((inode_t*)buffer)->ext);
-    if (!strcmp(it, filename)) { free(it); return (inode_t*)buffer; } 
+    if (!strcmp(it, filename)) { return (inode_t*)buffer; } 
     free(it);
   }
 
@@ -314,14 +312,13 @@ void init_first_cluster(inode_t* inode) {
   fat_write(fat_buffer);
 }
 
-
 /* Create a file 
  * Input: Desired filename, [up to 8 bytes of name].[up to 3 bytes of file extention]
  * Input: File path, where the file will be stored, this parameter can be null the directory is the root
  * Input: File attributes, more information in the header file
  * */
 inode_t* create_file(char* filename, char* path, uint8_t attributes) {
-    
+
   inode_t* file = init_file(filename, attributes);
 
   init_first_cluster(file);
@@ -384,6 +381,8 @@ void fat_resize_file(inode_t* inode, size_t size) {
   uint16_t old_cluster_amount = inode->size / CLUSTER_SIZE;
   if (inode->size % CLUSTER_SIZE) { old_cluster_amount++; }
 
+  if (new_cluster_amount == old_cluster_amount) { return; }
+
   fat_read(fat_buffer);
 
   if (inode->size > size) {
@@ -401,13 +400,11 @@ void fat_resize_file(inode_t* inode, size_t size) {
     goto write;
   }
 
-  
   int err = NO_ERROR;
   
   if (inode->size < size) {
     
     while (((uint16_t*)fat_buffer)[cluster] != EOC) { cluster = ((uint16_t*)fat_buffer)[cluster]; }
-    
     size_t s = new_cluster_amount - old_cluster_amount - 1;
     
     for (uint16_t i = 0; i < s; i++) {
@@ -428,6 +425,17 @@ write:
 }
 
 
+void write_file(char* path, void* buffer, size_t size) {
+
+  inode_t* dir = navigate_dir(path, NULL);
+  void* dir_buffer = read_file(dir);
+  inode_t* file = find_file(dir_buffer, dir ? dir->size : ROOT_SIZE, get_last_file_from_path(path));
+
+  write_file_data(file, buffer, size);
+
+  edit_file(dir, dir_buffer, dir ? dir->size : ROOT_SIZE);
+}
+
 /* Write data to a specified file
  * Input: File node to link to created data
  * Input: Buffer containing the data to save (write)
@@ -440,13 +448,13 @@ void write_file_data(inode_t* inode, void* buffer, size_t size) {
 
   if (sectors > SYSTEM_SECTORS) { panic(ERROR_FILE_TOO_LARGE); }
 
-  fat_resize_file(inode, size);
-  
+  fat_resize_file(inode, size);   
   fat_read(fat_buffer);
 
   uint16_t cluster = inode->cluster;
   
   if (sectors) {
+
     do {
 
       ata_write(cluster * CLUSTERS_IN_SECTOR, CLUSTERS_IN_SECTOR, buffer);   /* Write one cluster */ 
@@ -458,7 +466,6 @@ void write_file_data(inode_t* inode, void* buffer, size_t size) {
     } while (cluster != EOC && size >= CLUSTER_SIZE);
   }
 
-
   /* Last sector to write is smaller than the default sector size */
   if (remainder) { 
      
@@ -468,7 +475,6 @@ void write_file_data(inode_t* inode, void* buffer, size_t size) {
     memset((void*)((size_t)remainder_buffer + remainder), '\0', SECTOR_SIZE - remainder);
 
     ata_write(cluster * CLUSTERS_IN_SECTOR, CLUSTERS_IN_SECTOR, (void*)remainder_buffer);
-    
     free(remainder_buffer);
   }
 }
@@ -575,14 +581,22 @@ void* read_file(inode_t* inode) {
   return buffer;
 }
 
-
+/* Create a new file at a specified location with the contents of the old file */
 void copy_file(inode_t* file, char* new_path) {
 
-  create_file(make_full_filename(file->filename, file->ext), new_path, file->attributes);
+  char* full_filename = make_full_filename(file->filename, file->ext);
+  create_file(full_filename, new_path, file->attributes);
 
-  //write_file_data();
+  size_t new_path_size = strl(new_path);
+  char* full_path = kcalloc(1, new_path_size + strl(full_filename) + (!CHECK_SEPERATOR(new_path[new_path_size - 1]) ? 1 : 0) + 1);
   
+  memcpy(full_path, new_path, strl(new_path));
+  if (!CHECK_SEPERATOR(new_path[new_path_size - 1])) { strcat(full_path, "/"); }
 
+  strcat(full_path, full_filename);
 
+  PRINT(full_path);
+  while(1) {}
+  write_file(full_path, read_file(file), file->size);
 }
 

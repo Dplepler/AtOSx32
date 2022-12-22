@@ -104,6 +104,17 @@ char* strcat(char* dest, const char* src) {
   return dest;
 }
 
+char* strncat(char* dest, const char* src, size_t n) {
+  
+  unsigned long i = 0;
+  size_t dest_length = strl(dest);
+
+  for (; i < dest_length; i++) { }
+  for (; i - dest_length < n; i++) { dest[i] = src[i - dest_length]; }
+
+  return dest;
+}
+
 /* Make all lower characters in the string uppercase */
 char* upper(char* src, size_t n) {
   

@@ -61,11 +61,15 @@ int kmain(void) {
   char* txt = "OMG!!!";  
 
   inode_t* file = navigate_file("dir/dir2/aa.txt", NULL);
+  write_file("dir/dir2/aa.txt", txt, strl(txt));
+  
+  inode_t* dir = navigate_dir("dir/dir2", NULL);
 
-  write_file_data(file, txt, strl(txt));
-  char* a = read_file(file);
-
-  PRINT(a);
+  copy_file(file, "dir");
+ 
+  while(1) {}
+  inode_t* copy = navigate_file("dir/aa.txt", NULL);
+  PRINT(read_file(copy));
 
   /* init_cleaner_task();
 

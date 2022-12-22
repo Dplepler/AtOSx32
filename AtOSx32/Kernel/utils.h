@@ -12,6 +12,7 @@ void  memcpy(void* s1, const void* s2, size_t n);
 
 char* itoa(int value, size_t base);
 char* strcat(char* dest, const char* src);
+char* strncat(char* dest, const char* src, size_t n);
 
 size_t strl(const char* str);
 size_t intl(int n);

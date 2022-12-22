@@ -108,6 +108,7 @@ uint16_t fat_find_free_cluster(void* buffer, int* err);
 
 inode_t* create_directory(char* dirname, char* path, uint8_t attributes);
 inode_t* navigate_dir(char* path, void** buff_ref);
+inode_t* navigate_file(char* path, void** buff_ref);
 inode_t* find_file(char* buffer, size_t size, char* filename);
 inode_t* create_file(char* filename, char* path, uint8_t attributes);
 inode_t* init_file(char* filename, uint8_t attributes);
@@ -118,15 +119,18 @@ void fat_setup_table();
 void enter_file(inode_t* file, inode_t* dir);
 void fat_resize_file(inode_t* inode, size_t size);
 void init_first_cluster(inode_t* inode);
-void write_file_data(inode_t* inode, void* buffer, size_t size);
 void cat_file(inode_t* inode, void* buffer, size_t size);
 void edit_file(inode_t* inode, void* buffer, size_t size);
 void fat_delete_file(inode_t* inode);
 void fat_create_filename(inode_t* inode, char* name);
+void write_file_data(inode_t* inode, void* buffer, size_t size);
+
+void write_file(char* path, void* buffer, size_t size);
+void copy_file(inode_t* file, char* new_path);
+
 
 bool file_has_extention(char* full_filename);
 
 
-inode_t* navigate_file(char* path, void** buff_ref);
 #endif
 
