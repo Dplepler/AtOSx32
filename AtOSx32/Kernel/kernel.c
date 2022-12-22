@@ -60,17 +60,18 @@ int kmain(void) {
   create_file("aa.txt", "dir/dir2/", 0x0);
   char* txt = "OMG!!!";  
 
-  inode_t* file = navigate_file("dir/dir2/aa.txt", NULL);
   write_file("dir/dir2/aa.txt", txt, strl(txt));
-  
+ 
+  inode_t* file = navigate_file("dir/dir2/aa.txt", NULL);
   inode_t* dir = navigate_dir("dir/dir2", NULL);
 
   copy_file(file, "dir");
  
-  while(1) {}
   inode_t* copy = navigate_file("dir/aa.txt", NULL);
-  PRINT(read_file(copy));
 
+  char* b = read_file(copy);
+
+  PRINT(b);
   /* init_cleaner_task();
 
   create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);

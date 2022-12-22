@@ -92,8 +92,6 @@ char* make_full_filename(char* filename, char* ext) {
 
   filename_buff[size - 1] = '\0';
  
-  PRINTN(size); NL;
-  PRINT(filename_buff); NL;
   return filename_buff;
 }
 
@@ -289,6 +287,7 @@ inode_t* find_file(char* buffer, size_t size, char* filename) {
   char* it = NULL; 
 
   for (uint32_t i = 0; i < size; i += DIR_ENTRY_SIZE, buffer += DIR_ENTRY_SIZE) {
+
     it = make_full_filename(((inode_t*)buffer)->filename, ((inode_t*)buffer)->ext);
     if (!strcmp(it, filename)) { return (inode_t*)buffer; } 
     free(it);
@@ -327,7 +326,7 @@ inode_t* create_file(char* filename, char* path, uint8_t attributes) {
   inode_t* dir = navigate_dir(path, &dir_buffer);
 
   enter_file(file, dir);
-  
+ 
   if (dir) {
     char* dir_path = eat_path_reverse(path);
     inode_t* dir_dir = navigate_dir(dir_path, NULL);
@@ -381,6 +380,7 @@ void fat_resize_file(inode_t* inode, size_t size) {
   uint16_t old_cluster_amount = inode->size / CLUSTER_SIZE;
   if (inode->size % CLUSTER_SIZE) { old_cluster_amount++; }
 
+  inode->size = size;
   if (new_cluster_amount == old_cluster_amount) { return; }
 
   fat_read(fat_buffer);
@@ -428,12 +428,13 @@ write:
 void write_file(char* path, void* buffer, size_t size) {
 
   inode_t* dir = navigate_dir(path, NULL);
+  
   void* dir_buffer = read_file(dir);
   inode_t* file = find_file(dir_buffer, dir ? dir->size : ROOT_SIZE, get_last_file_from_path(path));
 
   write_file_data(file, buffer, size);
 
-  edit_file(dir, dir_buffer, dir ? dir->size : ROOT_SIZE);
+  edit_file(dir, dir_buffer, dir ? dir->size : ROOT_SIZE); 
 }
 
 /* Write data to a specified file
@@ -497,7 +498,7 @@ void cat_file(inode_t* inode, void* buffer, size_t size) {
 
 /* Change a file's data to contain what's inside the given buffer, at the specified size */
 void edit_file(inode_t* inode, void* buffer, size_t size) {
- 
+
   /* Normal cases */
   if (inode) {
     write_file_data(inode, buffer, size);
@@ -584,6 +585,7 @@ void* read_file(inode_t* inode) {
 /* Create a new file at a specified location with the contents of the old file */
 void copy_file(inode_t* file, char* new_path) {
 
+  PRINTN(file->size); NL;
   char* full_filename = make_full_filename(file->filename, file->ext);
   create_file(full_filename, new_path, file->attributes);
 
@@ -595,8 +597,6 @@ void copy_file(inode_t* file, char* new_path) {
 
   strcat(full_path, full_filename);
 
-  PRINT(full_path);
-  while(1) {}
   write_file(full_path, read_file(file), file->size);
 }
 
