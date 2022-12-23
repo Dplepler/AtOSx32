@@ -159,6 +159,8 @@ char* eat_path(char* path) {
   if (*it && CHECK_SEPERATOR(*it)) { it++; }
 
   size_t size = strl(path) - (strl(path) - strl(it)) + 1;
+ 
+  if (size == 1) { return NULL; }
 
   char* ret = kmalloc(size);
   memcpy(ret, it, size);
@@ -211,21 +213,24 @@ char* eat_path_reverse(char* path) {
 
   if (!path || !*path) { return NULL; }
   
-  size_t size = strl(path);
+  size_t psize = strl(path);
 
   char* it = path;
-  if (CHECK_SEPERATOR(it[size - 1])) { size--; }
+  if (CHECK_SEPERATOR(it[psize - 1])) { psize--; }
   
-  unsigned long i = size - 1;
+  unsigned long i = psize - 1;
   for (; i > 0 && !CHECK_SEPERATOR(it[i]); i--) { }
+  
+  if (!i) { return NULL; }
   
   char k = it[i];
   it[i] = '\0';
 
+
   char* ret = kmalloc(i + 1);
-  memcpy(ret, it, i + 1);
-  
+  memcpy(ret, it, i + 1); 
   it[i] = k;
+
   return ret;
 }
 
@@ -262,14 +267,17 @@ inode_t* navigate_dir(char* path, void** buff_ref) {
     if (buff_ref) { *buff_ref = buffer; }
     
   }
- 
+
   return current_file;
 } 
 
-// TODO: This func does not work if the path contains only one file when the file is a directory.
+
 inode_t* navigate_file(char* path, void** buff_ref) {
 
   inode_t* dir = navigate_dir(path, NULL);
+  char* np = eat_path(path);
+  if (dir && !np) { return dir; }
+  free(np);
 
   char* buffer = read_file(dir);
   
@@ -292,9 +300,6 @@ inode_t* find_file(char* buffer, size_t size, char* filename) {
     free(it);
   }
 
-  NL;
-  PRINTNH(buffer);
-  while(1) {}
   panic(ERROR_PATH_INCORRECT);
   return NULL;
 }
@@ -587,7 +592,6 @@ void* read_file(inode_t* inode) {
 /* Create a new file at a specified location with the contents of the old file */
 void copy_file(inode_t* file, char* new_path) {
 
-  PRINTN(file->size); NL;
   char* full_filename = make_full_filename(file->filename, file->ext);
   create_file(full_filename, new_path, file->attributes);
 

@@ -50,7 +50,8 @@ int kmain(void) {
   setup_multitasking();
   setup_clock();
   //init_multitasking();
-
+  
+  
   init_fs();
   
   create_directory("dir", NULL, 0x0);
@@ -69,11 +70,11 @@ int kmain(void) {
  
   inode_t* copy = navigate_file("dir/aa.txt", NULL);
 
-  rename_file("dir", "bruhh");
+  rename_file("dir/aa.txt", "bruhh.txt");
   
-  inode_t* a = navigate_file("bruhh", NULL);
+  inode_t* a = navigate_file("dir/bruhh.txt", NULL);
   
-  PRINTNH(a);
+  PRINT(read_file(a));
 
   /* init_cleaner_task();
 
