@@ -9,6 +9,19 @@ uint16_t root_entries = 0;
 static bool was_fat_read = false;
 static bool was_root_read = false;
 
+static inline uint16_t entries_to_sectors(uint16_t entries) {
+
+  size_t sectors = (entries * DIR_ENTRY_SIZE) / SECTOR_SIZE;
+  return (!sectors && entries) ? 1 : sectors;
+}
+
+static inline size_t size_to_sectors(size_t size) {
+
+  size_t sectors = size / SECTOR_SIZE;
+  return (size % SECTOR_SIZE) ? ++sectors : sectors;
+}
+
+
 /* Write FAT data from RAM (buffer) to the disk */
 static inline void fat_write(void* buffer) {
 
@@ -23,33 +36,28 @@ static inline void fat_read(void* buffer) {
 }
 
 /* Write root data from RAM (buffer) to the disk */
-static inline void root_write(void* buffer) {
-
-  ata_write(ROOT_SECTOR_OFFSET, ROOT_SIZE / SECTOR_SIZE, buffer);
+static inline void root_write(void* buffer, size_t sectors) {
+ 
+  if (!sectors) { sectors = 1;}
+  ata_write(ROOT_SECTOR_OFFSET, sectors, buffer);
   was_root_read = false;
 }
 
 /* Read root from disk to RAM (buffer) */
-static inline void root_read(void* buffer) {
-  if (!was_root_read) { was_root_read = true; ata_read(ROOT_SECTOR_OFFSET, ROOT_SIZE / SECTOR_SIZE, buffer); }
+static inline void root_read(void* buffer, size_t sectors) {
+  if (!sectors) { sectors = 1;}
+  if (!was_root_read) { was_root_read = true; ata_read(ROOT_SECTOR_OFFSET, sectors, buffer); }
 }
 
 /* Initialize fat table and root directory if they weren't initialised yet */
 void init_fs() {
-  
   
   fat_buffer = kcalloc(1, FAT_SIZE);
   root_buffer = kcalloc(1, ROOT_SIZE);
 
   if (fat_extract_value(0) != FAT_SIGNATURE) { 
     fat_setup_table();
-    root_setup_dir();
   }
-}
-
-/* Setup the root directory */
-void root_setup_dir() {
-  root_write(root_buffer);
 }
 
 /* Setup initial table values, indexes 0 & 1 are reserved */
@@ -129,11 +137,6 @@ uint16_t fat_create_date(cmos_time date) {
   fat_date |= ((uint16_t)(date.year - 1980) <<  9);
 
   return fat_date;
-}
-
-/* Creates a directory, for more information look at the create_file function */
-inode_t* create_directory(char* dirname, char* path, uint8_t attributes) {
-  return create_file(dirname, path, attributes | ATTRIBUTE_DIRECTORY);
 }
 
 /* Checks if a filename contains an extention (.) */
@@ -244,7 +247,7 @@ inode_t* navigate_dir(char* path, void** buff_ref) {
   char* name = NULL;
   char* navigate_path = path;
 
-  root_read(root_buffer);
+  root_read(root_buffer, entries_to_sectors(root_entries));
   
   inode_t* current_file = NULL;
   char* buffer = (char*)root_buffer;
@@ -258,8 +261,8 @@ inode_t* navigate_dir(char* path, void** buff_ref) {
     if (file_has_extention(name)) { return current_file; } 
 
     if (tb != (char*)root_buffer) { free(tb); }
-    
-    current_file = current_file ? find_file(buffer, current_file->size, name) : find_file(buffer, root_entries * DIR_ENTRY_SIZE, name);
+   
+    current_file = current_file ? find_file(buffer, current_file->size, name) : find_file(buffer, ROOT_CURRENT_SIZE, name);
     free(name);
 
     if (navigate_path && *navigate_path) { 
@@ -289,7 +292,7 @@ inode_t* navigate_file(char* path, void** buff_ref) {
   
   if (buff_ref) { *buff_ref = buffer; }
 
-  return find_file(buffer, dir ? dir->size : ROOT_SIZE, get_last_file_from_path(path));
+  return find_file(buffer, dir ? dir->size : ROOT_CURRENT_SIZE , get_last_file_from_path(path));
 }
 
 /* Find a file by it's name from a given data buffer
@@ -306,7 +309,9 @@ inode_t* find_file(char* buffer, size_t size, char* filename) {
     if (!strcmp(it, filename)) { return (inode_t*)buffer; } 
     free(it);
   }
- 
+
+  PRINTNH(buffer);
+  while(1) {}
   panic(ERROR_PATH_INCORRECT);
   return NULL;
 }
@@ -323,6 +328,11 @@ void init_first_cluster(inode_t* inode) {
   ((uint16_t*)fat_buffer)[inode->cluster] = EOC; 
 
   fat_write(fat_buffer);
+}
+
+/* Creates a directory, for more information look at the create_file function */
+inode_t* create_directory(char* dirname, char* path, uint8_t attributes) {
+  return create_file(dirname, path, attributes | ATTRIBUTE_DIRECTORY);
 }
 
 /* Create a file 
@@ -344,7 +354,7 @@ inode_t* create_file(char* filename, char* path, uint8_t attributes) {
   if (dir) {
     char* dir_path = eat_path_reverse(path);
     inode_t* dir_dir = navigate_dir(dir_path, NULL);
-    edit_file(dir_dir, dir_buffer, (dir_dir ? dir_dir->size : ROOT_SIZE));   /* Edit directory's size */
+    edit_file(dir_dir, dir_buffer, (dir_dir ? dir_dir->size : entries_to_sectors(root_entries)));   /* Edit directory's size */
   }
 
   return file;
@@ -444,7 +454,7 @@ void remove_dir_entry(char* dir_path, char* entry) {
   void* dir_buffer;
   inode_t* dir = navigate_dir(dir_path, &dir_buffer);
 
-  size_t size = dir ? dir->size : root_entries * DIR_ENTRY_SIZE;
+  size_t size = dir ? dir->size : ROOT_CURRENT_SIZE;
   if (!size) { return; }
 
   void* new_dir_buffer = kmalloc(size - DIR_ENTRY_SIZE);
@@ -457,14 +467,14 @@ void remove_dir_entry(char* dir_path, char* entry) {
     free(it);
   }
 
-  edit_file(dir, new_dir_buffer, dir ? (dir->size - DIR_ENTRY_SIZE) : (ROOT_SIZE - DIR_ENTRY_SIZE));
+  edit_file(dir, new_dir_buffer, dir ? (dir->size - DIR_ENTRY_SIZE) : (ROOT_CURRENT_SIZE - DIR_ENTRY_SIZE));
 
   if (dir) {
     
     dir_path = eat_path_reverse(dir_path);
     inode_t* dir_dir = navigate_dir(dir_path, NULL);
 
-    edit_file(dir_dir, dir_buffer, (dir_dir ? dir_dir->size : ROOT_SIZE));   /* Edit directory's size */
+    edit_file(dir_dir, dir_buffer, (dir_dir ? dir_dir->size : ROOT_CURRENT_SIZE));   /* Edit directory's size */
   }
   else { root_entries--; }
 }
@@ -479,11 +489,11 @@ void write_file(char* path, void* buffer, size_t size) {
   inode_t* dir = navigate_dir(path, NULL);
   
   void* dir_buffer = read_file(dir);
-  inode_t* file = find_file(dir_buffer, dir ? dir->size : ROOT_SIZE, get_last_file_from_path(path));
+  inode_t* file = find_file(dir_buffer, dir ? dir->size : ROOT_CURRENT_SIZE, get_last_file_from_path(path));
 
   write_file_data(file, buffer, size);
 
-  edit_file(dir, dir_buffer, dir ? dir->size : ROOT_SIZE); 
+  edit_file(dir, dir_buffer, dir ? dir->size : ROOT_CURRENT_SIZE); 
 }
 
 /* Write data to a specified file
@@ -555,10 +565,13 @@ void edit_file(inode_t* inode, void* buffer, size_t size) {
   }
 
   /* Only for cases where the file is NULL, we're going to edit the root directory */
-  void* root = kmalloc(ROOT_SIZE);
-  memcpy(root, buffer, size);
-  root_write(root);
+  // TODO SIZE SHOULD BE AT LEAST 1 SECTOR
 
+  size_t fixed_size = size_to_sectors(size) * SECTOR_SIZE;
+  void* root = kmalloc(fixed_size);
+  memcpy(root, buffer, size);
+
+  root_write(root, entries_to_sectors(root_entries));
   free(root);
 }
 
@@ -605,11 +618,12 @@ void* read_file(inode_t* inode) {
 
   /* Read from root */
   if (!inode) {
-   
-    root_read(root_buffer);
-    buffer = kmalloc(ROOT_SIZE);
-    memcpy(buffer, root_buffer, root_entries * DIR_ENTRY_SIZE);
-    
+ 
+    root_read(root_buffer, entries_to_sectors(root_entries));
+    buffer = kmalloc(ROOT_CURRENT_SIZE);
+    memcpy(buffer, root_buffer, ROOT_CURRENT_SIZE);
+  
+    //PRINTNH(buffer);
     return buffer;
   }
 
@@ -650,18 +664,16 @@ void copy_file(char* old_path, char* new_path) {
   }
 
   strcat(full_path, full_filename);
-  
+
   write_file(full_path, read_file(file), file->size);
 }
 
-
+/* Move a file from one directory to a new one */
 void move_file(char* old_path, char* new_path) {
     
   copy_file(old_path, new_path);
   delete_file(old_path);
 }
-
-
 
 /* Given file path's last file will be renamed to the new given filename */
 void rename_file(char* path, char* new_filename) {
@@ -673,10 +685,10 @@ void rename_file(char* path, char* new_filename) {
 
   void* dir_buffer = read_file(dir);
 
-  inode_t* file = find_file(dir_buffer, dir ? dir->size : ROOT_SIZE, filename);
+  inode_t* file = find_file(dir_buffer, dir ? dir->size : ROOT_CURRENT_SIZE, filename);
   fat_create_filename(file, new_filename);
   
-  edit_file(dir, dir_buffer, dir ? dir->size : ROOT_SIZE);
+  edit_file(dir, dir_buffer, dir ? dir->size : ROOT_CURRENT_SIZE);
 }
 
 /* Completely delete a file, it's directory entry & it's data link */
@@ -689,7 +701,7 @@ void delete_file(char* path) {
 
   void* dir_buffer = read_file(dir);
 
-  inode_t* file = find_file(dir_buffer, dir ? dir->size : ROOT_SIZE, filename);
+  inode_t* file = find_file(dir_buffer, dir ? dir->size : ROOT_CURRENT_SIZE, filename);
 
   fat_delete_file(file);
   

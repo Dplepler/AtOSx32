@@ -26,6 +26,7 @@
 
 #define FAT_SIZE (SECTORS_IN_FAT * SECTOR_SIZE)
 #define ROOT_SIZE (ROOT_ENTRIES * DIR_ENTRY_SIZE)
+#define ROOT_CURRENT_SIZE (root_entries * DIR_ENTRY_SIZE)
 
 #define FAT_SECTOR_OFFSET HIDDEN_SECTORS 
 #define ROOT_SECTOR_OFFSET (HIDDEN_SECTORS + SECTORS_IN_FAT)
@@ -47,6 +48,7 @@
 #define CHECK_SEPERATOR(c) (c == '/' || c == '\\')
 
 #define VALID_CLUSTER(cluster) (cluster != BAD_CLUSTER && cluster > 0x2)
+
 
 typedef enum ATTRIBUTES_ENUM {
 

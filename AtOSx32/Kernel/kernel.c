@@ -49,20 +49,23 @@ int kmain(void) {
 
   setup_multitasking();
   setup_clock();
-  //init_multitasking();
+  init_multitasking();
  
   init_fs();
-  
-  create_directory("dir", NULL, 0x0);
 
+  create_directory("dir", NULL, 0x0);
+ 
   create_directory("dir2", "dir", 0x0);
   
   create_file("aa.txt", "dir/dir2/", 0x0);
 
+  while(1) {}
   move_file("dir/dir2/aa.txt", NULL);
 
   inode_t* a = navigate_file("aa.txt", NULL);
   PRINTNH(a);
+
+  
   /*init_cleaner_task();
 
   create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);

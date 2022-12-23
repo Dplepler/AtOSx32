@@ -1,5 +1,9 @@
 #include "process.h"
 
+
+#pragma GCC diagnostic ignored "-Waddress-of-packed-member"
+
+
 uint32_t irq_disable_counter = 0;
 
 tcb_t* running_task   = NULL;  /* Current task */

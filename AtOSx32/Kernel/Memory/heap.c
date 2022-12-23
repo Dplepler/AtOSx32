@@ -127,6 +127,8 @@ heap_header_t* heap_allocate_header(unsigned int size) {
 /* Allocate dynamic memory */
 void* kmalloc(size_t size) {
 
+  if (!size) { return NULL; }  
+
   uint8_t index = heap_get_index(size);
   
   heap_header_t* header = free_blocks[index];  
