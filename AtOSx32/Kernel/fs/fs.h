@@ -87,12 +87,6 @@ typedef struct _INODE_ENTRY_STRUCT {
 } __attribute__((packed)) inode_t;
 
 
-
-void fat_write(void* buffer);
-void fat_read(void* buffer);
-void root_write(void* buffer);
-void root_read(void* buffer);
-
 void* read_file(inode_t* inode);
 
 char* eat_path(char* path);

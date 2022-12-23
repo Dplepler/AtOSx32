@@ -9,27 +9,30 @@ uint16_t root_entries = 0;
 static bool was_fat_read = false;
 static bool was_root_read = false;
 
-void fat_write(void* buffer) {
+/* Write FAT data from RAM (buffer) to the disk */
+static inline void fat_write(void* buffer) {
 
   ata_write(FAT_SECTOR_OFFSET, SECTORS_IN_FAT, buffer);
   was_fat_read = false;
 }
 
-void fat_read(void* buffer) {
+/* Read FAT from disk to RAM (buffer) */
+static inline void fat_read(void* buffer) {
 
   if (!was_fat_read) { was_fat_read = true; ata_read(FAT_SECTOR_OFFSET, SECTORS_IN_FAT, buffer); }
 }
 
-void root_write(void* buffer) {
+/* Write root data from RAM (buffer) to the disk */
+static inline void root_write(void* buffer) {
 
   ata_write(ROOT_SECTOR_OFFSET, ROOT_SIZE / SECTOR_SIZE, buffer);
   was_root_read = false;
 }
 
-void root_read(void* buffer) {
+/* Read root from disk to RAM (buffer) */
+static inline void root_read(void* buffer) {
   if (!was_root_read) { was_root_read = true; ata_read(ROOT_SECTOR_OFFSET, ROOT_SIZE / SECTOR_SIZE, buffer); }
 }
-
 
 /* Initialize fat table and root directory if they weren't initialised yet */
 void init_fs() {
@@ -133,7 +136,7 @@ inode_t* create_directory(char* dirname, char* path, uint8_t attributes) {
   return create_file(dirname, path, attributes | ATTRIBUTE_DIRECTORY);
 }
 
-
+/* Checks if a filename contains an extention (.) */
 bool file_has_extention(char* full_filename) {
 
   size_t size = strl(full_filename);
@@ -168,6 +171,7 @@ char* eat_path(char* path) {
   return ret;
 }
 
+/* Returns the first file (specified by path)'s name */
 char* get_first_file_from_path(char* path) {
   
   if (path == NULL) { return NULL; }
@@ -187,7 +191,7 @@ char* get_first_file_from_path(char* path) {
   return filename;
 }
 
-
+/* Returns the last file (specified by path)'s name */
 char* get_last_file_from_path(char* path) {
 
   if (!path || !*path) { return NULL; }
@@ -269,7 +273,10 @@ inode_t* navigate_dir(char* path, void** buff_ref) {
   return current_file;
 } 
 
-
+/* Get the last file from the given path
+ * If buff_ref is not null, it will be a reference to buffer that will hold the 
+ * directory buffer holding the specified file
+ * */
 inode_t* navigate_file(char* path, void** buff_ref) {
 
   inode_t* dir = navigate_dir(path, NULL);
@@ -304,7 +311,7 @@ inode_t* find_file(char* buffer, size_t size, char* filename) {
   return NULL;
 }
 
-
+/* Initialize a file's first cluster, every file, even an empty one, holds at least 1 cluster */
 void init_first_cluster(inode_t* inode) {
   
   fat_read(fat_buffer);
@@ -377,7 +384,7 @@ uint16_t fat_find_free_cluster(void* buffer, int* err) {
   return 0;
 }
 
-
+/* Resize the clusters holding a file, and it's handler's size */
 void fat_resize_file(inode_t* inode, size_t size) {
 
   uint16_t cluster = inode->cluster;
@@ -431,7 +438,7 @@ write:
   fat_write(fat_buffer);
 }
 
-
+/* Remove a given entry name from a given file */
 void remove_dir_entry(char* dir_path, char* entry) {
  
   void* dir_buffer;
@@ -462,7 +469,11 @@ void remove_dir_entry(char* dir_path, char* entry) {
   else { root_entries--; }
 }
 
-
+/* Write a file to the disk 
+ * Input: Path of file to write, file has to exist
+ * Input: Data buffer to write to file
+ * Input: Amount of data to take from the data buffer
+ * */
 void write_file(char* path, void* buffer, size_t size) {
 
   inode_t* dir = navigate_dir(path, NULL);
@@ -569,6 +580,7 @@ void fat_delete_file(inode_t* inode) {
   fat_write(fat_buffer);
 }
 
+/* Delete all clusters */
 void fat_clear_file(inode_t* inode) {
 
   if (!inode || !inode->cluster) { return; }
@@ -624,24 +636,34 @@ void* read_file(inode_t* inode) {
 void copy_file(char* old_path, char* new_path) {
 
   inode_t* file = navigate_file(old_path, NULL);
-  
-  if (!file) { return; }
 
   char* full_filename = make_full_filename(file->filename, file->ext);
   create_file(full_filename, new_path, file->attributes);
 
   size_t new_path_size = strl(new_path);
-  char* full_path = kcalloc(1, new_path_size + strl(full_filename) + (!CHECK_SEPERATOR(new_path[new_path_size - 1]) ? 1 : 0) + 1);
+  char* full_path = kcalloc(1, new_path_size + strl(full_filename) + 
+      (new_path && !CHECK_SEPERATOR(new_path[new_path_size - 1]) ? 1 : 0) + 1);
   
-  memcpy(full_path, new_path, strl(new_path));
-  if (!CHECK_SEPERATOR(new_path[new_path_size - 1])) { strcat(full_path, "/"); }
+  if (new_path) {
+    memcpy(full_path, new_path, strl(new_path));
+    if (!CHECK_SEPERATOR(new_path[new_path_size - 1])) { strcat(full_path, "/"); }
+  }
 
   strcat(full_path, full_filename);
-
+  
   write_file(full_path, read_file(file), file->size);
 }
 
 
+void move_file(char* old_path, char* new_path) {
+    
+  copy_file(old_path, new_path);
+  delete_file(old_path);
+}
+
+
+
+/* Given file path's last file will be renamed to the new given filename */
 void rename_file(char* path, char* new_filename) {
   
   char* filename = get_last_file_from_path(path);
@@ -657,7 +679,7 @@ void rename_file(char* path, char* new_filename) {
   edit_file(dir, dir_buffer, dir ? dir->size : ROOT_SIZE);
 }
 
-
+/* Completely delete a file, it's directory entry & it's data link */
 void delete_file(char* path) {
 
   char* filename = get_last_file_from_path(path);

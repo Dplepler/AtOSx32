@@ -59,12 +59,10 @@ int kmain(void) {
   
   create_file("aa.txt", "dir/dir2/", 0x0);
 
-  delete_file("dir/dir2/aa.txt");
+  move_file("dir/dir2/aa.txt", NULL);
 
-  inode_t* dir = navigate_file("dir/dir2", NULL);
-  
-  PRINTNH(dir); 
-
+  inode_t* a = navigate_file("aa.txt", NULL);
+  PRINTNH(a);
   /*init_cleaner_task();
 
   create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);
