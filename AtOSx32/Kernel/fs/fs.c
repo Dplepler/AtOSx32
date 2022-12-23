@@ -266,7 +266,7 @@ inode_t* navigate_dir(char* path, void** buff_ref) {
   return current_file;
 } 
 
-
+// TODO: This func does not work if the path contains only one file when the file is a directory.
 inode_t* navigate_file(char* path, void** buff_ref) {
 
   inode_t* dir = navigate_dir(path, NULL);
@@ -276,7 +276,6 @@ inode_t* navigate_file(char* path, void** buff_ref) {
   if (buff_ref) { *buff_ref = buffer; }
   return find_file(buffer, dir ? dir->size : ROOT_SIZE, get_last_file_from_path(path));
 }
-
 
 /* Find a file by it's name from a given data buffer
  * The function searches for the file name in a directory data buffer
@@ -293,6 +292,9 @@ inode_t* find_file(char* buffer, size_t size, char* filename) {
     free(it);
   }
 
+  NL;
+  PRINTNH(buffer);
+  while(1) {}
   panic(ERROR_PATH_INCORRECT);
   return NULL;
 }
@@ -557,7 +559,7 @@ void* read_file(inode_t* inode) {
   if (!inode) {
    
     root_read(root_buffer);
-    buffer = kmalloc(root_entries * DIR_ENTRY_SIZE);
+    buffer = kmalloc(ROOT_SIZE);
     memcpy(buffer, root_buffer, root_entries * DIR_ENTRY_SIZE);
     
     return buffer;
@@ -598,5 +600,21 @@ void copy_file(inode_t* file, char* new_path) {
   strcat(full_path, full_filename);
 
   write_file(full_path, read_file(file), file->size);
+}
+
+
+void rename_file(char* path, char* new_filename) {
+  
+  char* filename = get_last_file_from_path(path);
+  char* dir_path = eat_path_reverse(path);
+
+  inode_t* dir = navigate_dir(dir_path, NULL);
+
+  void* dir_buffer = read_file(dir);
+
+  inode_t* file = find_file(dir_buffer, dir ? dir->size : ROOT_SIZE, filename);
+  fat_create_filename(file, new_filename);
+  
+  edit_file(dir, dir_buffer, dir ? dir->size : ROOT_SIZE);
 }
 

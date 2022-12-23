@@ -69,9 +69,12 @@ int kmain(void) {
  
   inode_t* copy = navigate_file("dir/aa.txt", NULL);
 
-  char* b = read_file(copy);
+  rename_file("dir", "bruhh");
+  
+  inode_t* a = navigate_file("bruhh", NULL);
+  
+  PRINTNH(a);
 
-  PRINT(b);
   /* init_cleaner_task();
 
   create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);
