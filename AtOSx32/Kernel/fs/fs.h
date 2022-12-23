@@ -124,10 +124,11 @@ void edit_file(inode_t* inode, void* buffer, size_t size);
 void fat_delete_file(inode_t* inode);
 void fat_create_filename(inode_t* inode, char* name);
 void write_file_data(inode_t* inode, void* buffer, size_t size);
+void remove_dir_entry(char* dir_path, char* entry);
 
 void write_file(char* path, void* buffer, size_t size);
-void copy_file(inode_t* file, char* new_path);
-
+void copy_file(char* old_path, char* new_path);
+void delete_file(char* path);
 
 bool file_has_extention(char* full_filename);
 

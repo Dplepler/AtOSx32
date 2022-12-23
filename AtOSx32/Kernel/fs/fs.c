@@ -256,7 +256,6 @@ inode_t* navigate_dir(char* path, void** buff_ref) {
     if (tb != (char*)root_buffer) { free(tb); }
     
     current_file = current_file ? find_file(buffer, current_file->size, name) : find_file(buffer, root_entries * DIR_ENTRY_SIZE, name);
-    
     free(name);
 
     if (navigate_path && *navigate_path) { 
@@ -265,7 +264,6 @@ inode_t* navigate_dir(char* path, void** buff_ref) {
     }
 
     if (buff_ref) { *buff_ref = buffer; }
-    
   }
 
   return current_file;
@@ -275,13 +273,15 @@ inode_t* navigate_dir(char* path, void** buff_ref) {
 inode_t* navigate_file(char* path, void** buff_ref) {
 
   inode_t* dir = navigate_dir(path, NULL);
+
   char* np = eat_path(path);
-  if (dir && !np) { return dir; }
+  if (dir && !file_has_extention(get_last_file_from_path(np))) { return dir; }
   free(np);
 
   char* buffer = read_file(dir);
   
   if (buff_ref) { *buff_ref = buffer; }
+
   return find_file(buffer, dir ? dir->size : ROOT_SIZE, get_last_file_from_path(path));
 }
 
@@ -299,7 +299,7 @@ inode_t* find_file(char* buffer, size_t size, char* filename) {
     if (!strcmp(it, filename)) { return (inode_t*)buffer; } 
     free(it);
   }
-
+ 
   panic(ERROR_PATH_INCORRECT);
   return NULL;
 }
@@ -429,6 +429,37 @@ write:
 
   inode->size = size;
   fat_write(fat_buffer);
+}
+
+
+void remove_dir_entry(char* dir_path, char* entry) {
+ 
+  void* dir_buffer;
+  inode_t* dir = navigate_dir(dir_path, &dir_buffer);
+
+  size_t size = dir ? dir->size : root_entries * DIR_ENTRY_SIZE;
+  if (!size) { return; }
+
+  void* new_dir_buffer = kmalloc(size - DIR_ENTRY_SIZE);
+  void* old_dir_buffer = read_file(dir);
+
+  char* it = NULL;
+  for (uint32_t i = 0; i < size; i += DIR_ENTRY_SIZE, old_dir_buffer += DIR_ENTRY_SIZE) {
+    it = make_full_filename(((inode_t*)old_dir_buffer)->filename, ((inode_t*)old_dir_buffer)->ext);
+    if (strcmp(it, entry)) { memcpy(new_dir_buffer, old_dir_buffer, DIR_ENTRY_SIZE); old_dir_buffer += DIR_ENTRY_SIZE; } 
+    free(it);
+  }
+
+  edit_file(dir, new_dir_buffer, dir ? (dir->size - DIR_ENTRY_SIZE) : (ROOT_SIZE - DIR_ENTRY_SIZE));
+
+  if (dir) {
+    
+    dir_path = eat_path_reverse(dir_path);
+    inode_t* dir_dir = navigate_dir(dir_path, NULL);
+
+    edit_file(dir_dir, dir_buffer, (dir_dir ? dir_dir->size : ROOT_SIZE));   /* Edit directory's size */
+  }
+  else { root_entries--; }
 }
 
 
@@ -590,7 +621,11 @@ void* read_file(inode_t* inode) {
 }
 
 /* Create a new file at a specified location with the contents of the old file */
-void copy_file(inode_t* file, char* new_path) {
+void copy_file(char* old_path, char* new_path) {
+
+  inode_t* file = navigate_file(old_path, NULL);
+  
+  if (!file) { return; }
 
   char* full_filename = make_full_filename(file->filename, file->ext);
   create_file(full_filename, new_path, file->attributes);
@@ -620,5 +655,22 @@ void rename_file(char* path, char* new_filename) {
   fat_create_filename(file, new_filename);
   
   edit_file(dir, dir_buffer, dir ? dir->size : ROOT_SIZE);
+}
+
+
+void delete_file(char* path) {
+
+  char* filename = get_last_file_from_path(path);
+  char* dir_path = eat_path_reverse(path);
+
+  inode_t* dir = navigate_dir(dir_path, NULL);
+
+  void* dir_buffer = read_file(dir);
+
+  inode_t* file = find_file(dir_buffer, dir ? dir->size : ROOT_SIZE, filename);
+
+  fat_delete_file(file);
+  
+  remove_dir_entry(dir_path, filename);  
 }
 
