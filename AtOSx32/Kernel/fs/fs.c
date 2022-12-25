@@ -38,14 +38,14 @@ static inline void fat_read(void* buffer) {
 /* Write root data from RAM (buffer) to the disk */
 static inline void root_write(void* buffer, size_t sectors) {
  
-  if (!sectors) { sectors = 1;}
   ata_write(ROOT_SECTOR_OFFSET, sectors, buffer);
   was_root_read = false;
 }
 
 /* Read root from disk to RAM (buffer) */
 static inline void root_read(void* buffer, size_t sectors) {
-  if (!sectors) { sectors = 1;}
+  
+  if (!sectors) { return;}
   if (!was_root_read) { was_root_read = true; ata_read(ROOT_SECTOR_OFFSET, sectors, buffer); }
 }
 
@@ -246,7 +246,8 @@ inode_t* navigate_dir(char* path, void** buff_ref) {
  
   char* name = NULL;
   char* navigate_path = path;
-
+  
+  if (!root_entries) { return NULL; }
   root_read(root_buffer, entries_to_sectors(root_entries));
   
   inode_t* current_file = NULL;
@@ -310,8 +311,6 @@ inode_t* find_file(char* buffer, size_t size, char* filename) {
     free(it);
   }
 
-  PRINTNH(buffer);
-  while(1) {}
   panic(ERROR_PATH_INCORRECT);
   return NULL;
 }
@@ -354,7 +353,7 @@ inode_t* create_file(char* filename, char* path, uint8_t attributes) {
   if (dir) {
     char* dir_path = eat_path_reverse(path);
     inode_t* dir_dir = navigate_dir(dir_path, NULL);
-    edit_file(dir_dir, dir_buffer, (dir_dir ? dir_dir->size : entries_to_sectors(root_entries)));   /* Edit directory's size */
+    edit_file(dir_dir, dir_buffer, (dir_dir ? dir_dir->size : ROOT_CURRENT_SIZE));   /* Edit directory's size */
   }
 
   return file;
@@ -565,10 +564,8 @@ void edit_file(inode_t* inode, void* buffer, size_t size) {
   }
 
   /* Only for cases where the file is NULL, we're going to edit the root directory */
-  // TODO SIZE SHOULD BE AT LEAST 1 SECTOR
-
   size_t fixed_size = size_to_sectors(size) * SECTOR_SIZE;
-  void* root = kmalloc(fixed_size);
+  void* root = kcalloc(1, fixed_size);
   memcpy(root, buffer, size);
 
   root_write(root, entries_to_sectors(root_entries));
@@ -618,12 +615,12 @@ void* read_file(inode_t* inode) {
 
   /* Read from root */
   if (!inode) {
- 
+
+    if (!root_entries) { return NULL; }
     root_read(root_buffer, entries_to_sectors(root_entries));
     buffer = kmalloc(ROOT_CURRENT_SIZE);
     memcpy(buffer, root_buffer, ROOT_CURRENT_SIZE);
   
-    //PRINTNH(buffer);
     return buffer;
   }
 
