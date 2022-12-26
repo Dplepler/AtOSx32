@@ -1,6 +1,7 @@
 #ifndef IRQS_H
 #define IRQS_H
 
+#include "Drivers/kernel_keyboard.h"
 #include "System/clock.h"
 
 #define EOI 0x20

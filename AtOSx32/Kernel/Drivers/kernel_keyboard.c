@@ -1,5 +1,17 @@
 #include "kernel_keyboard.h"
 
+char keyboard[128] = {
+
+    0,  27, '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    '0', '-', '=', '\b', '\t', 'q', 'w', 'e', 'r', 't', 'y',
+    'u', 'i', 'o', 'p', '[', ']', '\n', 0, 'a', 's', 'd', 'f', 
+    'g', 'h', 'j', 'k', 'l', ';', '\'', '`', 0, '\\', 'z', 'x', 
+    'c', 'v', 'b', 'n', 'm', ',', '.', '/', 0, '*', 0,  ' ', 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '-', 0, 0, 0, 
+    '+', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+};
+
+
 /*
 reads the status of the keyboard controller
 Output: Data inside port 0x64
@@ -42,5 +54,19 @@ void keyboard_enc_send_cmd(uint8_t cmd) {
   while ((keyboard_ctrl_read_status() & KEYBOARD_CTRL_STATS_MASK_IN_BUF)) { }
  
   outportb(KEYBOARD_ENC_CMD_REG, cmd);  // Send command
+}
+
+/* Write input to screen */
+void keyboard_handler() {
+  
+  while (!(inportb(KEYBOARD_CTRL_STATS_REG) & KEYBOARD_CTRL_STATS_MASK_OUT_BUF)) { }
+  int scancode = inportb(KEYBOARD_ENC_INPUT_BUF);
+
+  if (scancode & 0x80) { return; }
+  
+  char* c = kmalloc(2);
+  c[0] = keyboard[scancode];
+  c[1] = '\0';
+  PRINT(c);
 }
 

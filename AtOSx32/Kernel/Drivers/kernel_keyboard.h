@@ -2,7 +2,9 @@
 #define KERNEL_KEYBOARD_H
 
 #include <stdbool.h>
-#include "../System/hal.h"
+#include "System/hal.h"
+#include "Memory/heap.h"
+
 
 /* Keyboard encoder is accessible through port 0x60 */
 enum KEYBOARD_ENCODER_IO {
@@ -33,6 +35,10 @@ uint16_t keyboard_ctrl_read_status();
 uint16_t keyboard_enc_read_buffer();
 void keyboard_ctrl_send_cmd(uint8_t cmd);
 void keyboard_enc_send_cmd(uint8_t cmd);
+
+
+
+void keyboard_handler();
 
 #endif
 

@@ -124,6 +124,7 @@ void remove_dir_entry(char* dir_path, char* entry);
 
 void write_file(char* path, void* buffer, size_t size);
 void copy_file(char* old_path, char* new_path);
+void move_file(char* old_path, char* new_path);
 void delete_file(char* path);
 
 bool file_has_extention(char* full_filename);
