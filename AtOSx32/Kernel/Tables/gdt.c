@@ -34,8 +34,10 @@ void gdt_create_gate(uint32_t index, uint32_t base, uint32_t limit, uint8_t acce
 void gdt_install_gates() {
 
   gdt_create_gate(0, 0, 0, 0, 0);   // First gate is ignored by the CPU
-  gdt_create_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xCF); // Kernel code
-  gdt_create_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF); // Kernel data
+  gdt_create_gate(1, 0, 0xFFFFF, 0x9A, 0xCF); // Kernel code
+  gdt_create_gate(2, 0, 0xFFFFF, 0x92, 0xCF); // Kernel data
+  gdt_create_gate(3, 0, 0xFFFFF, 0xFA, 0xCF); // User code
+  gdt_create_gate(4, 0, 0xFFFFF, 0xF2, 0xCF); // User data
 
   load_gdt();
 }

@@ -627,14 +627,12 @@ void* read_file(inode_t* inode) {
   /* Normal file read */
   size_t buff_sector_size = inode->size / SECTOR_SIZE;
   if (inode->size % SECTOR_SIZE) { buff_sector_size++; }
- 
   if (!buff_sector_size) { return NULL; }
 
   buffer = kmalloc(buff_sector_size * SECTOR_SIZE);
   fat_read(fat_buffer);
 
   void* it = buffer; 
-
   for (uint16_t cluster = inode->cluster; cluster != EOC; cluster = ((uint16_t*)fat_buffer)[cluster]) {
     ata_read(cluster * CLUSTERS_IN_SECTOR, CLUSTERS_IN_SECTOR, it);
     it += CLUSTER_SIZE;
@@ -679,9 +677,7 @@ void rename_file(char* path, char* new_filename) {
   char* dir_path = eat_path_reverse(path);
 
   inode_t* dir = navigate_dir(dir_path, NULL);
-
   void* dir_buffer = read_file(dir);
-
   inode_t* file = find_file(dir_buffer, dir ? dir->size : ROOT_CURRENT_SIZE, filename);
   fat_create_filename(file, new_filename);
   
@@ -695,13 +691,10 @@ void delete_file(char* path) {
   char* dir_path = eat_path_reverse(path);
 
   inode_t* dir = navigate_dir(dir_path, NULL);
-
   void* dir_buffer = read_file(dir);
-
   inode_t* file = find_file(dir_buffer, dir ? dir->size : ROOT_CURRENT_SIZE, filename);
-
-  fat_delete_file(file);
   
+  fat_delete_file(file);
   remove_dir_entry(dir_path, filename);  
 }
 

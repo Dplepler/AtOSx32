@@ -52,22 +52,7 @@ int kmain(void) {
   init_multitasking();
  
   init_fs();
-  
-  char* txt = "Hello!";
-  create_directory("dir", NULL, 0x0);
-
-  create_directory("dir2", "dir", 0x0);
- 
-  create_file("aa.txt", "dir/dir2/", 0x0);
-  write_file("dir/dir2/aa.txt", txt, strl(txt));
-
-  move_file("dir/dir2/aa.txt", NULL);
-
-  inode_t* a = navigate_file("aa.txt", NULL);
-  PRINT(read_file(a));
-
-  
-
+    
   
   /*init_cleaner_task();
 
