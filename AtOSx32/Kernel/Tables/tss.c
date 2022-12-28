@@ -9,7 +9,6 @@ void tss_install() {
 
   task_state.ss0 = GDT_KERNEL_DS;
   task_state.iopb = sizeof(tss_t);
-  task_state.esp0 = 1024;
  
   gdt_create_gate(5, (uint32_t)&task_state, (uint32_t)&task_state + sizeof(tss_t) - 1, 0xE9, 0x00);
 

@@ -8,6 +8,8 @@
 #include "Drivers/ata.h"
 #include "fs/fs.h"
 
+extern void jmp_userland(void* func);
+
 void clock() {
   while (true) {
     terminal_draw_rec(0, 0, 9, 1, 8); 
@@ -19,13 +21,14 @@ void clock() {
 }
 
 void tongue() {
-  
+ 
+  __asm__ __volatile__ ("cli":);
 
   for (;;)  {
     terminal_draw_rec(34, 11, 46, 12, VGA_COLOR_LIGHT_RED);
-    sleep(750);
+    singetasking_sleep(750);
     terminal_draw_rec(34, 11, 46, 12, VGA_COLOR_CYAN);
-    sleep(750);
+    singetasking_sleep(750);
   }
 }
 
@@ -50,9 +53,9 @@ int kmain(void) {
   setup_multitasking();
   setup_clock();
   init_multitasking();
- 
   init_fs();
-    
+   
+  jmp_userland((void*)tongue);
   
   /*init_cleaner_task();
 
