@@ -6,6 +6,7 @@
 
 uint32_t irq_disable_counter = 0;
 
+
 tcb_t* running_task   = NULL;  /* Current task */
 tcb_t* next_task      = NULL;  /* Buffer of the selected task to run */
 tcb_t* scheduler_task = NULL;  /* Default idle task, searches for other tasks to run */
@@ -20,7 +21,6 @@ task_list_t* terminated_tasks = NULL;  /* Tasks that have ended their lifetime *
 
 
 bool allow_ts = false;  /* Task switching lock */
-
 
 static inline void lock_ts()   { allow_ts = false; }
 static inline void unlock_ts() { allow_ts = true; }
@@ -163,13 +163,9 @@ void init_cleaner_task() {
 void terminate_task() {
 
   irq_disable();
-  NL;
-  PRINTNH(running_task->pid);
-  PRINT(" TERMINATED\n\r");
 
   /* Schedule the cleaner to free up the process' memory */
   if (cleaner_task->state == TASK_BLOCKED) { task_unblock(cleaner_task); }
-  
   
   irq_enable();
 

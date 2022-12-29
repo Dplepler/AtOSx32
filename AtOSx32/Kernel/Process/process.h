@@ -36,8 +36,10 @@ typedef struct _TASK_CONTROL_BLOCK_STRUCT {
   uint32_t* address_space;
 
   enum {
+
     PROCESS,
     THREAD
+
   } type;
 
   enum {
@@ -114,10 +116,10 @@ void task_list_insert_front(task_list_t* list, tcb_t* task);
 void task_list_insert_back(task_list_t* list, tcb_t* task);
 void task_list_remove_task(task_list_t* list, tcb_t* task);
 
-
-
-  /* Scheduler */
+/* Scheduler */
 void schedule();
+
+tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, uint8_t policy);
 tcb_t* schedule_priority_task(tcb_t* list);
 tcb_t* schedule_time_slice_task();
 
@@ -125,7 +127,6 @@ uint32_t* create_address_space();
 uint32_t* relocate_stack(uint32_t* address, size_t size);
 uint32_t get_next_pid();
 
-tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, uint8_t policy);
 process_t* create_process_handler(uint32_t* address_space, uint32_t eip, void* params, uint8_t policy);
 thread_t* create_thread_handler(uint32_t eip, void* params, uint8_t policy);
 

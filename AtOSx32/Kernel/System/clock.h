@@ -2,7 +2,7 @@
 #define CLOCK_H
 
 #include "System/hal.h"
-#include "Tables/interrupts.h"
+#include "Tables/irqs.h"
 #include "Process/process.h"
 #include "utils.h"
 

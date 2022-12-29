@@ -12,6 +12,11 @@ char keyboard[128] = {
 };
 
 
+void init_keyboard() {
+  irq_install_handler(1, &keyboard_handler);
+}
+
+
 /*
 reads the status of the keyboard controller
 Output: Data inside port 0x64

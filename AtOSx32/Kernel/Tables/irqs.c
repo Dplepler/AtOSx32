@@ -17,8 +17,8 @@ extern void irq13();
 extern void irq14();
 extern void irq15();
 
-void* irq_routines[16] = { NULL, &keyboard_handler, NULL, NULL, NULL, NULL, NULL, NULL, 
-                          &rtc_handler, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+void* irq_routines[256]; // { NULL, &keyboard_handler, NULL, NULL, NULL, NULL, NULL, NULL, 
+                          // &rtc_handler, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 
 void irq_install_handler(uint8_t irq, void(*handler)(isr_stack_t* stack)) {
   irq_routines[irq] = handler;
@@ -86,18 +86,8 @@ void irq_handler(isr_stack_t* stack) {
   /* In any case send an End of Interrupt command to the first PIC */
   outportb(MASTER_COMMAND, EOI);
 
-
   /* Handle task switching */
-  if (index == 0x8) {
-   
-    allow_ts = false; 
-    /* Wake up tasks */
-    manage_sleeping_tasks();
-    
-    /* Decrease the tasks's time slice */
-    if (scheduler_task != running_task) { manage_time_slice(); } 
-    allow_ts = true;
-  }
+  if (index == 0x8) { scheduler_tick(); } 
   else { sti(); }
 }
 

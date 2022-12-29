@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include "System/hal.h"
 #include "Memory/heap.h"
-
+#include "Tables/irqs.h"
 
 /* Keyboard encoder is accessible through port 0x60 */
 enum KEYBOARD_ENCODER_IO {
@@ -31,13 +31,12 @@ enum KEYBOARD_CTRL_STATS_MASK {
   KEYBOARD_CTRL_STATS_MASK_PARITY		=	0x80	//10000000
 };
 
+void init_keyboard();
+
 uint16_t keyboard_ctrl_read_status();
 uint16_t keyboard_enc_read_buffer();
 void keyboard_ctrl_send_cmd(uint8_t cmd);
 void keyboard_enc_send_cmd(uint8_t cmd);
-
-
-
 void keyboard_handler();
 
 #endif

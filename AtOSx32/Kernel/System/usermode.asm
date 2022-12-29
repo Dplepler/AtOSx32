@@ -4,6 +4,7 @@ global jmp_userland
 ; Input: Function destination in ESI
 jmp_userland:
   
+  cli
   mov esi, dword [esp + 0x4] 
   
   mov ax, 0x20
@@ -14,10 +15,10 @@ jmp_userland:
   mov fs, ax
   mov gs, ax
 
-  mov edx, esp
   push eax
-  push edx
-  pushf
+  push esp
+  pushfd
+  or dword [esp], 0x200
   mov eax, 0x18
   or eax, 3
   push eax

@@ -6,6 +6,8 @@ unsigned long idle_time_counter = 0;
 
 
 void setup_clock() {
+
+  irq_install_handler(8, &rtc_handler);
   set_periodic_interrupt();
 }
 
