@@ -102,11 +102,11 @@ uint16_t fat_create_time(cmos_time time);
 uint16_t fat_create_date(cmos_time date);
 uint16_t fat_find_free_cluster(void* buffer, int* err);
 
+inode_t* create_file(char* filename, char* path, uint8_t attributes);
 inode_t* create_directory(char* dirname, char* path, uint8_t attributes);
 inode_t* navigate_dir(char* path, void** buff_ref);
 inode_t* navigate_file(char* path, void** buff_ref);
 inode_t* find_file(char* buffer, size_t size, char* filename);
-inode_t* create_file(char* filename, char* path, uint8_t attributes);
 inode_t* init_file(char* filename, uint8_t attributes);
 
 void init_fs();

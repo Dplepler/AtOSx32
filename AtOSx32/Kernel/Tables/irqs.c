@@ -17,8 +17,9 @@ extern void irq13();
 extern void irq14();
 extern void irq15();
 
-void* irq_routines[256] = { NULL }; // { NULL, &keyboard_handler, NULL, NULL, NULL, NULL, NULL, NULL, 
-                          // &rtc_handler, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+
+void* irq_routines[256] = { NULL };
+void* service_routines[256] = { NULL };
 
 void irq_install_handler(uint8_t irq, void(*handler)(isr_stack_t* stack)) {
   irq_routines[irq] = handler;
@@ -28,11 +29,37 @@ void irq_remove_handler(uint8_t irq) {
   irq_routines[irq] = NULL;
 }
 
+void init_syscalls() {
+  
+  idt_create_gate(SYSTEM_IRQ_DISPATCHER, (uint32_t)syscall_dispatcher, 0x8, 0xEE);
+  
+  service_routines[0] = &create_file_handler;
 
-/* 
-The first 8 IRQs are by default mapped to entries 8-15, these entries are already reserved for exceptions with double faults
-so we need to remap the IRQs via the Programmble Interrupt Controller; New location will be at entries 32-47
- */
+}
+
+void syscall_dispatcher() {
+
+  uint8_t index;
+  __asm__ __volatile__ ("mov %%ah, %0" : "=r" (index));
+
+  void* service = service_routines[index];
+
+  __asm__ __volatile__ (" \
+    push %%edi;     \
+    push %%esi;     \
+    push %%edx;     \
+    push %%ecx;     \
+    push %%ebx;     \
+    call %0;        \
+    add $20, %%esp; \
+    iret;           "
+    
+    : : "r"((uint32_t)service));
+}
+
+
+/* The first 8 IRQs are by default mapped to entries 8-15, these entries are already reserved for exceptions with double faults
+so we need to remap the IRQs via the Programmble Interrupt Controller; New location will be at entries 32-47 */
 void irq_remap() {
 
   outportb(MASTER_COMMAND, 0x11);
