@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include "Memory/vmm.h"
 #include "System/hal.h"
-#include "Tables/tss.h"
 
 #define GDT_SIZE 6
 

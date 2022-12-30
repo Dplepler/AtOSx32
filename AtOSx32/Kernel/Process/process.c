@@ -291,7 +291,7 @@ void manage_sleeping_tasks() {
 void manage_time_slice() {
   
   irq_disable();
-  if (!--running_task->time_slice) { sleep(5); }
+  if (!--running_task->time_slice) { sleep(1); }
   irq_enable();
 }
 

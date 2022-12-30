@@ -1,5 +1,5 @@
-#ifndef INTERRUPTS_H
-#define INTERRUPTS_H
+#ifndef IDT_H
+#define IDT_H
 
 #include "Memory/vmm.h"
 #include "Drivers/kernel_screen.h"

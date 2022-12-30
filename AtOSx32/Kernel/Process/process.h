@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 #include "Memory/heap.h"
-#include "System/clock.h"
 
 #define INIT_KERNEL_STACK 0xC03FE000
 #define STACK_SIZE        0x1000
@@ -18,6 +17,8 @@
 extern unsigned long proc_time_counter; 
 extern unsigned long time_counter;
 extern unsigned long idle_time_counter;
+
+extern void sleep(unsigned long milisec);
 
 typedef struct _TASK_CONTROL_BLOCK_STRUCT {
 

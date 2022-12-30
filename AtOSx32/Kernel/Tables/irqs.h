@@ -1,7 +1,7 @@
 #ifndef IRQS_H
 #define IRQS_H
 
-#include "Tables/interrupts.h"
+#include "Tables/idt.h"
 #include "Process/process.h"
 
 #define EOI 0x20

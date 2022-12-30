@@ -17,7 +17,7 @@ extern void irq13();
 extern void irq14();
 extern void irq15();
 
-void* irq_routines[256]; // { NULL, &keyboard_handler, NULL, NULL, NULL, NULL, NULL, NULL, 
+void* irq_routines[256] = { NULL }; // { NULL, &keyboard_handler, NULL, NULL, NULL, NULL, NULL, NULL, 
                           // &rtc_handler, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 
 void irq_install_handler(uint8_t irq, void(*handler)(isr_stack_t* stack)) {

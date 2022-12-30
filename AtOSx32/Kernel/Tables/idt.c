@@ -1,4 +1,4 @@
-#include "interrupts.h"
+#include "idt.h"
 
 static interrupt_descriptor_t idt[IDT_SIZE];
 static idtptr_t idt_ptr;
