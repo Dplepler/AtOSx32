@@ -59,7 +59,7 @@ unsigned long clock_time() {
 }
 
 
-void singetasking_sleep(unsigned long milisec) {
+void singletasking_sleep(unsigned long milisec) {
   
   if (!milisec) { return; }
   
