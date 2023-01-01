@@ -134,7 +134,7 @@ unreal_mode:
 %include "Bootload/GDT.asm" 				        ;		Global descriptor table
 %include "Bootload/DAP.asm"					        ;		Disk address packet
 %include "Bootload/protected_mode_setup.asm";		Routines to set up and initialize protected mode
-%include "Bootload/ata.asm"
+%include "Bootload/ata.asm"                 ;   ATA driver to load kernel with
 ;===========================================;
 
 [bits 16]
@@ -154,16 +154,6 @@ load_kernel:
 
 	call load_disk
   
-  ;mov dl, 80h
-  ;mov si, DAP_START
-  ;add dword [DAP_LBA], 50
-  ;add word [DAP_KERNEL_OFFSET], 6400h
-
-  ;mov si, DAP_START
-  ;jmp $
-
-  ;call load_disk
-
 	ret
 
 .no_extentions:
@@ -216,7 +206,7 @@ print_string:
 ; Jump to our kernel!
 genesis:
 
-	call 0C0000000h 		; Call the virtual address of the Kernel
+	call 0C0001000h 		; Call the virtual address of the Kernel
 	jmp $					      ; Hang at the end of the kernel
 	
 

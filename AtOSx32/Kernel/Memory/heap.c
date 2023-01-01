@@ -1,7 +1,13 @@
 #include "heap.h"
 
-static heap_header_t* free_blocks[20];      // Each index represents 2^index allocated pages size
-static uint8_t     complete_pages[20];      // Keep track of unused pages so we can free some if there are too many
+static heap_header_t* free_blocks[20] = { NULL };      // Each index represents 2^index allocated pages size
+static uint8_t     complete_pages[20] = { 0 };         // Keep track of unused pages so we can free some if there are too many
+
+void init_heap() {
+  memset(free_blocks, 0, sizeof(heap_header_t*) * 20);
+  memset(complete_pages, 0, 20);
+}
+
 
 /* Unused memory blocks will be indexed to the free_blocks array based on how many pages they take
    2^index <= pages < 2^(index+1) */
@@ -130,9 +136,8 @@ void* kmalloc(size_t size) {
   if (!size) { return NULL; }  
 
   uint8_t index = heap_get_index(size);
-  
-  heap_header_t* header = free_blocks[index];  
-  
+  heap_header_t* header = free_blocks[index];
+
   while (header) {
     if (header->size - sizeof(heap_header_t) >= size) { break; }
     header = header->flink;
@@ -141,7 +146,7 @@ void* kmalloc(size_t size) {
   if (!header) { header = heap_allocate_header(size); header->used = true; }   // Get a new header
   else {
     header->used = true;
-    header->req_size = size;
+    header->req_size = size;  
     heap_remove_header(header);   // Remove from free headers
     
     if (!header->page_flink && !header->page_blink) { complete_pages[header->index]--; }

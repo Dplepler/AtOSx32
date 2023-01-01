@@ -32,10 +32,10 @@ void tongue() {
 }
 
 int kmain(void) {
- 
+
+
   pd_remove_entry(0); 	// Remove identity mapping
   
-  /* Initialize terminal interface */
   terminal_initialize();
 
   bitmap_mark_kernel();
@@ -49,8 +49,11 @@ int kmain(void) {
  
   tss_install();
 
+  init_heap();
   setup_multitasking();
+ 
   setup_clock();
+    
   init_multitasking();
   init_fs();
    
@@ -58,13 +61,13 @@ int kmain(void) {
 
   //jmp_userland((void*)tongue);
   
-  /* init_cleaner_task();
+  init_cleaner_task();
 
   create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);
   create_process_handler(create_address_space(), (uint32_t)tongue, NULL, POLICY_0);
 
 
-  while(1) { cli(); schedule(); sti(); } */
+  while(1) { cli(); schedule(); sti(); }
 
 
   return 0;

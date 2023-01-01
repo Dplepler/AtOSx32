@@ -34,7 +34,7 @@ static inline void scheduler_tick() {
   allow_ts = true;
 }
 
-
+void init_irq();
 void init_syscalls(); 
 void syscall_dispatcher();
 void irq_install_handler(uint8_t irq, void(*handler)(isr_stack_t* stack));

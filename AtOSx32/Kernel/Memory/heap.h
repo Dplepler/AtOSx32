@@ -38,6 +38,7 @@ void* krealloc(void* ptr, size_t size);
 void* kcalloc(size_t n, size_t size);
 void* kmalloc_aligned(size_t size, uint32_t alignment);
 
+void init_heap();
 void free(void* ptr);
 void free_aligned(void* ptr);
 void heap_insert_unused_header(heap_header_t* header);

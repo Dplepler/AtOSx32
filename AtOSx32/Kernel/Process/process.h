@@ -17,7 +17,6 @@
 extern unsigned long proc_time_counter; 
 extern unsigned long time_counter;
 extern unsigned long idle_time_counter;
-
 extern void sleep(unsigned long milisec);
 
 typedef struct _TASK_CONTROL_BLOCK_STRUCT {

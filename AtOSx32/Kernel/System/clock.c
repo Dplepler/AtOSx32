@@ -7,7 +7,7 @@ unsigned long idle_time_counter = 0;
 
 void setup_clock() {
 
-  irq_install_handler(8, &rtc_handler);
+  irq_install_handler(8, &rtc_handler);  
   set_periodic_interrupt();
 }
 
@@ -15,11 +15,11 @@ void setup_clock() {
 void set_periodic_interrupt() {
 
   cli();
-  outportb(CMOS_REGISTER, 0x8B);      // Select register 0xB and disable NMI
+  outportb(CMOS_REGISTER, 0x8B);      // Select register 0xB and disable NMI   
   uint8_t old_data = inportb(CMOS_RW);
   outportb(CMOS_REGISTER, 0x8B);      // For some reason reading from this port resets the CMOS register to 0xD
-  outportb(CMOS_RW, old_data | 0x40);
-  sti();
+  outportb(CMOS_RW, old_data | 0x40); 
+  sti();  
 }
 
 /* Called 1024 times a second, keep track of the system's time */
