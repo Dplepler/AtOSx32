@@ -2,7 +2,6 @@
 
 void* fat_buffer  = NULL;
 void* root_buffer = NULL;
-void* hello = NULL;
 
 uint16_t root_entries = 0;
 
@@ -54,6 +53,7 @@ void init_fs() {
   
   fat_buffer = kcalloc(1, FAT_SIZE);
   root_buffer = kcalloc(1, ROOT_SIZE);
+  root_entries = 0;
 
   if (fat_extract_value(0) != FAT_SIGNATURE) { 
     fat_setup_table();
@@ -249,7 +249,7 @@ inode_t* navigate_dir(char* path, void** buff_ref) {
   
   if (!root_entries) { return NULL; }
   root_read(root_buffer, entries_to_sectors(root_entries));
-  
+ 
   inode_t* current_file = NULL;
   char* buffer = (char*)root_buffer;
   char* tb = NULL;

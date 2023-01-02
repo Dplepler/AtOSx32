@@ -4,6 +4,8 @@ static uint32_t frame_bitmap[NPAGES / BITS_IN_LONG];
 
 /* Marks the entire kernel as used */
 void bitmap_mark_kernel() {
+  
+  memset(frame_bitmap, 0, NPAGES / BITS_IN_LONG);
 
   size_t kernel_pages = (pgulong_t)(((uint32_t)&_kernel_end) - ((uint32_t)&_kernel_start)) / 0x1000;
 
