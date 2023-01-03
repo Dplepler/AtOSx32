@@ -34,32 +34,29 @@ void tongue() {
 int kmain(void) {
 
 
-  pd_remove_entry(0); 	// Remove identity mapping
-  
+  pd_remove_entry(0); 	// Remove identity mapping 
   terminal_initialize();
-
   bitmap_mark_kernel();
-
   perry(25, 5);
-
   setup_gdt();
   setup_idt();
-  
   init_irq();
- 
   tss_install();
-
   init_heap();
   setup_multitasking();
-  
   setup_clock();
-    
   init_multitasking();
   init_fs();
+  init_keyboard();
+ 
    
-  //init_keyboard();
-  
-  char* txt = "Hello!";
+
+
+
+
+
+
+  /* char* txt = "Hello!";
   create_directory("dir", NULL, 0x0);
 
   create_directory("dir2", "dir", 0x0);
@@ -70,10 +67,10 @@ int kmain(void) {
   move_file("dir/dir2/aa.txt", NULL);
 
   inode_t* a = navigate_file("aa.txt", NULL);
-  PRINT(read_file(a));
+  PRINT(read_file(a)); */
   //jmp_userland((void*)tongue);
   
-  /*init_cleaner_task();
+  /* init_cleaner_task();
 
   create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);
   create_process_handler(create_address_space(), (uint32_t)tongue, NULL, POLICY_0);

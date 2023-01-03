@@ -51,7 +51,7 @@ void syscall_dispatcher() {
     push %%edx;     \
     push %%ecx;     \
     push %%ebx;     \
-    call %0;        \
+    call *%0;       \
     add $20, %%esp; \
     iret;           "
     
