@@ -32,9 +32,11 @@ void irq_remove_handler(uint8_t irq) {
 void init_syscalls() {
   
   memset(service_routines, 0, 256 * sizeof(void*));
-  idt_create_gate(SYSTEM_IRQ_DISPATCHER, (uint32_t)syscall_dispatcher, 0x8, 0xEE);
-  
+
   service_routines[0] = &create_file_handler;
+  service_routines[1] = &terminal_write_string;
+
+  idt_create_gate(SYSTEM_IRQ_DISPATCHER, (uint32_t)syscall_dispatcher, 0x8, 0xEE);
 
 }
 
@@ -57,7 +59,6 @@ void syscall_dispatcher() {
     
     : : "r"((uint32_t)service));
 }
-
 
 /* The first 8 IRQs are by default mapped to entries 8-15, these entries are already reserved for exceptions with double faults
 so we need to remap the IRQs via the Programmble Interrupt Controller; New location will be at entries 32-47 */

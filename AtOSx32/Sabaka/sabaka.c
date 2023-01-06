@@ -1,10 +1,16 @@
 #include "atoslib.h"
 
-int main(void) {
+int a[1024];
 
 
+void foo(int m[]) {
+
+  m[10] = m[11];
   
+}
 
-
-  return 0;
+int main(void) {
+  
+  foo(a);
+  return a[10];
 }

@@ -7,7 +7,25 @@
 #include "Drivers/kernel_screen.h"
 #include "System/clock.h"
 #include "System/errors.h"
+ 
+typedef struct _ELF_32_STRUCT {
 
+        unsigned char   identify[16]; 
+        uint16_t      type;
+        uint16_t      machine;
+        uint32_t      version;
+        uint32_t      entry;
+        uint32_t      phoff;
+        uint32_t      shoff;
+        uint32_t      flags;
+        uint16_t      ehsize;
+        uint16_t      phentsize;
+        uint16_t      phnum;
+        uint16_t      shentsize;
+        uint16_t      shnum;
+        uint16_t      shstrndx;
+
+} elf32_header_t;
 
 #define HIDDEN_SECTORS 0x3
 #define SECTOR_SIZE    0x200
@@ -88,6 +106,7 @@ typedef struct _INODE_ENTRY_STRUCT {
 
 } __attribute__((packed)) inode_t;
 
+uint32_t get_elf_size(elf32_header_t* elf);
 
 void* read_file(inode_t* inode);
 
@@ -110,6 +129,7 @@ inode_t* find_file(char* buffer, size_t size, char* filename);
 inode_t* init_file(char* filename, uint8_t attributes);
 
 void init_fs();
+void load_shell();
 void root_setup_dir();
 void fat_setup_table();
 void enter_file(inode_t* file, inode_t* dir);

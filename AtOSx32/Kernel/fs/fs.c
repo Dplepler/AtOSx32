@@ -48,6 +48,16 @@ static inline void root_read(void* buffer, size_t sectors) {
   if (!was_root_read) { was_root_read = true; ata_read(ROOT_SECTOR_OFFSET, sectors, buffer); }
 }
 
+uint32_t get_elf_size(elf32_header_t* elf) {
+
+  size_t header_size = elf->ehsize;
+  size_t table_program_size = elf->phentsize * elf->phnum;
+  size_t table_headers_size = elf->shentsize * elf->shnum;
+
+  return (elf->ehsize + (elf->phnum * elf->phentsize) + (elf->shnum * elf->shentsize)) + (elf->shnum * elf->shentsize);
+}
+
+
 /* Initialize fat table and root directory if they weren't initialised yet */
 void init_fs() {
   
@@ -57,6 +67,7 @@ void init_fs() {
 
   if (fat_extract_value(0) != FAT_SIGNATURE) { 
     fat_setup_table();
+    load_shell();
   }
 }
 
@@ -70,6 +81,27 @@ void fat_setup_table() {
 
   fat_write(fat_buffer);
 }
+
+
+void load_shell() {
+
+  uint8_t buffer[512];   
+  ata_read(390, 1, buffer);
+  
+  elf32_header_t* elf = (elf32_header_t*)buffer;
+  size_t size = get_elf_size(elf);
+  
+  PRINTN(elf->shoff);
+  size_t sectors = size_to_sectors(size);
+
+  void* file_buffer = kmalloc(sectors * SECTOR_SIZE);
+
+  ata_read(390, sectors, file_buffer);
+
+  create_file("sabaka.run", NULL, 0);
+  write_file("sabaka.run", file_buffer, size);
+}
+
 
 /* Returns a value from the fat table at the given location */
 uint16_t fat_extract_value(uint16_t index) {
