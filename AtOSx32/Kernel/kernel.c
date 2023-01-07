@@ -33,7 +33,6 @@ void tongue() {
 
 int kmain(void) {
 
-
   pd_remove_entry(0); 	// Remove identity mapping 
   terminal_initialize();
   bitmap_mark_kernel();
@@ -49,11 +48,6 @@ int kmain(void) {
   init_fs();
   init_keyboard();
  
-   
-
-
-
-
 
 
   /* char* txt = "Hello!";

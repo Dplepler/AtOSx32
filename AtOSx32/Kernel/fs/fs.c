@@ -48,15 +48,6 @@ static inline void root_read(void* buffer, size_t sectors) {
   if (!was_root_read) { was_root_read = true; ata_read(ROOT_SECTOR_OFFSET, sectors, buffer); }
 }
 
-uint32_t get_elf_size(elf32_header_t* elf) {
-
-  size_t header_size = elf->ehsize;
-  size_t table_program_size = elf->phentsize * elf->phnum;
-  size_t table_headers_size = elf->shentsize * elf->shnum;
-
-  return (elf->ehsize + (elf->phnum * elf->phentsize) + (elf->shnum * elf->shentsize)) + (elf->shnum * elf->shentsize);
-}
-
 
 /* Initialize fat table and root directory if they weren't initialised yet */
 void init_fs() {
@@ -82,7 +73,12 @@ void fat_setup_table() {
   fat_write(fat_buffer);
 }
 
+/* Get the size of a file using it's elf header */
+uint32_t get_elf_size(elf32_header_t* elf) {
+  return elf->shoff + (elf->shentsize * elf->shnum);
+}
 
+/* When the OS first initializes we want to load our shell application */
 void load_shell() {
 
   uint8_t buffer[512];   
@@ -91,7 +87,6 @@ void load_shell() {
   elf32_header_t* elf = (elf32_header_t*)buffer;
   size_t size = get_elf_size(elf);
   
-  PRINTN(elf->shoff);
   size_t sectors = size_to_sectors(size);
 
   void* file_buffer = kmalloc(sectors * SECTOR_SIZE);
