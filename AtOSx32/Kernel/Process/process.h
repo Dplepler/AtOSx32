@@ -2,6 +2,7 @@
 #define PROCESS_H
 
 #include <stdint.h>
+#include "fs/fs.h"
 #include "Memory/heap.h"
 
 #define INIT_KERNEL_STACK 0xC03FE000
@@ -91,15 +92,16 @@ typedef struct _CDECL_REGISTERS_STRUCT {
 } cdecl_regs;
 
 
+extern tcb_t* scheduler_task;
+extern tcb_t* running_task;
+extern bool allow_ts;
+
 extern void switch_task(struct _TASK_CONTROL_BLOCK_STRUCT* new_task);
-
-
-void irq_enable();
-void irq_disable();
 
 void setup_multitasking();
 void init_multitasking();
 void init_cleaner_task();
+void process_startup(inode_t* code);
 void run_task();
 void terminate_task();
 void init_task(tcb_t* task, void* params);
@@ -118,7 +120,9 @@ void task_list_remove_task(task_list_t* list, tcb_t* task);
 
 /* Scheduler */
 void schedule();
+void sleep(unsigned long milisec);
 
+void scheduler_tick(); 
 tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, uint8_t policy);
 tcb_t* schedule_priority_task(tcb_t* list);
 tcb_t* schedule_time_slice_task();

@@ -47,8 +47,8 @@ int kmain(void) {
   init_multitasking();
   init_fs();
   init_keyboard();
- 
 
+  create_process_handler(create_address_space(), (uint32_t)process_startup, navigate_file("sabaka.run", NULL),  POLICY_0);
 
   /* char* txt = "Hello!";
   create_directory("dir", NULL, 0x0);
@@ -69,8 +69,9 @@ int kmain(void) {
   create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);
   create_process_handler(create_address_space(), (uint32_t)tongue, NULL, POLICY_0);
 
-
-  for(;;) { cli(); schedule(); sti(); } */
+  */
+  
+  for(;;) { cli(); schedule(); sti(); } 
 
 
   return 0;

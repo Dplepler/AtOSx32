@@ -1,6 +1,5 @@
 #include "mutex.h"
 
-extern tcb_t* running_task;
 
 
 /* Init mutex function */
@@ -19,13 +18,13 @@ void mutex_lock(mutex_t* mutex) {
   
   if (!mutex->aquired) { mutex->aquired = true; return; }  // Normal lock
   
-  running_task->flink = NULL;   // Detach task, we will move it to the waiting task list
+  ((tcb_t*)running_task)->flink = NULL;   // Detach task, we will move it to the waiting task list
 
   /* If lock is already locked, add task to the waiting list */
-  if (!mutex->wait_list->head) { mutex->wait_list->head = running_task; }
-  else { mutex->wait_list->tail->flink = running_task; }
+  if (!mutex->wait_list->head) { mutex->wait_list->head = (tcb_t*)running_task; }
+  else { mutex->wait_list->tail->flink = (tcb_t*)running_task; }
 
-  mutex->wait_list->tail = running_task;
+  mutex->wait_list->tail = (tcb_t*)running_task;
   
   task_block(TASK_WAITING);
 }

@@ -69,7 +69,7 @@ void keyboard_handler() {
 
   if (scancode & 0x80) { return; }
   
-  char* c = kmalloc(2);
+  char c[2];
   c[0] = keyboard[scancode];
   c[1] = '\0';
   PRINT(c);

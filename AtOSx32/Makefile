@@ -29,7 +29,6 @@ image: Bootload/stage0.bin Bootload/Bootloader.bin Kernel/kernel.bin Sabaka/saba
 
 C_SOURCES = $(shell find Kernel/ -type f -name '*.c')
 S_SOURCES = $(shell find Kernel/ -type f -name '*.asm')
-
 C_USERLAND = $(shell find Sabaka/ -type f -name '*.c')
 
 OBJC = $(C_SOURCES:.c=.o)

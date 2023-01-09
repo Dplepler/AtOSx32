@@ -3,7 +3,6 @@
 
 #include <stdbool.h>
 #include "System/hal.h"
-#include "Memory/heap.h"
 #include "Tables/irqs.h"
 
 /* Keyboard encoder is accessible through port 0x60 */

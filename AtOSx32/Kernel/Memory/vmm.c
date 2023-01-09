@@ -49,7 +49,7 @@ pgulong_t* page_make_address(pgulong_t pd_index, pgulong_t pt_index) {
 }
 
 /* Gets offset to possible contigious unused data in the given length, used when length > 4mb */
-pgulong_t* page_memory_above4mb(size_t length, int* err) {
+pgulong_t* page_memory_above4mb(size_t length, bool kernel, int* err) {
 
   size_t req_pt_entries = length / PAGE_SIZE;
   if (length % PAGE_SIZE) { req_pt_entries++; }
@@ -59,7 +59,7 @@ pgulong_t* page_memory_above4mb(size_t length, int* err) {
 
   pgulong_t* addr = NULL;
 
-  for (uint16_t i = 0x300; i < PD_ENTRIES; i++) {
+  for (uint16_t i = kernel ? KERNEL_ENTRY_INDEX : 0x0; i < PD_ENTRIES; i++) {
 
     if (PD_ENTRIES - i < (int)req_pd_entries) { break; }
 
@@ -95,14 +95,14 @@ pgulong_t* page_memory_above4mb(size_t length, int* err) {
 }
 
 /* Gets offset to possible contigious unused data in the given length, used when length <= 4mb */
-pgulong_t* page_memory_under4mb(size_t length, int* err) {
+pgulong_t* page_memory_under4mb(size_t length, bool kernel, int* err) {
  
   pgulong_t req_pt_entries = length / PAGE_SIZE;
   if (length % PAGE_SIZE) { req_pt_entries++; }
   
   pgulong_t* addr = NULL;
 
-  for (uint16_t i = 0x300; i < PD_ENTRIES; i++) {
+  for (uint16_t i = kernel ? KERNEL_ENTRY_INDEX : 0x0; i < PD_ENTRIES; i++) {
 
     addr = page_get_table_address(i);
     
@@ -120,8 +120,8 @@ pgulong_t* page_memory_under4mb(size_t length, int* err) {
   return NULL;
 }
 
-pgulong_t* page_get_free_addr(size_t length, int* err) {
-  return length > 0x400000 ? page_memory_above4mb(length, err) : page_memory_under4mb(length, err);
+pgulong_t* page_get_free_addr(size_t length, bool kernel, int* err) {
+  return length > 0x400000 ? page_memory_above4mb(length, kernel, err) : page_memory_under4mb(length, kernel, err);
 }
 
 
@@ -135,6 +135,7 @@ void map_higher_half(pgulong_t* address_space) {
   }
 }
 
+
 /*
 Maps a physical address to a desired virtual address
 Input: Desired virtual address, if no specific address is desired parameter can be NULL
@@ -147,7 +148,7 @@ pgulong_t* page_map(pgulong_t* addr, size_t pages, uint16_t flags) {
 
   int err = NO_ERROR;
 
-  if (!addr) { addr = page_get_free_addr(pages * PAGE_SIZE, &err); }
+  if (!addr) { addr = page_get_free_addr(pages * PAGE_SIZE, flags & USER_ACCESS, &err); }
   if (err) { panic(err); }
   
   pgulong_t pd_index = pd_get_entry_index(addr);

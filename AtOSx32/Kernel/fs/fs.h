@@ -3,30 +3,11 @@
 
 #include <stdint.h>
 #include "Drivers/ata.h"
-#include "Memory/vmm.h"
+#include "Memory/heap.h"
 #include "Drivers/kernel_screen.h"
 #include "System/clock.h"
 #include "System/errors.h"
  
-typedef struct _ELF_32_STRUCT {
-
-        unsigned char   identify[16]; 
-        uint16_t      type;
-        uint16_t      machine;
-        uint32_t      version;
-        uint32_t      entry;
-        uint32_t      phoff;
-        uint32_t      shoff;
-        uint32_t      flags;
-        uint16_t      ehsize;
-        uint16_t      phentsize;
-        uint16_t      phnum;
-        uint16_t      shentsize;
-        uint16_t      shnum;
-        uint16_t      shstrndx;
-
-} elf32_header_t;
-
 #define HIDDEN_SECTORS 0x3
 #define SECTOR_SIZE    0x200
 #define CLUSTER_SIZE SECTOR_SIZE
@@ -105,6 +86,27 @@ typedef struct _INODE_ENTRY_STRUCT {
   uint32_t size;
 
 } __attribute__((packed)) inode_t;
+
+
+typedef struct _ELF_32_STRUCT {
+
+        unsigned char   identify[16]; 
+        uint16_t      type;
+        uint16_t      machine;
+        uint32_t      version;
+        uint32_t      entry;
+        uint32_t      phoff;
+        uint32_t      shoff;
+        uint32_t      flags;
+        uint16_t      ehsize;
+        uint16_t      phentsize;
+        uint16_t      phnum;
+        uint16_t      shentsize;
+        uint16_t      shnum;
+        uint16_t      shstrndx;
+
+} elf32_header_t;
+
 
 uint32_t get_elf_size(elf32_header_t* elf);
 

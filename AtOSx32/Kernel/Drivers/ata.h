@@ -1,10 +1,9 @@
 #ifndef ATA_H 
 #define ATA_H
 
-#include "System/hal.h"
 #include <stdbool.h>
+#include "System/hal.h"
 #include "kernel_screen.h"
-#include "Process/process.h" 
 
 #define ATA_READ  0x20
 #define ATA_WRITE 0x30

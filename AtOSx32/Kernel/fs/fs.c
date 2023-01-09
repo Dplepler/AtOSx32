@@ -95,8 +95,8 @@ void load_shell() {
 
   create_file("sabaka.run", NULL, 0);
   write_file("sabaka.run", file_buffer, size);
+  free(file_buffer);
 }
-
 
 /* Returns a value from the fat table at the given location */
 uint16_t fat_extract_value(uint16_t index) {
@@ -645,7 +645,7 @@ void* read_file(inode_t* inode) {
 
     if (!root_entries) { return NULL; }
     root_read(root_buffer, entries_to_sectors(root_entries));
-    buffer = kmalloc(ROOT_CURRENT_SIZE);
+    buffer = malloc(ROOT_CURRENT_SIZE);
     memcpy(buffer, root_buffer, ROOT_CURRENT_SIZE);
   
     return buffer;
@@ -656,7 +656,7 @@ void* read_file(inode_t* inode) {
   if (inode->size % SECTOR_SIZE) { buff_sector_size++; }
   if (!buff_sector_size) { return NULL; }
 
-  buffer = kmalloc(buff_sector_size * SECTOR_SIZE);
+  buffer = malloc(buff_sector_size * SECTOR_SIZE);
   fat_read(fat_buffer);
 
   void* it = buffer; 

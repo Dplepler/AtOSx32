@@ -16,7 +16,7 @@ void io_delay() {
  */
 void ata_read(uint32_t sector_index, size_t sectors, void* buffer) {
   
-  irq_disable();
+  cli();
 
   while (inportb(PORT_COMMAND) & BSY) { } 
   
@@ -52,7 +52,7 @@ void ata_read(uint32_t sector_index, size_t sectors, void* buffer) {
     io_delay();
   }
 
-  irq_enable();
+  sti();
 }
 
 /* Write from the buffer to a specified addr on the disk
@@ -62,7 +62,7 @@ void ata_read(uint32_t sector_index, size_t sectors, void* buffer) {
  */
 void ata_write(uint32_t sector_index, size_t sectors, void* buffer) {
   
-  irq_disable();
+  cli();
 
   while (inportb(PORT_COMMAND) & BSY) { } 
   
@@ -93,6 +93,6 @@ void ata_write(uint32_t sector_index, size_t sectors, void* buffer) {
     io_delay();
   }
 
-  irq_enable();
+  sti();
 }
 

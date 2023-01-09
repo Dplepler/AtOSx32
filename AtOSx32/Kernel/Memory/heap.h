@@ -38,6 +38,10 @@ void* krealloc(void* ptr, size_t size);
 void* kcalloc(size_t n, size_t size);
 void* kmalloc_aligned(size_t size, uint32_t alignment);
 
+void* malloc(size_t size);
+void* realloc(void* ptr, size_t size);
+void* calloc(size_t n, size_t size);
+
 void init_heap();
 void free(void* ptr);
 void free_aligned(void* ptr);
@@ -47,7 +51,7 @@ void heap_split_header(heap_header_t* header);
 void heap_eat_right(heap_header_t* header);
 
 heap_header_t* heap_melt_left(heap_header_t* header);
-heap_header_t* heap_allocate_header(unsigned int size);
+heap_header_t* heap_allocate_header(unsigned int size, uint16_t flags);
 
 uint8_t heap_get_index(size_t size);
 

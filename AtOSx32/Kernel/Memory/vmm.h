@@ -35,12 +35,12 @@ enum PAGE_FLAGS {
 
 pgulong_t* page_physical_address(pgulong_t* addr);
 pgulong_t* page_get_table_address(uint16_t pd_index);
-pgulong_t* page_get_free_addr(size_t length, int* err);
+pgulong_t* page_get_free_addr(size_t length, bool kernel, int* err);
 pgulong_t* page_make_address(pgulong_t pd_index, pgulong_t pt_index);
 pgulong_t* page_map(pgulong_t* addr, size_t length, uint16_t flags);
 pgulong_t* pd_assign_table(pgulong_t pd_index, uint16_t flags);
-pgulong_t* page_memory_under4mb(size_t length, int* err);
-pgulong_t* page_memory_above4mb(size_t length, int* err);
+pgulong_t* page_memory_under4mb(size_t length, bool kernel, int* err);
+pgulong_t* page_memory_above4mb(size_t length, bool kernel, int* err);
 
 pgulong_t page_get_entry_index(pgulong_t* addr);
 pgulong_t pd_get_entry_index(pgulong_t* addr);

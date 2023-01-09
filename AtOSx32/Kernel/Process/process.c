@@ -3,10 +3,6 @@
 
 #pragma GCC diagnostic ignored "-Waddress-of-packed-member"
 
-
-uint32_t irq_disable_counter = 0;
-
-
 tcb_t* running_task   = NULL;  /* Current task */
 tcb_t* next_task      = NULL;  /* Buffer of the selected task to run */
 tcb_t* scheduler_task = NULL;  /* Default idle task, searches for other tasks to run */
@@ -25,16 +21,6 @@ bool allow_ts = false;  /* Task switching lock */
 static inline void lock_ts()   { allow_ts = false; }
 static inline void unlock_ts() { allow_ts = true; }
 
-void irq_enable() {
-
-  if (!irq_disable_counter) { return; }
-  if (!--irq_disable_counter) { sti(); }
-}
-
-void irq_disable() { 
-  
-  if (!irq_disable_counter++) { cli(); }
-} 
 
 /* Initialize all task lists */
 void setup_multitasking() {
@@ -68,6 +54,12 @@ void init_multitasking() {
   unlock_ts();
 }
 
+void process_startup(inode_t* code) {
+
+  malloc(code->size);
+
+}
+
 /* Creates a virtual address space */
 uint32_t* create_address_space() {
 
@@ -89,7 +81,7 @@ process_t* create_process_handler(uint32_t* address_space, uint32_t eip, void* p
 }
 
 /* Create a thread handler - address space remains the same as the caller's */
-thread_t* create_thread_handler(uint32_t eip, void* params, uint8_t policy){
+thread_t* create_thread_handler(uint32_t eip, void* params, uint8_t policy) {
   return (thread_t*)create_task_handler(running_task->address_space, eip, params, policy);
 }
 
@@ -139,7 +131,6 @@ tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, 
 
   /* Update stack */
   new_task->esp = (uint32_t)stack;
-
 
   task_list_insert_back(available_tasks[new_task->policy], new_task);
  
@@ -360,6 +351,17 @@ void schedule() {
   if (next_task) { run_task(); }
 }
 
+void scheduler_tick() {
+
+  allow_ts = false; 
+  /* Wake up tasks */
+  manage_sleeping_tasks();
+    
+  /* Decrease the tasks's time slice */
+  if (scheduler_task != running_task) { manage_time_slice(); } 
+  allow_ts = true;
+}
+
 /* Picks the highest priority task from the task list */
 tcb_t* schedule_priority_task(tcb_t* list) {
 
@@ -384,3 +386,11 @@ tcb_t* schedule_time_slice_task() {
   return time_slice_task;
 }
 
+/* Delay the systems by the given miliseconds */
+void sleep(unsigned long milisec) {
+ 
+  if (!milisec) { return; }
+ 
+  set_naptime(HERTZ(milisec) + time_counter);
+  task_block(TASK_SLEEPING);
+}

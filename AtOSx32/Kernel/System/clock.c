@@ -35,15 +35,6 @@ void rtc_handler(isr_stack_t* stack) {
 }
 
 
-/* Delay the systems by the given miliseconds */
-void sleep(unsigned long milisec) {
- 
-  if (!milisec) { return; }
- 
-  set_naptime(HERTZ(milisec) + time_counter);
-  task_block(TASK_SLEEPING);
-}
-
 /* The system's timer. First time it's called it will initialize the timer and the 
    second time will return the time passed from the first call in miliseconds */
 unsigned long clock_time() {

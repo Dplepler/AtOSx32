@@ -1,5 +1,7 @@
 #include "irqs.h"
 
+uint32_t irq_disable_counter = 0;
+
 extern void irq0();
 extern void irq1();
 extern void irq2();
@@ -28,6 +30,17 @@ void irq_install_handler(uint8_t irq, void(*handler)(isr_stack_t* stack)) {
 void irq_remove_handler(uint8_t irq) {
   irq_routines[irq] = NULL;
 }
+
+void irq_enable() {
+
+  if (!irq_disable_counter) { return; }
+  if (!--irq_disable_counter) { sti(); }
+}
+
+void irq_disable() { 
+  
+  if (!irq_disable_counter++) { cli(); }
+} 
 
 void init_syscalls() {
   

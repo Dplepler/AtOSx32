@@ -114,10 +114,10 @@ void heap_eat_right(heap_header_t* header) {
 }
 
 /* Create a new header for cases where there aren't any unused ones to use */
-heap_header_t* heap_allocate_header(unsigned int size) {
+heap_header_t* heap_allocate_header(unsigned int size, uint16_t flags) {
   
   size_t page_amount = heap_get_page_count(size + sizeof(heap_header_t));  
-  heap_header_t* header = (heap_header_t*)page_map(NULL, page_amount, 0);
+  heap_header_t* header = (heap_header_t*)page_map(NULL, page_amount, flags);
   
   header->signature = HEAP_SIGNATURE;
   header->size = page_amount * PAGE_SIZE;
@@ -143,7 +143,7 @@ void* kmalloc(size_t size) {
     header = header->flink;
   }
 
-  if (!header) { header = heap_allocate_header(size); header->used = true; }   // Get a new header
+  if (!header) { header = heap_allocate_header(size, 0); header->used = true; }   // Get a new header
   else {
     header->used = true;
     header->req_size = size;  
@@ -238,3 +238,57 @@ void free_aligned(void* ptr) {
   free((void*)((unsigned long)ptr + sizeof(heap_header_t)));
 }
 
+
+void* malloc(size_t size) {
+
+  if (!size) { return NULL; }  
+
+  uint8_t index = heap_get_index(size);
+  heap_header_t* header = free_blocks[index];
+
+  while (header) {
+    if (header->size - sizeof(heap_header_t) >= size) { break; }
+    header = header->flink;
+  }
+
+  if (!header) { header = heap_allocate_header(size, USER_ACCESS); header->used = true; }   // Get a new header
+  else {
+    header->used = true;
+    header->req_size = size;  
+    heap_remove_header(header);   // Remove from free headers
+    
+    if (!header->page_flink && !header->page_blink) { complete_pages[header->index]--; }
+  }
+  
+  heap_split_header(header);    // If there's extra space that will never be used, split it to a new header
+  
+  return (void*)((unsigned long)header + sizeof(heap_header_t));
+}
+
+
+/* Resize an allocated memory block */
+void* realloc(void* ptr, size_t size) {
+
+  /* For special cases */
+  if (!ptr) { return malloc(size); }
+  if (!size) { free(ptr); return NULL; }
+
+  heap_header_t* header = (heap_header_t*)((unsigned long)ptr - sizeof(heap_header_t));
+  if (header->req_size == size) { return ptr; }
+
+  /* Normal reallocation */
+  void* np = malloc(size);
+  memcpy(np, ptr, (header->req_size > size ? size : header->req_size));
+
+  free(ptr);
+  return np;
+}
+
+/* Allocate and reset dynamic memory */
+void* calloc(size_t n, size_t size) {
+
+  void* ptr = malloc(n * size);
+  memset(ptr, 0, n * size);
+
+  return ptr;
+}
