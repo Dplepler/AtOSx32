@@ -225,7 +225,6 @@ void* kmalloc_aligned(size_t size, uint32_t alignment) {
   */
 
   void* ptr = kmalloc(size + (alignment - 1));
-
   return (void*)(((uint32_t)ptr + (alignment - 1)) & ~(alignment - 1));
 }
 

@@ -56,7 +56,21 @@ void init_multitasking() {
 
 void process_startup(inode_t* code) {
 
+  PRINT("AA");
   malloc(code->size);
+
+  while(1) {}
+}
+
+
+void run_elf_file(elf32_header_t* fheader) {
+  
+  program_header_t* pheader = (program_header_t*)((uint32_t)fheader + fheader->phoff);
+  
+  uint32_t program_end = pheader + fheader->phnum;
+
+  for (; pheader < program_end; pheader++) {
+  }
 
 }
 
@@ -106,7 +120,6 @@ tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, 
 
   new_task->time_slice = DEFAULT_TIME_SLICE;
   new_task->req_priority = new_task->priority = policy <= POLICY_1 ? DEFAULT_PRIORITY : 0;
-
 
   /* Set up initial stack layout to be popped in the task switch routine */
   uint32_t* stack = (uint32_t*)new_task->esp;  // Temporary stack pointer

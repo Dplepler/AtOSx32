@@ -148,7 +148,7 @@ pgulong_t* page_map(pgulong_t* addr, size_t pages, uint16_t flags) {
 
   int err = NO_ERROR;
 
-  if (!addr) { addr = page_get_free_addr(pages * PAGE_SIZE, flags & USER_ACCESS, &err); }
+  if (!addr) { addr = page_get_free_addr(pages * PAGE_SIZE, !(flags & USER_ACCESS), &err); }
   if (err) { panic(err); }
   
   pgulong_t pd_index = pd_get_entry_index(addr);

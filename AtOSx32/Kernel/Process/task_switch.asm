@@ -36,7 +36,7 @@ switch_task:
 .continue:
    
   mov dword [allow_ts], 1
-
+  
   ; Cdecl registers
   pop ebp
   pop edi

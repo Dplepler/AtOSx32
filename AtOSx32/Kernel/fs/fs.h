@@ -107,6 +107,18 @@ typedef struct _ELF_32_STRUCT {
 
 } elf32_header_t;
 
+typedef struct _PROGRAM_HEADER_STRUCT {
+
+  uint32_t type;
+  uint32_t offset;
+  uint32_t va;
+  uint32_t pa;
+  uint32_t filesz;
+  uint32_t memsz;
+  uint32_t flags; 
+  uint32_t align;
+
+} program_header_t;
 
 uint32_t get_elf_size(elf32_header_t* elf);
 
