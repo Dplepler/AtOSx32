@@ -15,6 +15,13 @@
 
 #define POLICY_AMOUNT 4
 
+
+#define PT_LOAD   1
+
+#define PROGRAM_X 1
+#define PROGRAM_W 2
+#define PROGRAM_R 4
+
 extern unsigned long proc_time_counter; 
 extern unsigned long time_counter;
 extern unsigned long idle_time_counter;
@@ -121,8 +128,9 @@ void task_list_remove_task(task_list_t* list, tcb_t* task);
 /* Scheduler */
 void schedule();
 void sleep(unsigned long milisec);
-
 void scheduler_tick(); 
+void run_elf_file(elf32_header_t* fheader);
+
 tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, uint8_t policy);
 tcb_t* schedule_priority_task(tcb_t* list);
 tcb_t* schedule_time_slice_task();

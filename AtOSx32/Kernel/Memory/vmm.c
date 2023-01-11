@@ -1,5 +1,11 @@
 #include "vmm.h"
 
+size_t size_to_pages(size_t size) {
+  size_t pages = size / PAGE_SIZE;
+  return (size % PAGE_SIZE) ? ++pages : pages;
+}
+
+
 /* Returns a page directory index from a given virtual address */
 pgulong_t pd_get_entry_index(pgulong_t* addr) {
   return (pgulong_t)addr >> 22;
@@ -135,7 +141,6 @@ void map_higher_half(pgulong_t* address_space) {
   }
 }
 
-
 /*
 Maps a physical address to a desired virtual address
 Input: Desired virtual address, if no specific address is desired parameter can be NULL
@@ -144,7 +149,6 @@ Length in pages, flags
 Output: Mapped address, NULL if failed
 */
 pgulong_t* page_map(pgulong_t* addr, size_t pages, uint16_t flags) {
-
 
   int err = NO_ERROR;
 

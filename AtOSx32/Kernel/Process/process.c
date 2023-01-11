@@ -56,22 +56,39 @@ void init_multitasking() {
 
 void process_startup(inode_t* code) {
 
-  PRINT("AA");
-  malloc(code->size);
+  run_elf_file(read_file(code));
 
   while(1) {}
 }
 
 
 void run_elf_file(elf32_header_t* fheader) {
-  
+ 
   program_header_t* pheader = (program_header_t*)((uint32_t)fheader + fheader->phoff);
   
-  uint32_t program_end = pheader + fheader->phnum;
+  uint32_t segment_begin = 0;
+  uint32_t segment_end   = 0;
 
-  for (; pheader < program_end; pheader++) {
+  uint32_t entry = 0;   
+
+  PRINTNH(fheader->entry); NL;
+  for (unsigned long i = 0; i < fheader->phnum; i++, pheader++) {
+    if (pheader->type != PT_LOAD) { continue; }
+
+    segment_begin = pheader->va;
+    segment_end = segment_begin + pheader->memsz;
+
+    page_map((uint32_t*)segment_begin, size_to_pages(segment_end - segment_begin), READ_WRITE | USER_ACCESS);
+
+    memcpy((void*)segment_begin, fheader + pheader->offset, pheader->filesz);
+    memset((void*)(segment_begin + pheader->filesz), '\0', pheader->memsz - pheader->filesz);
+    
+    if (pheader->flags == PROGRAM_X + PROGRAM_W + PROGRAM_R || pheader->flags == PROGRAM_X + PROGRAM_R) {
+      entry = fheader->entry;
+    }
   }
 
+  __asm__ __volatile__ ("jmp *%0" : : "r"(entry));
 }
 
 /* Creates a virtual address space */
