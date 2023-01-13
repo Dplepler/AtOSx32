@@ -211,9 +211,8 @@ pgulong_t* pd_assign_table(pgulong_t pd_index, uint16_t flags) {
   ((pgulong_t*)PD_ADDRESS)[pd_index] = ((pgulong_t)pt_phys_addr | (flags & 0xFFF) | PRESENT);
  
   pgulong_t* pt_addr = page_get_table_address(pd_index);
-  
   page_clean(pt_addr);
- 
+
   return pt_addr;
 }
 

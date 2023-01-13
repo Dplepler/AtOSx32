@@ -1,7 +1,6 @@
 global jmp_userland
 
 ; jmp_userland(void* func)
-; Input: Function destination in ESI
 jmp_userland:
   
   cli

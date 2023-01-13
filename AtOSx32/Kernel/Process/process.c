@@ -26,6 +26,7 @@ static inline void unlock_ts() { allow_ts = true; }
 void setup_multitasking() {
 
   available_tasks = kcalloc(POLICY_AMOUNT, sizeof(task_list_t*));
+
   for (uint8_t i = 0; i < POLICY_AMOUNT; i++) { available_tasks[i] = kcalloc(1, sizeof(task_list_t)); }
  
   sleeping_tasks   = kcalloc(1, sizeof(task_list_t));
@@ -57,13 +58,12 @@ void init_multitasking() {
 void process_startup(inode_t* code) {
 
   run_elf_file(read_file(code));
-
   while(1) {}
 }
 
 
 void run_elf_file(elf32_header_t* fheader) {
- 
+
   program_header_t* pheader = (program_header_t*)((uint32_t)fheader + fheader->phoff);
   
   uint32_t segment_begin = 0;
@@ -71,7 +71,6 @@ void run_elf_file(elf32_header_t* fheader) {
 
   uint32_t entry = 0;   
 
-  PRINTNH(fheader->entry); NL;
   for (unsigned long i = 0; i < fheader->phnum; i++, pheader++) {
     if (pheader->type != PT_LOAD) { continue; }
 
@@ -88,7 +87,7 @@ void run_elf_file(elf32_header_t* fheader) {
     }
   }
 
-  __asm__ __volatile__ ("jmp *%0" : : "r"(entry));
+  jmp_userland((void*)entry);
 }
 
 /* Creates a virtual address space */
@@ -121,7 +120,7 @@ tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, 
 
   irq_disable();
   lock_ts();
-  
+
   tcb_t* new_task = kmalloc(sizeof(tcb_t));
  
   new_task->state = TASK_AVAILABLE;
