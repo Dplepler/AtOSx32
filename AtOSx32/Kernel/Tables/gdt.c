@@ -25,7 +25,7 @@ void gdt_create_gate(uint32_t index, uint32_t base, uint32_t limit, uint8_t acce
   gdt[index].base_m = (base >> 16) & 0xFF;
   gdt[index].base_h = base >> 24;
   gdt[index].limit = limit & 0xFFFF;
-  gdt[index].flags_and_limit = limit >> 16;
+  gdt[index].flags_and_limit = (limit >> 16) & 0x0F;
   gdt[index].flags_and_limit |= granularity & 0xF0;   // Only the higher half bits
   gdt[index].access = access;
 }
@@ -34,10 +34,10 @@ void gdt_create_gate(uint32_t index, uint32_t base, uint32_t limit, uint8_t acce
 void gdt_install_gates() {
 
   gdt_create_gate(0, 0, 0, 0, 0);   // First gate is ignored by the CPU
-  gdt_create_gate(1, 0, 0xFFFFF, 0x9A, 0xCF); // Kernel code
-  gdt_create_gate(2, 0, 0xFFFFF, 0x92, 0xCF); // Kernel data
-  gdt_create_gate(3, 0, 0xFFFFF, 0xFA, 0xCF); // User code
-  gdt_create_gate(4, 0, 0xFFFFF, 0xF2, 0xCF); // User data
+  gdt_create_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xCF); // Kernel code
+  gdt_create_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF); // Kernel data
+  gdt_create_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); // User code
+  gdt_create_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); // User data
 
   load_gdt();
 }

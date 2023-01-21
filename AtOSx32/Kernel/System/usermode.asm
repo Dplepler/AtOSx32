@@ -14,12 +14,13 @@ jmp_userland:
   mov fs, ax
   mov gs, ax
 
+  mov eax, esp
+  push 0x23
   push eax
-  push esp
   pushfd
-  or dword [esp], 0x200
   mov eax, 0x18
   or eax, 3
+  
   push eax
 
   push esi

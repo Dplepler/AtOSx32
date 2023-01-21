@@ -26,6 +26,8 @@ extern unsigned long proc_time_counter;
 extern unsigned long time_counter;
 extern unsigned long idle_time_counter;
 extern void sleep(unsigned long milisec);
+extern void jmp_userland(void* func);
+
 
 typedef struct _TASK_CONTROL_BLOCK_STRUCT {
 
