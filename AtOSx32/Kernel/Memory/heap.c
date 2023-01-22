@@ -291,3 +291,11 @@ void* calloc(size_t n, size_t size) {
 
   return ptr;
 }
+
+void* malloc_aligned(size_t size, uint32_t alignment) {
+
+  if (!alignment || (alignment & (alignment - 1))) { return NULL; }  // Leave if alignment is not a power of 2
+
+  void* ptr = malloc(size + (alignment - 1));
+  return (void*)(((uint32_t)ptr + (alignment - 1)) & ~(alignment - 1));
+}

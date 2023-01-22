@@ -57,8 +57,8 @@ void init_multitasking() {
 
 void process_startup(inode_t* code) {
 
+  running_task->esp3 = (uint32_t)malloc_aligned(STACK_SIZE, 0x1000) + STACK_SIZE;   // Create new kernel stack
   run_elf_file(read_file(code));
-  while(1) {}
 }
 
 
@@ -86,7 +86,8 @@ void run_elf_file(elf32_header_t* fheader) {
       entry = fheader->entry;
     }
   }
-
+  
+  __asm__ __volatile__ ("mov %0, %%esp" : : "r"(running_task->esp3));
   jmp_userland((void*)entry);
 }
 

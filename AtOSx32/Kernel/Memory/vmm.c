@@ -166,7 +166,7 @@ pgulong_t* page_map(pgulong_t* addr, size_t pages, uint16_t flags) {
     if ((pgulong_t)pt_addr[pt_index] & PRESENT) { return NULL; }   // If page table index was already mapped, fail 
     
     pt_addr[pt_index] = (pgulong_t)palloc();
-    pt_addr[pt_index] |= (flags & 0xFFF) | PRESENT;
+    pt_addr[pt_index] |= (flags & 0xFFF) | PRESENT | READ_WRITE;
 
     flush_tlb_single(&pt_addr[pt_index]);
   }
@@ -208,7 +208,7 @@ pgulong_t* pd_assign_table(pgulong_t pd_index, uint16_t flags) {
 
   pgulong_t* pt_phys_addr = palloc();
    
-  ((pgulong_t*)PD_ADDRESS)[pd_index] = ((pgulong_t)pt_phys_addr | (flags & 0xFFF) | PRESENT);
+  ((pgulong_t*)PD_ADDRESS)[pd_index] = ((pgulong_t)pt_phys_addr | (flags & 0xFFF) | READ_WRITE | PRESENT);
  
   pgulong_t* pt_addr = page_get_table_address(pd_index);
   page_clean(pt_addr);

@@ -1,4 +1,4 @@
-global jmp_userland
+[global jmp_userland]
 
 ; jmp_userland(void* func)
 jmp_userland:
@@ -22,7 +22,6 @@ jmp_userland:
   or eax, 3
   
   push eax
-
   push esi
 
   iret

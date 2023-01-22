@@ -78,7 +78,9 @@ typedef struct _TASK_CONTROL_BLOCK_STRUCT {
   uint8_t req_priority;
 
   uint32_t naptime;      // Duration of sleep
-                         
+
+  uint32_t esp3;
+
 
 } __attribute__((packed)) tcb_t, process_t, thread_t;
 
