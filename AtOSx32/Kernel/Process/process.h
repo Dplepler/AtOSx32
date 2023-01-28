@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "fs/fs.h"
+#include "Tables/tss.h"
 #include "Memory/heap.h"
 
 #define INIT_KERNEL_STACK 0xC03FE000
@@ -28,6 +29,7 @@ extern unsigned long idle_time_counter;
 extern void sleep(unsigned long milisec);
 extern void jmp_userland(void* func);
 
+extern tss_t task_state;
 
 typedef struct _TASK_CONTROL_BLOCK_STRUCT {
 

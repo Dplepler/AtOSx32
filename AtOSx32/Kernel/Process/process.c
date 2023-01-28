@@ -86,7 +86,8 @@ void run_elf_file(elf32_header_t* fheader) {
       entry = fheader->entry;
     }
   }
-  
+ 
+  __asm__ __volatile__ ("mov %%esp, %0" : "=r"(task_state.esp0));
   __asm__ __volatile__ ("mov %0, %%esp" : : "r"(running_task->esp3));
   jmp_userland((void*)entry);
 }

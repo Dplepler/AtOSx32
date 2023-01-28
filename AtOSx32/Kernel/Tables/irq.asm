@@ -81,6 +81,8 @@ syscall_dispatcher:
   
   call esi
   add esp, 20
+
+  jmp $
   iret
 
 
@@ -104,8 +106,6 @@ print:
 
   push dword [esp + PARAM_ESI]
   call terminal_write_string
-
-
-  jmp $
+  pop eax
   ret
 
