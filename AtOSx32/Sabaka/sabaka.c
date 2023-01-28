@@ -1,9 +1,7 @@
-#include "atoslib.h"
-
+extern void print(char* str);
 
 int main(void) {
  
-  while(1) {}
   print("Hello! From userland.");
   return 0;
 }

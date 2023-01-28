@@ -10,7 +10,6 @@
 #include "fs/fs.h"
 
 extern void jmp_userland(void* func);
-
 void clock() {
   while (true) {
     terminal_draw_rec(0, 0, 9, 1, 8); 
@@ -40,6 +39,7 @@ int kmain(void) {
   setup_gdt();
   setup_idt();
   init_irq();
+  init_syscalls();
   tss_install();
   init_heap();
   setup_multitasking();
@@ -47,6 +47,7 @@ int kmain(void) {
   init_multitasking();
   init_fs();
   init_keyboard();
+
 
   create_process_handler(create_address_space(), (uint32_t)process_startup, navigate_file("sabaka.run", NULL),  POLICY_0);
 

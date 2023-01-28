@@ -16,8 +16,9 @@ jmp_userland:
 
   mov eax, esp
   push 0x23
+  or eax, 0x200
   push eax
-  pushfd
+  pushf
   mov eax, 0x18
   or eax, 3
   

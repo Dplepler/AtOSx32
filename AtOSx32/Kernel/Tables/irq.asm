@@ -61,6 +61,30 @@ PARAM_EDX equ 0xC
 PARAM_ESI equ 0x10
 PARAM_EDI equ 0x14
 
+[extern service_routines]
+[global syscall_dispatcher]
+syscall_dispatcher:
+
+  push edi
+  push esi
+  push edx
+  push ecx
+  push ebx
+
+  mov ebx, service_routines
+  xor ecx, ecx
+  mov cl, ah
+  mov eax, 4
+  mul ecx
+  add ebx, eax
+  mov esi, dword [ebx]
+  
+  call esi
+  add esp, 20
+  iret
+
+
+
 [extern create_file]
 [global create_file_handler]
 create_file_handler:
@@ -71,7 +95,7 @@ create_file_handler:
   
   call create_file 
   
-  iret
+  ret
 
 
 [extern terminal_write_string]
@@ -81,5 +105,7 @@ print:
   push dword [esp + PARAM_ESI]
   call terminal_write_string
 
-  iret
+
+  jmp $
+  ret
 

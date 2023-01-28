@@ -47,31 +47,12 @@ void init_syscalls() {
   memset(service_routines, 0, 256 * sizeof(void*));
 
   service_routines[0] = &create_file_handler;
-  service_routines[1] = &terminal_write_string;
+  service_routines[1] = &print;
 
-  idt_create_gate(SYSTEM_IRQ_DISPATCHER, (uint32_t)syscall_dispatcher, 0x8, 0xEE);
-
+  idt_create_gate(69, (uint32_t)syscall_dispatcher, 0x8, 0xEE);
+  load_idt();
 }
 
-void syscall_dispatcher() {
-
-  uint8_t index;
-  __asm__ __volatile__ ("mov %%ah, %0" : "=r" (index));
-
-  void* service = service_routines[index];
-
-  __asm__ __volatile__ (" \
-    push %%edi;     \
-    push %%esi;     \
-    push %%edx;     \
-    push %%ecx;     \
-    push %%ebx;     \
-    call *%0;       \
-    add $20, %%esp; \
-    iret;           "
-    
-    : : "r"((uint32_t)service));
-}
 
 /* The first 8 IRQs are by default mapped to entries 8-15, these entries are already reserved for exceptions with double faults
 so we need to remap the IRQs via the Programmble Interrupt Controller; New location will be at entries 32-47 */
@@ -119,7 +100,7 @@ void init_irq() {
 void irq_handler(isr_stack_t* stack) {
 
   uint32_t index = (stack->index & 0xFF) - 0x20;
-
+  
   void (*handler)(isr_stack_t* stack) = irq_routines[index]; 
   
   if (handler) { (*handler)(stack); }

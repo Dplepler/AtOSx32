@@ -36,7 +36,6 @@ extern void isr29();
 extern void isr30();
 extern void isr31();
 
-extern void idt_flush();
 
 void setup_idt() {
   
@@ -99,7 +98,7 @@ void idt_install_gates() {
   idt_create_gate(29, (uint32_t)isr29, 0x8, IDT_GATE);
   idt_create_gate(30, (uint32_t)isr30, 0x8, IDT_GATE);
   idt_create_gate(31, (uint32_t)isr31, 0x8, IDT_GATE);
-
+  
   load_idt();      // Reload  
 }
 
