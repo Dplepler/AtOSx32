@@ -61,6 +61,7 @@ PARAM_EDX equ 0xC
 PARAM_ESI equ 0x10
 PARAM_EDI equ 0x14
 
+[extern jmp_userland]
 [extern service_routines]
 [global syscall_dispatcher]
 syscall_dispatcher:
@@ -82,9 +83,7 @@ syscall_dispatcher:
   call esi
   add esp, 20
 
-  jmp $
   iret
-
 
 
 [extern create_file]
