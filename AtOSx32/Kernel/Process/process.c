@@ -55,23 +55,44 @@ void init_multitasking() {
   unlock_ts();
 }
 
-void process_startup(inode_t* code) {
 
-  running_task->esp3 = (uint32_t)malloc_aligned(STACK_SIZE, 0x1000) + STACK_SIZE;   // Create new kernel stack
-  run_elf_file(read_file(code));
+void user_process_startup(elf32_header_t* fheader) {
+ 
+
+  elf_map(fheader);
+  running_task->esp3 = (uint32_t)malloc_aligned(STACK_SIZE, 0x1000) + STACK_SIZE;   // Create new user stack
+
+  uint32_t entry_point = elf_get_entry(fheader);
+  if (!entry_point) { panic(ERROR_FILE_NO_ENTRY); }
+  jmp_userland((void*)entry_point);
 }
 
 
-void run_elf_file(elf32_header_t* fheader) {
+uint32_t elf_get_entry(elf32_header_t* fheader) {
+  
+  program_header_t* pheader = (program_header_t*)((uint32_t)fheader + fheader->phoff);
+  
+  for (unsigned long i = 0; i < fheader->phnum; i++, pheader++) {
+
+    if (pheader->type != PT_LOAD) { continue; }
+
+    if (pheader->flags == PROGRAM_X + PROGRAM_W + PROGRAM_R || pheader->flags == PROGRAM_X + PROGRAM_R) {
+      return fheader->entry;
+    }
+  }
+
+  return 0;
+}
+
+void elf_map(elf32_header_t* fheader) {
 
   program_header_t* pheader = (program_header_t*)((uint32_t)fheader + fheader->phoff);
   
   uint32_t segment_begin = 0;
   uint32_t segment_end   = 0;
 
-  uint32_t entry = 0;   
-
   for (unsigned long i = 0; i < fheader->phnum; i++, pheader++) {
+
     if (pheader->type != PT_LOAD) { continue; }
 
     segment_begin = pheader->va;
@@ -80,17 +101,10 @@ void run_elf_file(elf32_header_t* fheader) {
     page_map((uint32_t*)segment_begin, size_to_pages(segment_end - segment_begin), READ_WRITE | USER_ACCESS);
 
     memcpy((void*)segment_begin, fheader + pheader->offset, pheader->filesz);
-    memset((void*)(segment_begin + pheader->filesz), '\0', pheader->memsz - pheader->filesz);
-    
-    if (pheader->flags == PROGRAM_X + PROGRAM_W + PROGRAM_R || pheader->flags == PROGRAM_X + PROGRAM_R) {
-      entry = fheader->entry;
-    }
+    memset((void*)(segment_begin + pheader->filesz), '\0', pheader->memsz - pheader->filesz); 
   }
- 
-  __asm__ __volatile__ ("mov %%esp, %0" : "=r"(task_state.esp0));
-  __asm__ __volatile__ ("mov %0, %%esp" : : "r"(running_task->esp3));
-  jmp_userland((void*)entry);
 }
+
 
 /* Creates a virtual address space */
 uint32_t* create_address_space() {
@@ -107,7 +121,12 @@ uint32_t* create_address_space() {
   return address_space;
 }
 
-/* Create a process handler */
+process_t* create_user_process_handler(char* path) {
+  
+  inode_t* file = navigate_file(path, NULL); 
+  return create_process_handler(create_address_space(), (uint32_t)user_process_startup, read_file(file), POLICY_0); 
+}
+
 process_t* create_process_handler(uint32_t* address_space, uint32_t eip, void* params, uint8_t policy) {
   return (process_t*)create_task_handler(address_space, eip, params, policy);  
 }
@@ -133,14 +152,12 @@ tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, 
   new_task->esp0 = (uint32_t)kmalloc_aligned(STACK_SIZE, 0x1000) + STACK_SIZE;   // Create new kernel stack
   new_task->eip = eip;
   new_task->cpu_time = 0;
-  new_task->esp = new_task->esp0; 
   new_task->policy = policy;
-
   new_task->time_slice = DEFAULT_TIME_SLICE;
   new_task->req_priority = new_task->priority = policy <= POLICY_1 ? DEFAULT_PRIORITY : 0;
 
   /* Set up initial stack layout to be popped in the task switch routine */
-  uint32_t* stack = (uint32_t*)new_task->esp;  // Temporary stack pointer
+  uint32_t* stack = (uint32_t*)new_task->esp0;  // Temporary stack pointer
 
   cdecl_regs registers;
 
@@ -161,7 +178,7 @@ tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, 
   *--stack = registers.ebp;
 
   /* Update stack */
-  new_task->esp = (uint32_t)stack;
+  new_task->esp0 = (uint32_t)stack;
 
   task_list_insert_back(available_tasks[new_task->policy], new_task);
  

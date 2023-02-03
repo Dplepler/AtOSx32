@@ -1,9 +1,9 @@
 extern void print(char* str);
 
 int main(void) {
- 
-  print("Hello! From userland.");
-  print("Whats up");
 
+  print("HIII");
+  while(1) {}
+  
   return 0;
 }

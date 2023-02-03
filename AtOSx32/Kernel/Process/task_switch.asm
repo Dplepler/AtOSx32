@@ -18,10 +18,10 @@ switch_task:
 
   mov esi, dword [running_task]
 
-  mov dword [esi+0x8], esp    ; Set previous task's esp
+  mov dword [esi+0x4], esp   ; Set previous task's esp
   
   mov esi, dword [esp+0x14]  ; Get new task
-  mov esp, dword [esi+0x8]   ; ESP
+  mov esp, dword [esi+0x4]   ; ESP
 
   mov dword [running_task], esi   ; running_task = new task
   

@@ -16,6 +16,8 @@
 
 #define POLICY_AMOUNT 4
 
+#define SUPERVISOR_DPL 0
+#define USER_DPL 3
 
 #define PT_LOAD   1
 
@@ -35,7 +37,7 @@ typedef struct _TASK_CONTROL_BLOCK_STRUCT {
 
   uint32_t eip;
   uint32_t esp0;
-  uint32_t esp;
+  uint32_t esp3;
   uint32_t ebp;
 
   uint32_t cr3;
@@ -81,9 +83,6 @@ typedef struct _TASK_CONTROL_BLOCK_STRUCT {
 
   uint32_t naptime;      // Duration of sleep
 
-  uint32_t esp3;
-
-
 } __attribute__((packed)) tcb_t, process_t, thread_t;
 
 typedef struct _WAITING_LIST_STRUCT {
@@ -114,7 +113,7 @@ extern void switch_task(struct _TASK_CONTROL_BLOCK_STRUCT* new_task);
 void setup_multitasking();
 void init_multitasking();
 void init_cleaner_task();
-void process_startup(inode_t* code);
+void user_process_startup(elf32_header_t* fheader);
 void run_task();
 void terminate_task();
 void init_task(tcb_t* task, void* params);
@@ -130,12 +129,12 @@ void task_cleanup(tcb_t* task);
 void task_list_insert_front(task_list_t* list, tcb_t* task);
 void task_list_insert_back(task_list_t* list, tcb_t* task);
 void task_list_remove_task(task_list_t* list, tcb_t* task);
+void elf_map(elf32_header_t* fheader);
 
-/* Scheduler */
+  /* Scheduler */
 void schedule();
 void sleep(unsigned long milisec);
 void scheduler_tick(); 
-void run_elf_file(elf32_header_t* fheader);
 
 tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, uint8_t policy);
 tcb_t* schedule_priority_task(tcb_t* list);
@@ -144,8 +143,10 @@ tcb_t* schedule_time_slice_task();
 uint32_t* create_address_space();
 uint32_t* relocate_stack(uint32_t* address, size_t size);
 uint32_t get_next_pid();
+uint32_t elf_get_entry(elf32_header_t* fheader);
 
 process_t* create_process_handler(uint32_t* address_space, uint32_t eip, void* params, uint8_t policy);
+process_t* create_user_process_handler(char* path);
 thread_t* create_thread_handler(uint32_t eip, void* params, uint8_t policy);
 
 #endif
