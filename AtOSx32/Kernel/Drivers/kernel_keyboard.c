@@ -1,5 +1,10 @@
 #include "kernel_keyboard.h"
 
+
+char keybuff[100];
+uint8_t key_head = 0;
+uint8_t key_tail = 0;
+
 char keyboard[128] = {
 
     0,  27, '1', '2', '3', '4', '5', '6', '7', '8', '9',
@@ -13,6 +18,9 @@ char keyboard[128] = {
 
 
 void init_keyboard() {
+  
+  key_head = key_tail = 0;
+
   irq_install_handler(1, &keyboard_handler);
 }
 
@@ -61,17 +69,28 @@ void keyboard_enc_send_cmd(uint8_t cmd) {
   outportb(KEYBOARD_ENC_CMD_REG, cmd);  // Send command
 }
 
-/* Write input to screen */
-void keyboard_handler() {
-  
-  while (!(inportb(KEYBOARD_CTRL_STATS_REG) & KEYBOARD_CTRL_STATS_MASK_OUT_BUF)) { }
-  int scancode = inportb(KEYBOARD_ENC_INPUT_BUF);
+  /* Write input to screen */
+  void keyboard_handler() {
+    
+    while (!(inportb(KEYBOARD_CTRL_STATS_REG) & KEYBOARD_CTRL_STATS_MASK_OUT_BUF)) { }
+    int scancode = inportb(KEYBOARD_ENC_INPUT_BUF);
 
-  if (scancode & 0x80) { return; }
-  
-  char c[2];
-  c[0] = keyboard[scancode];
-  c[1] = '\0';
-  PRINT(c);
+    if (scancode & 0x80) { return; }
+    key_push(keyboard[scancode]);
+  }
+
+
+void key_push(char key) {
+
+  key_head += (key_tail - key_head == KEYBUFF_SIZE);
+  keybuff[key_tail++ % KEYBUFF_SIZE] = key;
 }
+
+
+char key_pop() { 
+
+  if (key_tail == key_head) { return (char)0; }
+  return keybuff[key_head++ % KEYBUFF_SIZE];
+}
+
 

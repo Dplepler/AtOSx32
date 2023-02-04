@@ -4,9 +4,7 @@
 
 ; jmp_userland(void* func)
 jmp_userland:
-  
-  cli
-  
+   
   mov edx, dword [esp + 0x4] 
   
   mov esi, task_state

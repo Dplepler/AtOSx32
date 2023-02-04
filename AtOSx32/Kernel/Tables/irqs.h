@@ -11,6 +11,9 @@ extern void syscall_dispatcher();
 
 extern void create_file_handler(uint32_t param1, uint32_t param2, uint32_t param3, uint32_t param4, uint32_t param5);
 extern void print(char* str);
+extern char getchar();
+
+
 extern void scheduler_tick();
 
 enum PIC_TYPES {

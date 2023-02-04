@@ -95,7 +95,8 @@ create_file_handler:
   push dword [esp + PARAM_EDI]
   
   call create_file 
-  
+ 
+  add esp, 12
   ret
 
 
@@ -105,6 +106,12 @@ print:
 
   push dword [esp + PARAM_ESI]
   call terminal_write_string
-  pop eax
+  add esp, 4
   ret
 
+[extern key_pop]
+[global getchar]
+getchar:
+  
+  call key_pop
+  ret

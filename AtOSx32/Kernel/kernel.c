@@ -17,7 +17,15 @@ void clock() {
     cmos_time time = read_rtc();
     PRINT(ttoa(time));
     sleep(1000);
+
   }  
+}
+
+void test() {
+  
+  while(true) {
+    sleep(1000);
+  }
 }
 
 void tongue() {
@@ -39,21 +47,18 @@ int kmain(void) {
   setup_gdt();
   setup_idt();
   init_irq();
+  init_keyboard();
   init_syscalls();
   tss_install();
   init_heap();
+  init_fs();
   setup_multitasking();
   setup_clock();
   init_multitasking();
-  init_fs();
-  init_keyboard();
+
 
   create_user_process_handler("sabaka.run");
-   
   
-
-  //create_process_handler(create_address_space(), (uint32_t)process_startup, navigate_file("sabaka.run", NULL),  POLICY_0);
-
   /* char* txt = "Hello!";
   create_directory("dir", NULL, 0x0);
 
@@ -68,13 +73,11 @@ int kmain(void) {
   PRINT(read_file(a)); */
   //jmp_userland((void*)tongue);
   
-  /* init_cleaner_task();
+  //init_cleaner_task();
 
-  create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);
-  create_process_handler(create_address_space(), (uint32_t)tongue, NULL, POLICY_0);
+  //create_process_handler(create_address_space(), (uint32_t)clock, NULL, POLICY_0);
+  //create_process_handler(create_address_space(), (uint32_t)tongue, NULL, POLICY_0);
 
-  */
-  
   for(;;) { cli(); schedule(); sti(); }
 
 

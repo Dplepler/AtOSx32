@@ -58,7 +58,6 @@ void init_multitasking() {
 
 void user_process_startup(elf32_header_t* fheader) {
  
-
   elf_map(fheader);
   running_task->esp3 = (uint32_t)malloc_aligned(STACK_SIZE, 0x1000) + STACK_SIZE;   // Create new user stack
 
@@ -404,7 +403,7 @@ void scheduler_tick() {
   allow_ts = false; 
   /* Wake up tasks */
   manage_sleeping_tasks();
-    
+  
   /* Decrease the tasks's time slice */
   if (scheduler_task != running_task) { manage_time_slice(); } 
   allow_ts = true;
@@ -442,3 +441,4 @@ void sleep(unsigned long milisec) {
   set_naptime(HERTZ(milisec) + time_counter);
   task_block(TASK_SLEEPING);
 }
+

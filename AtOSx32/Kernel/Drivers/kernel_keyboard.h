@@ -5,6 +5,8 @@
 #include "System/hal.h"
 #include "Tables/irqs.h"
 
+#define KEYBUFF_SIZE 100
+
 /* Keyboard encoder is accessible through port 0x60 */
 enum KEYBOARD_ENCODER_IO {
   KEYBOARD_ENC_INPUT_BUF	=	0x60,
@@ -38,5 +40,7 @@ void keyboard_ctrl_send_cmd(uint8_t cmd);
 void keyboard_enc_send_cmd(uint8_t cmd);
 void keyboard_handler();
 
+void key_push(char key);
+char key_pop();
 #endif
 
