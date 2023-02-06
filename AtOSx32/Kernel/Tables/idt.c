@@ -130,6 +130,7 @@ void fault_handler(isr_stack_t* stack) {
     "Machine Check"
   };
 
+  while(1) {}
   terminal_display_error(exceptions[stack->index & 0xFF]);
   for (;;) {}
 }

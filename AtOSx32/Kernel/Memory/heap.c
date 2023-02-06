@@ -4,6 +4,7 @@ static heap_header_t* free_blocks[20] = { NULL };      // Each index represents 
 static uint8_t     complete_pages[20] = { 0 };         // Keep track of unused pages so we can free some if there are too many
 
 void init_heap() {
+
   memset(free_blocks, 0, sizeof(heap_header_t*) * 20);
   memset(complete_pages, 0, 20);
 }
@@ -27,9 +28,9 @@ uint8_t heap_get_index(size_t size) {
 void heap_insert_unused_header(heap_header_t* header) {
 
   header->index = heap_get_index(header->size - sizeof(heap_header_t));   // In case index is incorrect
-  
+
   /* Insert header as the head node */
-  if (free_blocks[header->index]) { 
+  if (free_blocks[header->index]) {
     free_blocks[header->index]->blink = header;
   }
   
@@ -90,10 +91,9 @@ heap_header_t* heap_melt_left(heap_header_t* header) {
   
     header->page_blink->page_flink = header->page_flink;
     header->page_blink->size += header->size;
-    
-    heap_remove_header(header);
-    
+     
     header = header->page_blink;
+    heap_remove_header(header);
   }
 
   return header;
@@ -104,10 +104,10 @@ void heap_eat_right(heap_header_t* header) {
 
   if (header->used) { return; }
 
-  while (header->page_flink && !header->page_flink->used) {
-    
+  while (header->page_flink && !header->page_flink->used) { 
     header->size += header->page_flink->size;
     if (header->page_flink->page_flink) { header->page_flink->page_flink->page_blink = header; }
+    
     heap_remove_header(header->page_flink);
     header->page_flink = header->page_flink->page_flink;
   }
@@ -153,7 +153,6 @@ void* kmalloc(size_t size) {
   }
   
   heap_split_header(header);    // If there's extra space that will never be used, split it to a new header
-  
   return (void*)((unsigned long)header + sizeof(heap_header_t));
 }
 
@@ -170,15 +169,16 @@ void free(void* ptr) {
 
   /* Merge unused blocks located at the same page */ 
   header = heap_melt_left(header);
-  heap_eat_right(header); 
-  
+  heap_eat_right(header);  
+
   if (!header->page_flink && !header->page_blink) {
+    
     /* If we saved too much free unused pages we should free this one */
     if (complete_pages[index] == MAX_COMPLETE) { page_unmap((pgulong_t*)header, heap_get_page_count(header->size)); return; }
     complete_pages[index]++;
   }
-  
-  heap_insert_unused_header(header);
+
+  heap_insert_unused_header(header);    
 }
 
 /* Resize an allocated memory block */
@@ -260,7 +260,6 @@ void* malloc(size_t size) {
   }
   
   heap_split_header(header);    // If there's extra space that will never be used, split it to a new header
-  
   return (void*)((unsigned long)header + sizeof(heap_header_t));
 }
 
@@ -280,6 +279,7 @@ void* realloc(void* ptr, size_t size) {
   memcpy(np, ptr, (header->req_size > size ? size : header->req_size));
 
   free(ptr);
+
   return np;
 }
 

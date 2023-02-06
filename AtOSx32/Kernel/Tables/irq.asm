@@ -115,3 +115,23 @@ getchar:
   
   call key_pop
   ret
+
+[extern malloc]
+[global memalloc]
+memalloc:
+  
+  push dword [esp + PARAM_EDX]
+  call malloc
+  add esp, 4
+  ret
+
+[extern realloc]
+[global memrealloc]
+memrealloc:
+
+  push dword [esp + PARAM_EDX]
+  push dword [esp + PARAM_ESI]
+  call realloc
+  add esp, 8
+  ret
+

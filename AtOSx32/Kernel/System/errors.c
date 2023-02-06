@@ -1,7 +1,7 @@
 #include "errors.h"
 
 void panic(int error) {
-  
+ 
   switch (error) {
     
     case NO_ERROR: return;

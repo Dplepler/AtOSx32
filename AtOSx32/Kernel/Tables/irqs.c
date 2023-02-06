@@ -49,12 +49,13 @@ void init_syscalls() {
   service_routines[0] = &create_file_handler;
   service_routines[1] = &print;
   service_routines[2] = &getchar;
+  service_routines[3] = &memalloc;
+  service_routines[4] = &memrealloc;
 
 
   idt_create_gate(0x45, (uint32_t)syscall_dispatcher, 0x8, 0xEE);
   load_idt();
   
-
   irq_install_handler(0x45, &syscall_dispatcher);
 }
 

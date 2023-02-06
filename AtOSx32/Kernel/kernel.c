@@ -57,7 +57,17 @@ int kmain(void) {
   init_multitasking();
 
 
-  create_user_process_handler("sabaka.run");
+  char* hello = NULL;
+
+  for (uint32_t i = 0; i < 20; i++) {
+
+    hello = realloc(hello, i + 1);
+  }
+
+  
+  PRINT("HELLO");
+
+  //create_user_process_handler("sabaka.run");
   
   /* char* txt = "Hello!";
   create_directory("dir", NULL, 0x0);

@@ -1,17 +1,14 @@
 extern void print(char* str);
 extern char getchar();
+extern char* getline();
 
 int main(void) {
   
-  char a = getchar();
-  
-  char b[2];
-  b[0] = a;
-  b[1] = 0;
+  char* hello = getline();
 
-  print(b);
+  print(hello);
 
-  while(1) {}
+  while(1) {} 
   return 0;
 }
 
