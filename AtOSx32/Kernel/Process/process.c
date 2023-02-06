@@ -57,7 +57,7 @@ void init_multitasking() {
 
 
 void user_process_startup(elf32_header_t* fheader) {
- 
+
   elf_map(fheader);
   running_task->esp3 = (uint32_t)malloc_aligned(STACK_SIZE, 0x1000) + STACK_SIZE;   // Create new user stack
 
@@ -85,6 +85,7 @@ uint32_t elf_get_entry(elf32_header_t* fheader) {
 
 void elf_map(elf32_header_t* fheader) {
 
+
   program_header_t* pheader = (program_header_t*)((uint32_t)fheader + fheader->phoff);
   
   uint32_t segment_begin = 0;
@@ -98,12 +99,11 @@ void elf_map(elf32_header_t* fheader) {
     segment_end = segment_begin + pheader->memsz;
 
     page_map((uint32_t*)segment_begin, size_to_pages(segment_end - segment_begin), READ_WRITE | USER_ACCESS);
-
+  
     memcpy((void*)segment_begin, fheader + pheader->offset, pheader->filesz);
     memset((void*)(segment_begin + pheader->filesz), '\0', pheader->memsz - pheader->filesz); 
   }
 }
-
 
 /* Creates a virtual address space */
 uint32_t* create_address_space() {
@@ -122,8 +122,8 @@ uint32_t* create_address_space() {
 
 process_t* create_user_process_handler(char* path) {
   
-  inode_t* file = navigate_file(path, NULL); 
-  return create_process_handler(create_address_space(), (uint32_t)user_process_startup, read_file(file), POLICY_0); 
+  inode_t* file = navigate_file(path, NULL);
+  return create_process_handler(create_address_space(), (uint32_t)user_process_startup, kread_file(file), POLICY_0); 
 }
 
 process_t* create_process_handler(uint32_t* address_space, uint32_t eip, void* params, uint8_t policy) {
@@ -165,7 +165,7 @@ tcb_t* create_task_handler(uint32_t* address_space, uint32_t eip, void* params, 
   __asm__ __volatile__ ("mov %%esi, %0" : "=r" (registers.esi));
   __asm__ __volatile__ ("mov %%edi, %0" : "=r" (registers.edi));
   __asm__ __volatile__ ("mov %%ebp, %0" : "=r" (registers.ebp));
-    
+   
   /* Push parameters for make_thread function */ 
   *--stack = (uint32_t)params;
   *--stack = (uint32_t)new_task->eip;

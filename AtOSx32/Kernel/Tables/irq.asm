@@ -90,10 +90,14 @@ syscall_dispatcher:
 [global create_file_handler]
 create_file_handler:
   
-  push dword [esp + PARAM_EDX]
-  push dword [esp + PARAM_ESI]
-  push dword [esp + PARAM_EDI]
-  
+  mov edx, dword [esp + PARAM_EDX]
+  mov esi, dword [esp + PARAM_ESI]
+  mov edi, dword [esp + PARAM_EDI]
+
+  push edx
+  push esi
+  push edi
+
   call create_file 
  
   add esp, 12
@@ -128,10 +132,26 @@ memalloc:
 [extern realloc]
 [global memrealloc]
 memrealloc:
-
-  push dword [esp + PARAM_EDX]
-  push dword [esp + PARAM_ESI]
+  
+  mov edx, dword [esp + PARAM_EDX]
+  mov esi, dword [esp + PARAM_ESI]
+ 
+  push edx
+  push esi
   call realloc
   add esp, 8
   ret
+
+[extern terminal_write_int]
+[global printh]
+printh:
+  
+  mov ebx, dword [esp + PARAM_EBX]
+  push 0x10
+  push ebx
+  call terminal_write_int
+  add esp, 8
+  ret
+
+
 

@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "Drivers/ata.h"
+#include "Memory/heap3.h"
 #include "Memory/heap.h"
 #include "Drivers/kernel_screen.h"
 #include "System/clock.h"
@@ -122,7 +123,9 @@ typedef struct _PROGRAM_HEADER_STRUCT {
 
 uint32_t get_elf_size(elf32_header_t* elf);
 
-void* read_file(inode_t* inode);
+void* read_file(inode_t* inode, bool kernel);
+void* kread_file(inode_t* inode);
+void* uread_file(inode_t* inode);
 
 char* eat_path(char* path);
 char* eat_path_reverse(char* path);

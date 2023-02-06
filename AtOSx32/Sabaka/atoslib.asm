@@ -39,3 +39,11 @@ realloc:
 
   ret
 
+[global printh]
+printh:
+
+  mov ah, 5
+  mov ebx, dword [esp + 0x4]
+  int 0x45
+
+  ret

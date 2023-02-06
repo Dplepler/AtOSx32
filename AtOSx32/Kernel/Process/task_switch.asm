@@ -45,7 +45,7 @@ switch_task:
 
   pop eax     ; Normal task switching, popping off the last EIP
   mov dword [next_task], 0
-  
+ 
   sti
   call eax
   jmp terminate_task 

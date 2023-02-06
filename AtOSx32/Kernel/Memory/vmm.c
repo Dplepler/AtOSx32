@@ -167,7 +167,7 @@ pgulong_t* page_map(pgulong_t* addr, size_t pages, uint16_t flags) {
     
     pt_addr[pt_index] = (pgulong_t)palloc();
     pt_addr[pt_index] |= (flags & 0xFFF) | PRESENT | READ_WRITE;
-
+    
     flush_tlb_single(&pt_addr[pt_index]);
   }
 

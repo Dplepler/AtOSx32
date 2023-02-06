@@ -295,7 +295,7 @@ inode_t* navigate_dir(char* path, void** buff_ref) {
 
     if (navigate_path && *navigate_path) { 
       tb = buffer;
-      buffer = read_file(current_file); 
+      buffer = kread_file(current_file); 
     }
 
     if (buff_ref) { *buff_ref = buffer; }
@@ -311,12 +311,12 @@ inode_t* navigate_dir(char* path, void** buff_ref) {
 inode_t* navigate_file(char* path, void** buff_ref) {
 
   inode_t* dir = navigate_dir(path, NULL);
-
+  
   char* np = eat_path(path);
   if (dir && !file_has_extention(get_last_file_from_path(np))) { return dir; }
   free(np);
 
-  char* buffer = read_file(dir);
+  char* buffer = kread_file(dir);
   
   if (buff_ref) { *buff_ref = buffer; }
 
@@ -484,7 +484,7 @@ void remove_dir_entry(char* dir_path, char* entry) {
   if (!size) { return; }
 
   void* new_dir_buffer = kmalloc(size - DIR_ENTRY_SIZE);
-  void* old_dir_buffer = read_file(dir);
+  void* old_dir_buffer = kread_file(dir);
 
   char* it = NULL;
   for (uint32_t i = 0; i < size; i += DIR_ENTRY_SIZE, old_dir_buffer += DIR_ENTRY_SIZE) {
@@ -514,7 +514,7 @@ void write_file(char* path, void* buffer, size_t size) {
 
   inode_t* dir = navigate_dir(path, NULL);
   
-  void* dir_buffer = read_file(dir);
+  void* dir_buffer = kread_file(dir);
   inode_t* file = find_file(dir_buffer, dir ? dir->size : ROOT_CURRENT_SIZE, get_last_file_from_path(path));
 
   write_file_data(file, buffer, size);
@@ -568,7 +568,7 @@ void write_file_data(inode_t* inode, void* buffer, size_t size) {
 /* Concatenate a file's contents with a given buffer and buffer size */
 void cat_file(inode_t* inode, void* buffer, size_t size) {
 
-  void* file_data = read_file(inode);
+  void* file_data = kread_file(inode);
   size_t prev_size = inode ? inode->size : (root_entries++ * DIR_ENTRY_SIZE);
 
   file_data = krealloc(file_data, prev_size + size);
@@ -634,9 +634,16 @@ void fat_clear_file(inode_t* inode) {
   fat_write(fat_buffer);
 }
 
+void* kread_file(inode_t* inode) {
+  return read_file(inode, true);
+}
+
+void* uread_file(inode_t* inode) {
+  return read_file(inode, false);
+}
 
 /* Read and return a file's data */
-void* read_file(inode_t* inode) {
+void* read_file(inode_t* inode, bool kernel) {
   
   uint8_t* buffer = NULL;
 
@@ -645,7 +652,7 @@ void* read_file(inode_t* inode) {
 
     if (!root_entries) { return NULL; }
     root_read(root_buffer, entries_to_sectors(root_entries));
-    buffer = malloc(ROOT_CURRENT_SIZE);
+    buffer = kernel ? kmalloc(ROOT_CURRENT_SIZE) : malloc(ROOT_CURRENT_SIZE);
     memcpy(buffer, root_buffer, ROOT_CURRENT_SIZE);
   
     return buffer;
@@ -656,7 +663,7 @@ void* read_file(inode_t* inode) {
   if (inode->size % SECTOR_SIZE) { buff_sector_size++; }
   if (!buff_sector_size) { return NULL; }
 
-  buffer = malloc(buff_sector_size * SECTOR_SIZE);
+  buffer = kernel ? kmalloc(buff_sector_size * SECTOR_SIZE) : malloc(buff_sector_size * SECTOR_SIZE);
   fat_read(fat_buffer);
 
   void* it = buffer; 
@@ -687,7 +694,7 @@ void copy_file(char* old_path, char* new_path) {
 
   strcat(full_path, full_filename);
 
-  write_file(full_path, read_file(file), file->size);
+  write_file(full_path, kread_file(file), file->size);
 }
 
 /* Move a file from one directory to a new one */
@@ -704,7 +711,7 @@ void rename_file(char* path, char* new_filename) {
   char* dir_path = eat_path_reverse(path);
 
   inode_t* dir = navigate_dir(dir_path, NULL);
-  void* dir_buffer = read_file(dir);
+  void* dir_buffer = kread_file(dir);
   inode_t* file = find_file(dir_buffer, dir ? dir->size : ROOT_CURRENT_SIZE, filename);
   fat_create_filename(file, new_filename);
   
@@ -718,7 +725,7 @@ void delete_file(char* path) {
   char* dir_path = eat_path_reverse(path);
 
   inode_t* dir = navigate_dir(dir_path, NULL);
-  void* dir_buffer = read_file(dir);
+  void* dir_buffer = kread_file(dir);
   inode_t* file = find_file(dir_buffer, dir ? dir->size : ROOT_CURRENT_SIZE, filename);
   
   fat_delete_file(file);

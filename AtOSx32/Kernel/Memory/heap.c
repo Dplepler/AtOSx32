@@ -3,6 +3,7 @@
 static heap_header_t* free_blocks[20] = { NULL };      // Each index represents 2^index allocated pages size
 static uint8_t     complete_pages[20] = { 0 };         // Keep track of unused pages so we can free some if there are too many
 
+
 void init_heap() {
 
   memset(free_blocks, 0, sizeof(heap_header_t*) * 20);
@@ -237,65 +238,3 @@ void free_aligned(void* ptr) {
   free((void*)((unsigned long)ptr + sizeof(heap_header_t)));
 }
 
-
-void* malloc(size_t size) {
-
-  if (!size) { return NULL; }  
-
-  uint8_t index = heap_get_index(size);
-  heap_header_t* header = free_blocks[index];
-
-  while (header) {
-    if (header->size - sizeof(heap_header_t) >= size) { break; }
-    header = header->flink;
-  }
-
-  if (!header) { header = heap_allocate_header(size, USER_ACCESS); header->used = true; }   // Get a new header
-  else {
-    header->used = true;
-    header->req_size = size;  
-    heap_remove_header(header);   // Remove from free headers
-    
-    if (!header->page_flink && !header->page_blink) { complete_pages[header->index]--; }
-  }
-  
-  heap_split_header(header);    // If there's extra space that will never be used, split it to a new header
-  return (void*)((unsigned long)header + sizeof(heap_header_t));
-}
-
-
-/* Resize an allocated memory block */
-void* realloc(void* ptr, size_t size) {
-
-  /* For special cases */
-  if (!ptr) { return malloc(size); }
-  if (!size) { free(ptr); return NULL; }
-
-  heap_header_t* header = (heap_header_t*)((unsigned long)ptr - sizeof(heap_header_t));
-  if (header->req_size == size) { return ptr; }
-
-  /* Normal reallocation */
-  void* np = malloc(size);
-  memcpy(np, ptr, (header->req_size > size ? size : header->req_size));
-
-  free(ptr);
-
-  return np;
-}
-
-/* Allocate and reset dynamic memory */
-void* calloc(size_t n, size_t size) {
-
-  void* ptr = malloc(n * size);
-  memset(ptr, 0, n * size);
-
-  return ptr;
-}
-
-void* malloc_aligned(size_t size, uint32_t alignment) {
-
-  if (!alignment || (alignment & (alignment - 1))) { return NULL; }  // Leave if alignment is not a power of 2
-
-  void* ptr = malloc(size + (alignment - 1));
-  return (void*)(((uint32_t)ptr + (alignment - 1)) & ~(alignment - 1));
-}

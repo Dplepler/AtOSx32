@@ -2,6 +2,7 @@
 #include "Tables/idt.h"
 #include "Tables/irqs.h"
 #include "Memory/heap.h"
+#include "Memory/heap3.h"
 #include "System/clock.h"
 #include "Tables/tss.h"
 #include "Drivers/kernel_keyboard.h"
@@ -51,23 +52,13 @@ int kmain(void) {
   init_syscalls();
   tss_install();
   init_heap();
+  init_heap_3();
   init_fs();
   setup_multitasking();
   setup_clock();
   init_multitasking();
-
-
-  char* hello = NULL;
-
-  for (uint32_t i = 0; i < 20; i++) {
-
-    hello = realloc(hello, i + 1);
-  }
-
   
-  PRINT("HELLO");
-
-  //create_user_process_handler("sabaka.run");
+  create_user_process_handler("sabaka.run");
   
   /* char* txt = "Hello!";
   create_directory("dir", NULL, 0x0);
