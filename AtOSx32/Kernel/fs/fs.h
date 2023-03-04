@@ -153,6 +153,7 @@ void enter_file(inode_t* file, inode_t* dir);
 void fat_resize_file(inode_t* inode, size_t size);
 void init_first_cluster(inode_t* inode);
 void cat_file(inode_t* inode, void* buffer, size_t size);
+void cat(char* dst, char* src);
 void edit_file(inode_t* inode, void* buffer, size_t size);
 void fat_delete_file(inode_t* inode);
 void fat_create_filename(inode_t* inode, char* name);

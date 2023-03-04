@@ -1,3 +1,14 @@
+[create_file_handler]
+create_file_handler: 
+
+  mov ah, 0
+  mov edx, dword [esp + 0xC]
+  mov esi, dword [esp + 0x8]
+  mov edi, dword [esp + 0x4]
+  int 0x45
+
+  ret
+
 [global print]
 print:
 
@@ -47,3 +58,26 @@ printh:
   int 0x45
 
   ret
+
+[global write_file]
+write_file:
+
+  mov ah, 6
+  mov edx, dword [esp + 0xC]
+  mov edi, dword [esp + 0x8]
+  mov esi, dword [esp + 0x4]
+  int 0x45
+
+  ret
+
+[global cat_file]
+cat_file:
+  
+  mov ah, 7
+  mov edi, dword [esp + 0x8]
+  mov esi, dword [esp + 0x4]
+  int 0x45
+
+  ret
+
+

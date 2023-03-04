@@ -20,3 +20,7 @@ char* getline() {
 
   return line;
 }
+
+bool isdigit(char ch) {
+  return ch >= '0' && ch <= '9';
+}

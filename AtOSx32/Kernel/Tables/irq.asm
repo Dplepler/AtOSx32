@@ -154,4 +154,31 @@ printh:
   ret
 
 
+[extern write_file]
+[global write_to_file]
+write_to_file:
+
+  mov edx, dword [esp + PARAM_EDX]
+  mov edi, dword [esp + PARAM_EDI]
+  mov esi, dword [esp + PARAM_ESI]
+
+  push edx
+  push edi
+  push esi
+  call write_file
+  add esp, 12
+  ret
+
+[extern cat]
+[global cat_to_file]
+cat_to_file:
+
+  mov edi, dword [esp + PARAM_EDI]
+  mov esi, dword [esp + PARAM_ESI]
+
+  push edi
+  push esi
+  call cat
+  add esp, 8
+  ret
 

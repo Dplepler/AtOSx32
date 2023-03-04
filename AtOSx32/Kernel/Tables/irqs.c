@@ -52,6 +52,8 @@ void init_syscalls() {
   service_routines[3] = &memalloc;
   service_routines[4] = &memrealloc;
   service_routines[5] = &printh;
+  service_routines[6] = &write_to_file;
+  service_routines[7] = &cat_to_file;
 
   idt_create_gate(0x45, (uint32_t)syscall_dispatcher, 0x8, 0xEE);
   load_idt();

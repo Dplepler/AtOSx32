@@ -6,6 +6,7 @@ extern void printh(void* ptr);
 
 int main(void) { 
 
+
   char* hello = getline();
   
   print(hello);

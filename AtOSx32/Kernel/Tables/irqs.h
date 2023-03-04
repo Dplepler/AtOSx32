@@ -15,6 +15,7 @@ extern char getchar();
 extern void* memalloc(size_t size);
 extern void* memrealloc(void* ptr, size_t size);
 extern void printh(void* ptr);
+extern void write_file(char* path, void* buffer, size_t size);
 
 extern void scheduler_tick();
 

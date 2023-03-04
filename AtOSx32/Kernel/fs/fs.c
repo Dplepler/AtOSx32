@@ -522,6 +522,21 @@ void write_file(char* path, void* buffer, size_t size) {
   edit_file(dir, dir_buffer, dir ? dir->size : ROOT_CURRENT_SIZE); 
 }
 
+void cat(char* dst, char* src) {
+  
+  inode_t* dir = navigate_dir(src, NULL);
+  
+  void* dir_buffer = kread_file(dir);
+  inode_t* src_file = find_file(dir_buffer, dir ? dir->size : ROOT_CURRENT_SIZE, get_last_file_from_path(src));
+
+  dir = navigate_dir(dst, NULL);
+  
+  void* dir_buffer = kread_file(dir);
+  inode_t* dst_file = find_file(dir_buffer, dir ? dir->size : ROOT_CURRENT_SIZE, get_last_file_from_path(dst));
+
+  cat_file(dst_file, kread_file(src_file), src_file->size);
+}
+
 /* Write data to a specified file
  * Input: File node to link to created data
  * Input: Buffer containing the data to save (write)
